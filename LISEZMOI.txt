@@ -1,0 +1,108 @@
+SCANLY V2.4 - Votre bibliotheque, en un scan.
+=============================================
+V2.4 : SYNCHRONISATION ENTRE APPAREILS (iPhone, iPad, Mac, PC)
+- Toutes les donnees (livres, etageres, meubles, infos IA, tranches, photos d'origine,
+  corbeille, series) sont stockees dans ton depot GitHub prive, gratuit.
+- Envoi automatique apres chaque modification, recuperation automatique a l'ouverture,
+  choix de la version en cas de modifications simultanees, historique complet.
+- Seules les nouvelles images sont envoyees. Icone nuage = etat de la synchronisation.
+- Procedure : INSTALLER_SUR_IPHONE_IPAD_MAC.txt, partie "SYNCHRONISER".
+- Correction : le bouton ＋ du mobile n'apparait plus sur PC.
+
+V2.3 : iPHONE / iPAD / MAC  (voir INSTALLER_SUR_IPHONE_IPAD_MAC.txt)
+- Application installable sur l'ecran d'accueil (iPhone, iPad) et dans le Dock (Mac),
+  gratuite, sans App Store, via un hebergement GitHub Pages.
+- Commandes tactiles : toucher, double-toucher (zoom), pincer, glisser, appui long
+  (selection), balayage dans la fiche (livre suivant / precedent).
+- Mise en page adaptee aux petits ecrans ; bouton ＋ qui regroupe photo / import / ajout.
+- Appareil photo natif de l'iPhone en pleine resolution pour le scan.
+- Sauvegarde via le menu de partage iOS (Fichiers, iCloud, OneDrive, AirDrop).
+- Version Windows inchangee (Lancer_SCANLY.bat).
+
+V2.2 : REPRENDRE UN LIVRE SUR LA PHOTO D'ORIGINE
+- Fiche ouvrage > "Reprendre sur la photo d'origine" : ouvre la photo complete de l'import,
+  cadree sur le livre (molette = zoom, clic droit ou mode "Deplacer" = deplacer).
+- Glisser pour tracer un cadre autour d'un livre, puis ajuster ses 4 coins dores (suit
+  l'inclinaison). Plusieurs cadres possibles. Suppr efface le cadre selectionne.
+  Contour dore = ce livre ; contours blancs = livres deja enregistres.
+- "Remplacer la tranche de ce livre" : corrige un detourage incomplet (titre relu par l'IA).
+- "Ajouter comme nouveau(x) livre(s)" : chaque cadre devient un livre, place a cote (a gauche
+  ou a droite selon sa position sur la photo), lu par l'IA puis complete en arriere-plan.
+- Imports anciens sans photo conservee : bouton "Autre photo..." pour choisir le fichier.
+- Annulable avec le bouton "Annuler" affiche apres l'action.
+
+V2.1
+- LIVRES FINS COLLES (ex. 4 poches J'ai lu lus comme 1 seul livre) : toute tranche anormalement
+  large pour sa hauteur est montree a l'IA en grand ("combien de livres ? titre et bord droit
+  de chacun") puis redecoupee sur les vrais bords visibles.
+- FICHE : bouton "Separer en plusieurs livres" : clic sur la tranche pour placer les coupures,
+  chaque morceau devient un livre (lu par l'IA). Bouton "Agrandir" (loupe, molette = zoom)
+  et "Zoom dans la piece".
+- PIECE 3D : double-clic sur un livre = zoom sur le livre ; double-clic a cote des livres =
+  zoom sur l'etagere entiere. Echap ou "Tout voir" pour revenir. Le clic simple ouvre
+  toujours la fiche.
+
+V2.0
+- FICHE OUVRAGE : fleches ‹ › dans l'en-tete (et touches ← →) pour passer au livre
+  precedent / suivant, dans l'ordre de la vue d'origine (etageres, Catalogue ou Liste avec
+  filtres et tri). Indication "12 / 231". Si la fiche a ete modifiee, SCANLY propose
+  d'enregistrer avant de changer de livre.
+- COUVERTURES : recherche elargie (ISBN Google Books puis Open Library, serie + tome avec
+  le numero lu aussi dans le sous-titre / numero de serie, Open Library, puis l'IA retrouve
+  l'ISBN de l'edition francaise du tome). Seule la couverture deja prise par un AUTRE tome
+  de la meme serie est refusee.
+- CATALOGUE : sans couverture, une vraie carte remplace la tranche etiree : couleur de la
+  tranche, serie, numero de tome en grand, sous-titre et auteur.
+- Parametres > "Corriger les couvertures" : a relancer une fois apres la mise a jour.
+
+V1.9.9 : LIVRE COUPE EN DEUX (ex. Le Seigneur des Anneaux T2 lu comme T1 + T2)
+- Apres la lecture, deux livres voisins suspects (meme serie / titre proche, ou deux morceaux
+  anormalement etroits) sont verifies : l'IA voit les deux morceaux reunis avec la coupe
+  marquee et repond "un seul livre ou deux ?". Un seul -> morceaux recolles, titre et tome relus.
+- Le numero de tome doit etre LU sur la tranche : il n'est plus deduit des livres voisins.
+- Les vrais tomes differents poses cote a cote restent separes.
+
+V1.9.8
+- BARRES COMPACTES dans la Piece 3D : les choix s'ouvrent au survol (ou au clic) :
+  * en haut a gauche : bouton du meuble affiche -> Vue d'ensemble, meubles, + Meuble, etageres ;
+  * en haut a droite : univers ;
+  * en bas : Comme sur les photos, Annuler/Retablir, zoom, menu "Vue" (3D, Face, Tout voir,
+    Tranches photo, Parallaxe, Nuit, Souhaits) et menu "Outils" (Selection, Ranger, Imports, Image).
+  Glisser un livre ou une etagere sur le bouton du meuble ouvre la liste pour la deposer.
+- COUVERTURES PAR TOME : une couverture n'est retenue que si elle correspond au bon numero
+  de tome. Dans le Catalogue, une couverture partagee par plusieurs tomes est remplacee par
+  la tranche photographiee. Parametres > "Corriger les couvertures" relance la recherche
+  d'une couverture propre a chaque tome (ISBN, serie + tome, Open Library).
+
+V1.9.7 : CORRECTION DE LA REGRESSION (10 livres seulement en 1.9.6)
+- L'etagere est toujours decoupee sur toute la largeur de la photo, meme si la lecture
+  d'ensemble de l'IA n'a vu que quelques livres.
+- Regroupement des morceaux (livres vus en perspective) encadre : l'IA ne signale que les
+  exceptions, 2 a 4 bandes voisines maximum, largeur plausible pour un seul livre.
+- Si une etape IA echoue, le decoupage est conserve : aucun livre perdu.
+
+V1.9.6 : LIVRES VUS EN PERSPECTIVE
+- Apres le decoupage automatique, l'IA voit chaque portion d'etagere avec les decoupes
+  numerotees et regroupe les bandes qui forment UN SEUL livre (livre pose de biais dont on
+  voit la couverture, tranche avec dessin ou motif vertical).
+- Pour un livre vu de biais, SCANLY garde la tranche (le dos) pour l'etagere 3D.
+- Une bande sans livre (mur, objet) est retiree.
+
+LANCEMENT : double-clic sur Lancer_SCANLY.bat (laisser la fenetre noire ouverte / reduite).
+MISE A JOUR : sauvegarde (Ctrl+S), puis remplacer le contenu du dossier (ex. C:\SCANLY).
+Les donnees (livres, meubles, cle Gemini) sont conservees.
+
+V1.9.5 : RECONNAISSANCE "DECOUPER PUIS LIRE"
+- L'IA lit d'abord toute la photo (titres probables, position des etageres).
+- SCANLY decoupe lui-meme les tranches, sans IA, en suivant l'inclinaison de chaque livre
+  (separations qui traversent toute la hauteur des livres ; poches fins separes).
+- Chaque tranche est redressee, agrandie et lue par l'IA (lots de 12), avec le titre
+  probable et le voisin comme indices.
+- L'IA signale les morceaux d'un meme livre (recolles), ce qui n'est pas un livre (retire)
+  et les tranches qui contiennent plusieurs poches (partagees).
+
+RAPPEL DES VERSIONS PRECEDENTES (toutes incluses)
+- V1.9 : rond dore ⇕ a gauche de chaque etagere pour la deplacer par simple glisser ;
+  bouton "↺ Comme sur les photos" pour revenir a l'etat d'origine.
+- V1.7 : tranches redressees, detourage precis (✎ / "Ajuster le detourage").
+- V1.6 : scan du code-barres dans la fiche, suppression groupee, corbeille 30 jours.

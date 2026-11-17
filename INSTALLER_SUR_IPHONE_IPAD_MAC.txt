@@ -1,0 +1,103 @@
+SCANLY V2.4 – INSTALLATION SUR iPHONE, iPAD ET MAC
+==================================================
+Gratuit, sans App Store, sans validation Apple. 10 minutes, une seule fois.
+
+PRINCIPE
+SCANLY est une application web : on la depose une fois sur un hebergement gratuit
+(GitHub Pages), puis on l'ajoute a l'ecran d'accueil. Tes livres et ta cle Gemini restent
+stockes uniquement sur chaque appareil (rien n'est envoye sur GitHub).
+
+ETAPE 1 – METTRE SCANLY EN LIGNE (depuis le PC, une seule fois)
+1. Va sur https://github.com et cree un compte gratuit (e-mail + mot de passe).
+2. En haut a droite : "+" > "New repository".
+   - Repository name : scanly
+   - Coche "Public" (obligatoire pour l'hebergement gratuit ; seul le code est visible,
+     jamais tes donnees ni ta cle)
+   - Clique "Create repository".
+3. Sur la page qui s'affiche, clique le lien "uploading an existing file".
+4. Decompresse ce zip, ouvre le dossier, selectionne TOUT son contenu (index.html, assets,
+   manifest.webmanifest, sw.js, .nojekyll...) et glisse-le dans la page.
+   Clique "Commit changes" en bas.
+5. Onglet "Settings" > menu de gauche "Pages" > Branch : "main", dossier "/ (root)" > "Save".
+6. Attends 1 a 2 minutes puis recharge la page : l'adresse s'affiche, du type
+      https://TON-PSEUDO.github.io/scanly/
+   C'est l'adresse de ton application.
+
+ETAPE 2 – INSTALLER SUR iPHONE / iPAD
+1. Ouvre l'adresse dans SAFARI (obligatoire sur iOS).
+2. Bouton Partager (carre avec fleche vers le haut) > "Sur l'ecran d'accueil" > "Ajouter".
+3. Lance SCANLY depuis son icone : il s'ouvre en plein ecran, comme une app.
+4. Parametres (roue) : colle ta cle Gemini.
+
+ETAPE 3 – INSTALLER SUR MAC
+- Safari (macOS Sonoma ou plus recent) : ouvre l'adresse > menu Fichier > "Ajouter au Dock".
+- Ou Chrome / Edge : ouvre l'adresse > icone "Installer" dans la barre d'adresse.
+
+RECUPERER TA BIBLIOTHEQUE SANS SYNCHRONISATION (fichier)
+1. Sur le PC (version actuelle) : bouton Sauvegarder (Ctrl+S) > enregistre le fichier .json
+   dans OneDrive / iCloud Drive (ou envoie-le toi par mail / AirDrop).
+2. Sur l'iPhone / iPad / Mac : Parametres > "Ouvrir une sauvegarde..." > choisis le fichier.
+   Les sauvegardes sont compatibles dans les deux sens (PC <-> iPhone <-> Mac).
+   Chaque appareil a ses propres donnees : pense a sauvegarder / reimporter pour synchroniser.
+
+SYNCHRONISER SES DONNEES ENTRE APPAREILS (iPhone, iPad, Mac, PC) – gratuit
+Tes livres, etageres, meubles, infos IA, tranches et photos d'origine sont stockes dans
+un depot GitHub PRIVE qui t'appartient. Chaque appareil les envoie et les recupere.
+
+A. Creer le stockage (une seule fois, depuis le PC)
+1. Sur github.com : "+" > "New repository".
+   - Repository name : scanly-data
+   - Coche "Private" (IMPORTANT : tes donnees ne doivent pas etre publiques)
+   - Coche "Add a README file" puis "Create repository".
+2. Creer le jeton d'acces : photo de profil > Settings > Developer settings (tout en bas)
+   > Personal access tokens > Fine-grained tokens > "Generate new token".
+   - Token name : SCANLY
+   - Expiration : la duree la plus longue proposee (note la date pour le renouveler)
+   - Repository access : "Only select repositories" > scanly-data
+   - Permissions > Repository permissions > Contents : "Read and write"
+   - "Generate token" puis COPIE le jeton (github_pat_...) : il ne sera plus affiche.
+     Garde-le dans un endroit sur (ex. note protegee) pour tes autres appareils.
+
+B. Sur l'appareil qui contient ta bibliotheque (ex. le PC)
+   Parametres > "Synchronisation entre appareils" : pseudo GitHub, depot scanly-data,
+   colle le jeton > "Tester" > "Envoyer cette bibliotheque".
+   (le premier envoi prend quelques minutes : toutes les images partent une fois)
+
+C. Sur chaque autre appareil (iPhone, iPad, Mac)
+   Parametres > meme pseudo, meme depot, meme jeton > "Tester" > "Recuperer depuis GitHub".
+
+ENSUITE, C'EST AUTOMATIQUE
+- Chaque modification est envoyee ~20 secondes apres (ou quand tu quittes l'app).
+- A l'ouverture, SCANLY recupere la version la plus recente si un autre appareil a modifie.
+- Icone nuage en haut : verte = a jour ; doree = modifications a envoyer ; rouge = erreur
+  (clic pour reessayer). Un clic sur le nuage synchronise tout de suite.
+- Si deux appareils ont modifie en meme temps, SCANLY demande quelle version garder.
+  Toutes les versions restent dans l'historique du depot (onglet "Commits" sur GitHub).
+- Seules les nouvelles images sont envoyees : les synchronisations suivantes sont rapides.
+- La cle Gemini et le jeton ne sont jamais envoyes : a saisir sur chaque appareil.
+- Jeton expire : genere-en un nouveau (etape A.2) et colle-le dans les Parametres.
+
+UTILISATION AU DOIGT (iPhone / iPad)
+- Toucher un livre : fiche ; balayer la fiche a gauche / droite : livre suivant / precedent.
+- Double-toucher un livre : zoom ; double-toucher a cote des livres : zoom sur l'etagere.
+- Pincer : zoom ; glisser le fond : se deplacer ; menu Vue > "Tout voir" pour revenir.
+- Glisser un livre : le deplacer ; glisser le rond dore ⇕ : deplacer l'etagere.
+- Appui long sur un livre : le selectionner (puis barre bleue : deplacer / supprimer).
+- Bouton ＋ (en bas a droite) : Prendre une photo (appareil photo de l'iPhone, pleine
+  resolution), Importer des photos (Photos / Fichiers), Ajouter un livre.
+- Sauvegarder : ouvre le menu de partage iOS (Fichiers, iCloud Drive, OneDrive, AirDrop...).
+
+METTRE A JOUR PLUS TARD
+Sur GitHub, dans le depot "scanly" : "Add file" > "Upload files" > glisse les nouveaux
+fichiers > "Commit changes". Sur l'iPhone, ferme puis rouvre SCANLY (2 fois si besoin).
+Tes donnees sont conservees.
+
+SUR PC WINDOWS
+Rien ne change : Lancer_SCANLY.bat fonctionne toujours. Tu peux aussi simplement utiliser
+l'adresse GitHub dans Edge (bouton "Installer l'application").
+
+A SAVOIR
+- Ne supprime pas l'icone ni les "donnees de sites web" de Safari sans avoir fait une
+  sauvegarde : les livres sont stockes dans l'application sur l'appareil.
+- Le scan du code-barres se fait par l'IA a partir d'une photo (pas de detection
+  automatique en direct dans Safari).
