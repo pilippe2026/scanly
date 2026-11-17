@@ -514,6 +514,38 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
   .mbox>.dhead{padding-top:calc(14px + env(safe-area-inset-top))}
   #caseBar,#themeBar{top:8px}
 }
+
+/* ===== V2.6 : téléphone en paysage (hauteur ≤ 500 px) ===== */
+.tbtog{display:none}
+.mundo{display:none!important}
+@media (max-height:500px) and (orientation:landscape){.mundo{display:flex!important}}
+@media (max-height:500px) and (orientation:landscape){
+  header{height:calc(44px + env(safe-area-inset-top));gap:8px;padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+  .brand img{height:26px}.word{font-size:17px}.tag{display:none}
+  .hsearch input{padding:5px 30px 5px 30px}
+  .hbtn{padding:5px 8px}
+  .toolbar{display:none;position:absolute;left:0;right:0;top:calc(44px + env(safe-area-inset-top));z-index:30;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+  body.tbopen .toolbar{display:flex}
+  .tbtog{display:flex;align-items:center;justify-content:center;position:absolute;z-index:31;top:calc(48px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+    width:44px;height:22px;border-radius:0 0 12px 12px;border:1px solid rgba(212,175,124,.5);border-top:0;background:rgba(11,31,68,.85);color:var(--gold);font-size:13px;cursor:pointer}
+  body.tbopen .tbtog{top:calc(44px + 55px + env(safe-area-inset-top))}
+  main{height:calc(100vh - 44px - env(safe-area-inset-top));height:calc(100dvh - 44px - env(safe-area-inset-top))}
+  #caseBar,#themeBar{top:6px;padding:2px}
+  #caseBar{left:max(8px,env(safe-area-inset-left))}#themeBar{right:max(8px,env(safe-area-inset-right))}
+  #caseBar .ddt,#themeBar .ddt{padding:4px 8px!important;font-size:12px}
+  #themeBar .ddt .lb{display:none}
+  #camBar{left:max(8px,env(safe-area-inset-left))!important;right:auto!important;bottom:calc(6px + env(safe-area-inset-bottom))!important;padding:2px;flex-wrap:nowrap!important;justify-content:flex-start}
+  #camBar button{padding:4px 7px!important}
+  #camBar #bUndo,#camBar #bRedo,#camBar .orig .lb{display:none}
+  #camBar #bRedo + .sep{display:none}
+  .toast{bottom:calc(52px + env(safe-area-inset-bottom));max-width:60vw;font-size:13px;padding:7px 12px}
+  #camBar .ddt .lb{display:none}
+  #zoomLbl{min-width:30px;font-size:10px}
+  .fab{right:max(10px,env(safe-area-inset-right))!important;bottom:calc(8px + env(safe-area-inset-bottom))!important}
+  .fab .fabm{width:44px!important;height:44px!important;font-size:24px!important}
+  #selBar{bottom:calc(50px + env(safe-area-inset-bottom))}
+  .dhead{padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:6px}
+}
 @media (max-width:420px){.brand .word{display:none}}
 @media (max-width:1400px){.tag,.hbtn .lb,#camBar .ddt .lb{display:none}.scan-grid{grid-template-columns:1fr}#caseBar{max-width:calc(100% - 260px)}}
 </style>
@@ -540,6 +572,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
   </div>
 </header>
 
+<button id="tbToggle" class="tbtog" title="Vues et filtres">▾</button>
 <div class="toolbar">
   <div class="seg" id="viewSeg"><button data-v="lib" class="on">Pièce 3D</button><button data-v="cat">Catalogue</button><button data-v="list">Liste</button><button data-v="series">Séries</button><button data-v="dash">Tableau de bord</button></div>
   <div class="chips" id="chips"></div>
@@ -584,6 +617,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
         </div></div>
       <div class="ddw up left"><button class="ddt" data-dd title="Outils"><span data-i="tools"></span> <span class="lb">Outils</span><span class="car">▴</span></button>
         <div class="dd">
+          <button data-act="undo" class="mundo" title="Annuler le dernier déplacement">↶ Annuler</button><button data-act="redo" class="mundo" title="Rétablir">↷ Rétablir</button>
           <button data-cam="select" title="Mode sélection : cocher des livres ou des étagères entières pour les déplacer ou les supprimer">☑ Sélection</button>
           <button data-act="sort" title="Ranger automatiquement (photo d'origine, auteur, série…)">⇅ Ranger</button>
           <button data-act="imports" title="Historique des imports : déplacer ou remettre un import entier">⧉ Imports</button>
@@ -643,7 +677,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.5';
+const VERSION = '2.6';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -2631,6 +2665,10 @@ $('#hAI').onclick = openAI;
 $('#hSave').onclick = backupNow;
 $('#hSync').onclick = () => syncNow();
 $('#hSet').onclick = openSettings;
+$('#tbToggle').onclick = e => { e.stopPropagation(); document.body.classList.toggle('tbopen'); $('#tbToggle').textContent = document.body.classList.contains('tbopen') ? '▴' : '▾'; };
+document.addEventListener('click', e => { if (document.body.classList.contains('tbopen') && !e.target.closest('.toolbar,#tbToggle,select')) { document.body.classList.remove('tbopen'); $('#tbToggle').textContent = '▾'; } });
+$('#viewSeg').addEventListener('click', () => setTimeout(() => { document.body.classList.remove('tbopen'); $('#tbToggle').textContent = '▾'; }, 50));
+matchMedia('(orientation:landscape)').addEventListener('change', () => setTimeout(() => applyView(), 300));
 $('#dBack').onclick = () => closeDrawer();
 document.addEventListener('click', e => { const b = e.target.closest('[data-hm]'); if (!b) return; $$('.ddw.open').forEach(w => w.classList.remove('open'));
   ({scan: () => $('#hScan').click(), ai: () => $('#hAI').click(), save: () => $('#hSave').click(), set: () => openSettings()})[b.dataset.hm](); });
