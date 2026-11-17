@@ -1,5 +1,12 @@
-SCANLY V2.4 - Votre bibliotheque, en un scan.
+SCANLY V2.5 - Votre bibliotheque, en un scan.
 =============================================
+V2.5 : CORRECTIONS iPHONE
+- Fiche ouvrage et fenetres : l'en-tete demarre sous la barre d'etat (heure, reseau,
+  batterie) ; la croix × est accessible ; bouton "‹ Retour" a gauche.
+- Page principale : bouton ☰ toujours visible -> Scanner, Assistant IA, Sauvegarder,
+  Parametres. La recherche prend la place disponible.
+- PC : affichage inchange.
+
 V2.4 : SYNCHRONISATION ENTRE APPAREILS (iPhone, iPad, Mac, PC)
 - Toutes les donnees (livres, etageres, meubles, infos IA, tranches, photos d'origine,
   corbeille, series) sont stockees dans ton depot GitHub prive, gratuit.

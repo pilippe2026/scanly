@@ -495,6 +495,26 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
   table.list{font-size:12px}
 }
 #hSync[data-st=ok]{color:#7bd59a;border-color:#2c5d4a}#hSync[data-st=dirty]{color:var(--gold);border-color:var(--gold)}#hSync[data-st=err]{color:#ff9b8a;border-color:#c0503f}
+
+/* ===== V2.5 : corrections iPhone (encoche / barre d'état, menu ☰) ===== */
+.hmenu,.dback{display:none}
+.dhead{padding-top:calc(14px + env(safe-area-inset-top))}
+.drawer{padding-bottom:env(safe-area-inset-bottom)}
+.mbox{padding-bottom:env(safe-area-inset-bottom)}
+#toast{bottom:calc(26px + env(safe-area-inset-bottom))}
+@media (max-width:900px){
+  #hScan,#hAI,#hSave,#hSet{display:none}
+  .hmenu{display:flex}
+  .hmenu .dd{min-width:210px}.hmenu .dd button{padding:12px 14px;font:600 15px var(--fB);background:none;border:0;border-radius:10px;color:var(--cream);text-align:left;cursor:pointer}.hmenu .dd button:active,.hmenu .dd button:hover{background:rgba(212,175,124,.2);color:var(--gold)}
+  .hsearch{flex:1;min-width:0}
+  .dback{display:inline-flex;align-items:center;background:none;border:0;color:var(--gold);font:600 15px var(--fB);padding:6px 4px;cursor:pointer;white-space:nowrap}
+  .dhead h3{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dhead .x{font-size:30px;padding:4px 10px}
+  .dhead{gap:6px;padding-left:12px;padding-right:8px}
+  .mbox>.dhead{padding-top:calc(14px + env(safe-area-inset-top))}
+  #caseBar,#themeBar{top:8px}
+}
+@media (max-width:420px){.brand .word{display:none}}
 @media (max-width:1400px){.tag,.hbtn .lb,#camBar .ddt .lb{display:none}.scan-grid{grid-template-columns:1fr}#caseBar{max-width:calc(100% - 260px)}}
 </style>
 </head>
@@ -515,6 +535,8 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
     <button class="hbtn sync" id="hSync" style="display:none" title="Synchronisation"></button>
     <button class="hbtn" id="hSave" title="Enregistrer une sauvegarde (Ctrl+S)"><span data-i="save"></span></button>
     <button class="hbtn" id="hSet" title="Paramètres"><span data-i="gear"></span></button>
+    <div class="ddw down right hmenu"><button class="hbtn ddt" id="hMenu" data-dd title="Menu">☰</button>
+      <div class="dd"><button data-hm="scan">▣ Scanner</button><button data-hm="ai">✦ Assistant IA</button><button data-hm="save">⬇ Sauvegarder</button><button data-hm="set">⚙ Paramètres</button></div></div>
   </div>
 </header>
 
@@ -593,7 +615,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
 </div>
 
 <div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer"><div class="dhead"><h3 id="dTitle"></h3><div class="dnav" id="dNav"></div><button class="x" id="dClose">×</button></div><div class="dbody" id="dBody"></div><div id="dFoot"></div></aside>
+<aside class="drawer" id="drawer"><div class="dhead"><button class="dback" id="dBack" title="Retour">‹ Retour</button><h3 id="dTitle"></h3><div class="dnav" id="dNav"></div><button class="x" id="dClose">×</button></div><div class="dbody" id="dBody"></div><div id="dFoot"></div></aside>
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <div id="editor">
   <div style="font:700 16px var(--fT)">Recadrer / redresser la photo</div>
@@ -621,7 +643,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.4';
+const VERSION = '2.5';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -2609,6 +2631,9 @@ $('#hAI').onclick = openAI;
 $('#hSave').onclick = backupNow;
 $('#hSync').onclick = () => syncNow();
 $('#hSet').onclick = openSettings;
+$('#dBack').onclick = () => closeDrawer();
+document.addEventListener('click', e => { const b = e.target.closest('[data-hm]'); if (!b) return; $$('.ddw.open').forEach(w => w.classList.remove('open'));
+  ({scan: () => $('#hScan').click(), ai: () => $('#hAI').click(), save: () => $('#hSave').click(), set: () => openSettings()})[b.dataset.hm](); });
 $('#undo').onclick = e => { if (e.target.id !== 'undoBtn') $('#undo').classList.remove('on'); };
 document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase(), typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName), libOn = $('#v-lib').classList.contains('on') && !$('#modal').classList.contains('on') && !$('#drawer').classList.contains('on');
