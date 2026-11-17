@@ -1,5 +1,14 @@
-SCANLY V2.6 - Votre bibliotheque, en un scan.
+SCANLY V2.7 - Votre bibliotheque, en un scan.
 =============================================
+V2.7 : CHOIX DE LA RECONNAISSANCE A CHAQUE IMPORT
+- Dans la fenetre de scan, choix "Rapide" (par defaut) ou "Precise". Le dernier choix est memorise.
+- Rapide : ~4 a 5 appels IA par photo (lecture d'ensemble + lecture des tranches par lots
+  de 25, sans "reflexion"), images plus legeres, recollage des morceaux fait pendant la
+  lecture. ≈ 30 a 60 s par photo.
+- Precise : methode complete (regroupement perspective, tranches larges, paires suspectes),
+  ~11 a 15 appels IA. Pour les etageres difficiles.
+- Fin de scan : mode, nombre d'appels IA, duree totale et duree des etapes principales.
+
 V2.6 : iPHONE EN PAYSAGE
 - En-tete affine ; barre des vues et filtres masquee (petit bouton ▾ en haut au centre
   pour l'ouvrir, elle se referme apres le choix d'une vue).

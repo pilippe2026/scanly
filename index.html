@@ -546,6 +546,12 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
   #selBar{bottom:calc(50px + env(safe-area-inset-bottom))}
   .dhead{padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:6px}
 }
+.smode{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin-top:14px;background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.smode .step{align-self:center}
+.smo{flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px 8px 34px;position:relative;cursor:pointer}
+.smo input{position:absolute;left:10px;top:11px;accent-color:var(--navy);width:16px;height:16px}
+.smo b{font:700 14px var(--fT)}.smo span{font-size:12px;color:var(--slate)}
+.smo:has(input:checked){border-color:var(--gold);background:#fffaf0}
 @media (max-width:420px){.brand .word{display:none}}
 @media (max-width:1400px){.tag,.hbtn .lb,#camBar .ddt .lb{display:none}.scan-grid{grid-template-columns:1fr}#caseBar{max-width:calc(100% - 260px)}}
 </style>
@@ -677,7 +683,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.6';
+const VERSION = '2.7';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -2213,6 +2219,9 @@ function openScan(caseId = null, mode = '') {
       <label class="drop" id="drop" for="fileIn">${I('img')}<b>Importer des photos</b><span>Clique ou glisse-dépose des images</span><span class="hint">Astuce : 1 photo par étagère, bien de face, sans reflet</span></label>
     </div>
     <div class="thumbs" id="thumbs"></div>
+    <div class="smode" id="sMode"><span class="step" style="margin:0"><i>⚡</i>Reconnaissance</span>
+      <label class="smo"><input type="radio" name="smode" value="fast" ${scanMode() === 'fast' ? 'checked' : ''}><b>Rapide</b><span>≈ 30 à 60 s par photo · ~5 appels IA · conseillé</span></label>
+      <label class="smo"><input type="radio" name="smode" value="precise" ${scanMode() === 'precise' ? 'checked' : ''}><b>Précise</b><span>2 à 4 min · ~15 appels IA · étagères difficiles (poches serrés, livres de biais)</span></label></div>
     <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:10px"><input type="checkbox" id="sMerge" style="accent-color:var(--navy)"> Ces photos sont des morceaux d'un même grand meuble (de gauche à droite) : les assembler</label>
     <div class="btns"><button class="btn p" id="sGo" disabled>Analyser avec l'IA</button><span class="hint" id="sMsg" style="align-self:center"></span></div>
     <div class="prog" id="sProg"><i></i></div><div id="review"></div></div>`);
@@ -2285,7 +2294,10 @@ $('#edOk').onclick = () => {
 };
 
 /* --- Analyse : lecture des tranches + découpe, vraie couleur et vraie taille --- */
+function scanMode() { return localStorage.getItem('scanly_mode') === 'precise' ? 'precise' : 'fast'; }
 async function analyze() {
+  { const r = document.querySelector('input[name=smode]:checked'); if (r) localStorage.setItem('scanly_mode', r.value); }
+  window.SCAN_T = {t0: performance.now(), steps: []};
   const merge = $('#sMerge').checked && shots.length > 1;
   if (merge && shots.length > 8) toast('Assemblage limité aux 8 premières photos');
   const batches = merge ? [shots.map((_, i) => i).slice(0, 8)] : shots.map((_, i) => [i]);
@@ -2322,7 +2334,8 @@ async function analyze() {
   detected.sort((a, b) => a._shot - b._shot || a.row - b.row || a.position - b.position);
   const unk = detected.filter(d => d.unknown).length;
   $('#sProg').style.display = 'none'; $('#sGo').disabled = false;
-  $('#sMsg').textContent = `Lecture des tranches : ${fmtDur(performance.now() - tScan)}${PERF.waitMs > 2000 ? ` (dont ${fmtDur(PERF.waitMs)} d'attente quota)` : ''}${unk ? ` · ${unk} livre(s) non reconnu(s), ajouté(s) avec des champs vides` : ''}`;
+  { const T = window.SCAN_T; if (T && T.steps.length) { const L = T.steps[T.steps.length - 1]; if (L.ms == null) L.ms = performance.now() - L.t; } }
+  $('#sMsg').textContent = `Mode ${scanMode() === 'fast' ? 'rapide' : 'précis'} · ${PERF.aiCalls} appel(s) IA · durée ${fmtDur(performance.now() - tScan)}${window.SCAN_T && window.SCAN_T.steps.length ? ' (' + window.SCAN_T.steps.filter(x => x.ms > 500).map(x => x.k.replace(/^lecture d'ensemble$/, 'ensemble').replace(/^regroupement des morceaux.*$/, 'regroupement').replace(/^lecture des tranches$/, 'lecture').replace(/^découpage des tranches$/, 'découpage') + ' ' + fmtDur(x.ms)).join(', ') + ')' : ''}${PERF.waitMs > 2000 ? ` (dont ${fmtDur(PERF.waitMs)} d'attente quota)` : ''}${unk ? ` · ${unk} livre(s) non reconnu(s), ajouté(s) avec des champs vides` : ''}`;
   renderReview(true);
 }
 function rebindScan() {
@@ -3103,7 +3116,7 @@ async function restoreOrigin() {
   const CL = (v, a, b) => Math.max(a, Math.min(b, v));
   const med = a => { const s = a.filter(v => isFinite(v)).sort((p, q) => p - q); return s.length ? s[Math.floor(s.length / 2)] : 0; };
   const pct = (a, p) => { const s = Float64Array.from(a).sort(); return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * p))] : 0; };
-  const setMsg = h => { const m = document.querySelector('#sMsg'); if (m) m.innerHTML = '<span class="spin"></span> ' + h; };
+  const setMsg = h => { const m = document.querySelector('#sMsg'); if (m) m.innerHTML = '<span class="spin"></span> ' + h; const T = window.SCAN_T; if (T) { const k = h.replace(/^Photo \d+\/\d+ : /, '').replace(/\s*\d+\/\d+.*$|…$/, '').trim(), now = performance.now(), L = T.steps[T.steps.length - 1]; if (!L || L.k !== k) { if (L) L.ms = now - L.t; T.steps.push({k, t: now}); } } };
   const asList = o => Array.isArray(o) ? o : (o && (o.livres || o.tranches)) || [];
   const NOBOOK = 'Ignore STRICTEMENT tout ce qui n\'est pas un livre : objets décoratifs, sabre, vase, cadre, boîte, montant ou planche du meuble.';
 
@@ -3221,7 +3234,7 @@ async function restoreOrigin() {
 
   /* ---------- 1. lecture d'ensemble ---------- */
   async function globalPass(url, ii) {
-    try { const o = await gemini([{text: SCAN_PROMPT + '\n- ' + NOBOOK}, {inlineData: {mimeType: 'image/jpeg', data: url.split(',')[1]}}], {json: true, think: 'low', timeout: 240000});
+    try { const o = await gemini([{text: SCAN_PROMPT + '\n- ' + NOBOOK}, {inlineData: {mimeType: 'image/jpeg', data: url.split(',')[1]}}], {json: true, think: scanMode() === 'fast' ? 'off' : 'low', timeout: 240000});
       return asList(o).filter(d => d && Array.isArray(d.boite) && d.boite.length === 4 && d.boite.every(isFinite) && d.boite[2] > d.boite[0] && d.boite[3] > d.boite[1])
         .filter(d => !/sabre|épée|katana|vase|cadre|décor/i.test(d.titre || ''))
         .map(d => { const [y0, x0, y1, x1] = d.boite.map(Number); return {t: d.illisible ? null : d.titre, a: d.auteur, s: d.serie, v: d.tome, e: d.editeur, ty: d.type, c: +d.confiance || 0, ii, x0: x0 / 1000, x1: x1 / 1000, y0: y0 / 1000, y1: y1 / 1000}; });
@@ -3239,8 +3252,9 @@ async function restoreOrigin() {
 
   /* ---------- 3. lecture des tranches par lots ---------- */
   async function readSlices(S, done) {
-    const chunks = []; for (let i = 0; i < S.length; i += 12) chunks.push(S.slice(i, i + 12)); let n = 0;
-    await pool(chunks, 3, async ch => {
+    const FAST = scanMode() === 'fast', LOT = FAST ? 25 : 12;
+    const chunks = []; for (let i = 0; i < S.length; i += LOT) chunks.push(S.slice(i, i + LOT)); let n = 0;
+    await pool(chunks, FAST ? 4 : 3, async ch => {
       const parts = [{text: `Voici ${ch.length} tranches de livres découpées dans une photo d'étagère, redressées et agrandies, dans l'ordre de gauche à droite (le texte est souvent vertical, parfois à l'envers).
 Pour chaque tranche k, lis le titre, l'auteur, l'éditeur et le tome (édition française en priorité). Un « titre probable » issu d'une lecture d'ensemble de la photo est indiqué quand il existe : vérifie-le sur l'image, corrige-le si besoin. Les voisins d'une même série se ressemblent : sers-t'en.
 Indique "livre": false si l'image n'est pas un livre (mur, planche, objet), et "suite": true si l'image est un morceau du MÊME livre que la tranche précédente (k-1).
@@ -3250,7 +3264,7 @@ JSON : [{"k":1,"livre":true,"suite":false,"titre":"…","auteur":"…","serie":"
       ch.forEach((s, k) => { parts.push({text: `Tranche k=${k + 1}${s.hint ? ` – titre probable : « ${s.hint} »` : ''}${s.prev ? ` – voisin de gauche : « ${s.prev} »` : ''}`},
         {inlineData: {mimeType: 'image/jpeg', data: s.read.split(',')[1]}}); });
       for (let a = 0; a < 2; a++) { try {
-        asList(await gemini(parts, {json: true, think: 'low', timeout: 180000})).forEach(o => { const s = ch[(+o.k || 0) - 1]; if (!s) return;
+        asList(await gemini(parts, {json: true, think: FAST ? 'off' : 'low', timeout: 180000})).forEach(o => { const s = ch[(+o.k || 0) - 1]; if (!s) return;
           s.ok = true; s.notBook = o.livre === false; s.cont = !!o.suite; s.nb = CL(parseInt(o.nb) || 1, 1, 6); s.more = Array.isArray(o.autres) ? o.autres : [];
           if (o.titre && (+o.confiance || 0) >= .35) Object.assign(s, {t: o.titre, a: o.auteur, se: o.serie, v: o.tome, e: o.editeur, ty: o.type, c: +o.confiance || .6}); });
         break; } catch (e) { console.warn('SCANLY lecture tranches', e); } }
@@ -3378,8 +3392,8 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
       const S = [], RAW = bands.map(B => segmentBand(img, B));
       for (let r = 0; r < bands.length; r++) {
         const L = RAW[r]; if (L.length < 2) continue;
-        setMsg(`Photo ${ii + 1}/${urls.length} : regroupement des morceaux (étagère ${r + 1})…`);
-        const groups = await groupPass(img, L, bands[r].y1 - bands[r].y0), merged = [];
+        if (scanMode() === 'precise') setMsg(`Photo ${ii + 1}/${urls.length} : regroupement des morceaux (étagère ${r + 1})…`);
+        const groups = scanMode() === 'fast' ? L.map((_, i) => ({idx: [i], spine: null})) : await groupPass(img, L, bands[r].y1 - bands[r].y0), merged = [];   // V2.7 : en mode rapide, le recollage se fait pendant la lecture (« suite »)
         groups.forEach(g => { const A = g.idx.map(i => L[i]); if (A.length === 1) { if (!A[0].wall) merged.push(A[0]); return; }
           if (A.every(s => s.wall)) return;
           const f = A[0], l = A[A.length - 1], sp = g.spine != null ? L[g.spine] : null, topY = Math.min(...A.map(s => s.Q[0][1]));
@@ -3393,14 +3407,14 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         const gm = (B.G || []).filter(d => d.t).map(d => ({d, dist: Math.abs((d.x0 + d.x1) / 2 - s.cx / W)})).filter(o => o.dist < (x1 - x0) * .9 + .004).sort((p, q) => p.dist - q.dist)[0];
         if (gm && s.cand.length) { const gy = gm.d.y0 * H, c = s.cand.reduce((p, q) => Math.abs(q.y - gy) < Math.abs(p.y - gy) ? q : p); if (Math.abs(c.y - gy) < (B.y1 - B.y0) * .25) s.Q = s.topAt(c.y); }
         if (s.spineQ) s.Q = s.spineQ;   // livre vu de biais : on garde la tranche (dos) pour l'étagère
-        const sp = warp(img, s.Q), rd = warp(img, s.Qr, Math.min(700, Math.max(380, sp.hpx * 1.6)));
+        const sp = warp(img, s.Q), rd = warp(img, s.Qr, scanMode() === 'fast' ? Math.min(460, Math.max(300, sp.hpx * 1.2)) : Math.min(700, Math.max(380, sp.hpx * 1.6)));
         S.push({...s, row: r + 1, sp, read: rd.crop, hint: gm ? gm.d.t + (gm.d.v ? ' (tome ' + gm.d.v + ')' : '') : '', g: gm && gm.d});
       }));
       S.forEach((s, i) => { if (i && S[i - 1].row === s.row && S[i - 1].hint) s.prev = S[i - 1].hint; });
       await readSlices(S, n => setMsg(`Photo ${ii + 1}/${urls.length} : lecture des tranches ${n}/${S.length}…`));
       S.forEach(s => { if (!s.ok && s.g && s.g.t) Object.assign(s, {t: s.g.t, a: s.g.a, se: s.g.s, v: s.g.v, e: s.g.e, ty: s.g.ty, c: Math.min(.6, s.g.c || .6)}); });
       setMsg(`Photo ${ii + 1}/${urls.length} : contrôle des tranches larges…`);
-      await splitWide(img, S);
+      if (scanMode() === 'precise') await splitWide(img, S);
       const S2 = [];
       S.forEach(s => { if (s.cuts && s.cuts.length) { const lerp = (p, q, f) => [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f], fr = [0, ...s.cuts, 1];
           for (let j = 0; j < fr.length - 1; j++) { const f0 = fr[j], f1 = fr[j + 1], inf = s.parts[j] || {};
@@ -3414,7 +3428,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         for (let j = 0; j < s.nb; j++) { const f0 = j / s.nb, f1 = (j + 1) / s.nb, Q = [lerp(s.Q[0], s.Q[1], f0), lerp(s.Q[0], s.Q[1], f1), lerp(s.Q[3], s.Q[2], f1), lerp(s.Q[3], s.Q[2], f0)];
           S2.push({...s, ...(info[j] || {t: null}), Q, cont: j ? false : s.cont, merged: true, nb: 1}); } });
       setMsg(`Photo ${ii + 1}/${urls.length} : vérification des livres coupés en deux…`);
-      await verifyPairs(img, S2);
+      if (scanMode() === 'precise') await verifyPairs(img, S2);
       const M = [];
       S2.filter(s => !s.notBook).forEach(s => { const p = M[M.length - 1];
         if (p && p.row === s.row && (s.cont || sameBook(p, s))) { const ty = Math.min(p.Q[0][1], s.Q[1][1]); p.Q = [[p.Q[0][0], ty], [s.Q[1][0], ty], s.Q[2], p.Q[3]]; if (!p.t && s.t) Object.assign(p, {t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c}); p.Qr = [p.Qr[0], s.Qr[1], s.Qr[2], p.Qr[3]]; p.wImg = (p.wImg || 0) + (s.wImg || 0); p.merged = true; }
