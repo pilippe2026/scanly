@@ -1,3 +1,26 @@
+SCANLY V2.15 - TACTILE : APPUI LONG AVANT DEPLACEMENT
+Base : V2.14 multilingue fournie par utilisateur.
+
+Glisser immediatement sur la piece, meme sur un livre : deplacer la vue.
+Maintenir le doigt immobile 0,6 seconde sur un livre : contour dore, puis glisser pour ranger.
+Meme protection pour les poignees d'etagere.
+Relacher apres un appui long sans glisser ne change pas le rangement.
+Un second doigt annule le deplacement en cours sans enregistrer, puis permet le zoom.
+Selection : Outils > Selection, puis toucher les livres (l'appui long sert au rangement).
+Toucher bref : fiche. Double toucher : zoom. Souris PC inchangee.
+Langues, photos, cadres, six univers et synchronisation conserves.
+
+Tests Chromium en emulation iPhone 13 / iPad : navigation sans changement des livres,
+appui long puis deplacement enregistre, annulation par second doigt et touchcancel,
+fiche au toucher et selection. Donnees fictives de test non incluses.
+Pas de test sur appareils physiques ni d'appel reel a Gemini ou GitHub.
+
+Archive : SCANLY V2.15.zip ; dossier : SCANLY V2.15.
+Sauvegarder avant mise a jour. Sur GitHub envoyer le CONTENU du dossier SCANLY V2.15,
+non le dossier parent, pour conserver index.html a la racine et la meme adresse.
+Fermer puis rouvrir l'application ; ne pas effacer les donnees Safari.
+
+
 SCANLY V2.14 - CHOIX DE LANGUE
 Base exclusive : archive V2.13 fournie par Philippe.
 

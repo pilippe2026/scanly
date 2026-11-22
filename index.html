@@ -572,6 +572,10 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
 #unit .book.dim{opacity:.12}
 #v-lib.smart-read #fx{display:none}#v-lib.smart-read #scene{transform:none!important;transition:none!important}#v-lib.smart-read .sh-glow{opacity:.15}
 @media(prefers-reduced-motion:reduce){#v-lib #fx{display:none}#v-lib #scene,#v-lib .book{transition:none!important}}
+
+/* V2.15: stationary hold feedback, without lifting books. */
+#unit .book.touch-ready .fr{outline:3px solid #D4AF7C;outline-offset:2px}
+#unit .shgrip.touch-ready{box-shadow:0 0 0 3px #D4AF7C}
 </style>
 </head>
 <body>
@@ -701,7 +705,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.14';
+const VERSION = '2.15';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -3681,39 +3685,67 @@ window.syncBoot = syncBoot; window.bindSyncSettings = bindSyncSettings;
   document.documentElement.classList.add('touch');
   const ZONES = '#viewport,#ogC,#qeWrap,#spW,#edCan,#lpW,.b3v';
   const fire = (type, t, target, extra = {}) => { const ev = new MouseEvent(type, {bubbles: true, cancelable: true, clientX: t.clientX, clientY: t.clientY, button: 0, buttons: type === 'mouseup' ? 0 : 1, view: window, ...extra}); (target || document.elementFromPoint(t.clientX, t.clientY) || document.body).dispatchEvent(ev); };
+  // V2.15: immediate swipe pans; only a stationary 600 ms hold arms a book/shelf drag.
   let st = null, pinch = null, lastTap = {t: 0, x: 0, y: 0}, lpTimer = 0;
+  const point = t => ({clientX:t.clientX,clientY:t.clientY});
+  function cancelRoomDrag(){
+    clearTimeout(lpTimer);
+    if(st?.target?.closest)st.target.closest('.book,.shgrip')?.classList.remove('touch-ready');
+    if(drag){drag.el?.classList.remove('lifted');drag=null;}
+    $('#dragGhost')?.remove();$('#dropMark').style.display='none';$('#unit').classList.remove('dragging');
+    if(sdrag){sdrag.grps.forEach(g=>{g.style.transform='';g.classList.remove('lift','anim');});sdrag=null;}
+    document.body.classList.remove('dnd');document.body.style.cursor='';
+    $$('#caseBar .dropok,#caseBar .dropok.over,.dropz.over').forEach(el=>el.classList.remove('dropok','over'));
+    pan=null;VP.classList.remove('panning');
+  }
+  function tapRoom(s0,t){
+    const now=Date.now();
+    if(now-lastTap.t<320&&Math.hypot(t.clientX-lastTap.x,t.clientY-lastTap.y)<30){lastTap.t=0;fire('dblclick',t,s0.target);}
+    else{lastTap={t:now,x:t.clientX,y:t.clientY};fire('click',t,s0.target);}
+  }
   document.addEventListener('touchstart', e => {
-    const zone = e.target.closest && e.target.closest(ZONES); if (!zone) return;
-    if (e.target.closest('button,select,input,a,.dd,.ddw,label')) return;
+    const zone=e.target.closest&&e.target.closest(ZONES);if(!zone)return;
+    if(e.target.closest('button,select,input,a,.dd,.ddw,label'))return;
     e.preventDefault();
-    if (e.touches.length === 2) { clearTimeout(lpTimer); if (st && st.down) fire('mouseup', st.last, null); st = null;
-      const [a, b] = e.touches; pinch = {d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), cx: (a.clientX + b.clientX) / 2, cy: (a.clientY + b.clientY) / 2, zone}; return; }
-    if (e.touches.length > 2) return;
-    const t = e.touches[0]; st = {x: t.clientX, y: t.clientY, last: t, target: e.target, moved: false, down: true, zone, time: Date.now(), long: false};
-    fire('mousedown', t, e.target);
-    clearTimeout(lpTimer); lpTimer = setTimeout(() => { if (st && !st.moved && st.target.closest && st.target.closest('#unit .book')) { st.long = true; fire('mouseup', st.last, null);
-        fire('click', st.last, st.target, {ctrlKey: true}); if (navigator.vibrate) navigator.vibrate(15); st.down = false; } }, 550);
-  }, {passive: false});
-  document.addEventListener('touchmove', e => {
-    if (pinch && e.touches.length === 2) { e.preventDefault(); const [a, b] = e.touches, d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), f = d / pinch.d; pinch.d = d;
-      const cx = (a.clientX + b.clientX) / 2, cy = (a.clientY + b.clientY) / 2;
-      pinch.zone.dispatchEvent(new WheelEvent('wheel', {bubbles: true, cancelable: true, clientX: cx, clientY: cy, deltaY: -Math.log(f) / .0015}));
-      if (pinch.zone.id === 'viewport') { VIEW.px += cx - pinch.cx; VIEW.py += cy - pinch.cy; applyView(); } pinch.cx = cx; pinch.cy = cy; return; }
-    if (!st || !st.down) return; e.preventDefault(); const t = e.touches[0]; st.last = t;
-    if (Math.hypot(t.clientX - st.x, t.clientY - st.y) > 8) { st.moved = true; clearTimeout(lpTimer); }
-    fire('mousemove', t, null);
-  }, {passive: false});
-  document.addEventListener('touchend', e => {
-    if (pinch) { if (e.touches.length < 2) pinch = null; return; }
-    if (!st) return; clearTimeout(lpTimer); const s0 = st; st = null; if (!s0.down) return;
-    const t = e.changedTouches[0]; fire('mouseup', t, null);
-    if (!s0.moved && Date.now() - s0.time < 550) {
-      const now = Date.now();
-      if (now - lastTap.t < 320 && Math.hypot(t.clientX - lastTap.x, t.clientY - lastTap.y) < 30) { lastTap.t = 0; fire('dblclick', t, s0.target); }
-      else { lastTap = {t: now, x: t.clientX, y: t.clientY}; fire('click', t, s0.target); }
+    if(e.touches.length>=2){
+      if(st?.room)cancelRoomDrag();else if(st?.down)fire('mouseup',st.last,null);
+      clearTimeout(lpTimer);st=null;lastTap.t=0;
+      const [a,b]=e.touches;pinch={d:Math.max(1,Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)),cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2,zone};return;
     }
-  }, {passive: false});
-  document.addEventListener('touchcancel', () => { clearTimeout(lpTimer); if (st && st.down) fire('mouseup', st.last, null); st = null; pinch = null; });
+    if(pinch||e.touches.length!==1)return;
+    const t=point(e.touches[0]),room=zone.id==='viewport';
+    st={x:t.clientX,y:t.clientY,last:t,target:e.target,moved:false,down:!room,room,zone,time:Date.now(),armed:false,px:VIEW.px,py:VIEW.py};
+    if(!room){fire('mousedown',t,e.target);return;}
+    const item=e.target.closest('#unit .book,#unit .shgrip');
+    if(item&&!CAM.sel){lpTimer=setTimeout(()=>{
+      if(!st||st.moved||!st.room)return;
+      st.armed=true;st.down=true;lastTap.t=0;item.classList.add('touch-ready');
+      fire('mousedown',st.last,st.target);
+      if(navigator.vibrate)navigator.vibrate(20);
+    },600);}
+  },{passive:false});
+  document.addEventListener('touchmove',e=>{
+    if(pinch&&e.touches.length===2){e.preventDefault();const [a,b]=e.touches,d=Math.max(1,Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)),f=d/pinch.d;pinch.d=d;
+      const cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;
+      pinch.zone.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,clientX:cx,clientY:cy,deltaY:-Math.log(f)/.0015}));
+      if(pinch.zone.id==='viewport'){VIEW.px+=cx-pinch.cx;VIEW.py+=cy-pinch.cy;applyView();}pinch.cx=cx;pinch.cy=cy;return;}
+    if(!st||!e.touches.length)return;e.preventDefault();const t=point(e.touches[0]);st.last=t;
+    if(Math.hypot(t.clientX-st.x,t.clientY-st.y)>8){st.moved=true;clearTimeout(lpTimer);lastTap.t=0;}
+    if(st.room&&!st.armed){if(st.moved){VIEW.px=st.px+t.clientX-st.x;VIEW.py=st.py+t.clientY-st.y;VP.classList.add('panning');applyView();}return;}
+    if(st.down)fire('mousemove',t,null);
+  },{passive:false});
+  document.addEventListener('touchend',e=>{
+    if(pinch){if(!e.touches.length)pinch=null;return;}
+    if(!st)return;clearTimeout(lpTimer);const s0=st;st=null;const t=point(e.changedTouches[0]);
+    s0.target.closest?.('.book,.shgrip')?.classList.remove('touch-ready');VP.classList.remove('panning');
+    if(s0.room){
+      if(s0.armed){if(s0.moved)fire('mouseup',t,null);else cancelRoomDrag();return;}
+      if(!s0.moved)tapRoom(s0,t);return;
+    }
+    if(s0.down)fire('mouseup',t,null);
+    if(!s0.moved&&Date.now()-s0.time<550)tapRoom(s0,t);
+  },{passive:false});
+  document.addEventListener('touchcancel',()=>{clearTimeout(lpTimer);if(st?.room)cancelRoomDrag();else if(st?.down)fire('mouseup',st.last,null);st=null;pinch=null;lastTap.t=0;});
   // balayage gauche / droite dans la fiche ouvrage : livre précédent / suivant
   let sw = null;
   document.addEventListener('touchstart', e => { const d = e.target.closest && e.target.closest('#dBody'); if (!d || e.touches.length !== 1 || e.target.closest('input,textarea,select,.b3v')) { sw = null; return; } const t = e.touches[0]; sw = {x: t.clientX, y: t.clientY, time: Date.now()}; }, {passive: true});
