@@ -1,0 +1,36 @@
+SCANLY V2.14 - CHOIX DE LANGUE
+Base exclusive : archive V2.13 fournie par Philippe.
+
+UTILISATION
+Menu > Parametres > Langue de l'application.
+Francais / English / Espanol / Korean / Deutsch.
+Le choix est applique immediatement et conserve sur chaque appareil.
+Les traductions sont locales : pas de service payant ni d'appel IA pour les menus.
+
+PORTEE
+Menus principaux, commandes, fiches, import photo, principales commandes de correction,
+parametres et principales aides traduits.
+Quelques aides longues, messages techniques dynamiques, textes dessines sur canevas et
+exports restent en francais. Les anciennes descriptions IA ne sont pas retraduites.
+Les nouvelles reponses de l'assistant et descriptions IA sont demandees dans la langue
+choisie, sans traduire les titres, auteurs, series, editeurs ou ISBN.
+
+PRESERVATION
+Six univers et visuels de V2.13 conserves sans modification.
+Traitements photo, cadres numerotes, correction dans Agrandir, synchronisation et
+schema des livres conserves. La traduction ne modifie pas les valeurs enregistrees.
+Le numero de version interne, encore 2.8 dans l'archive V2.13, est corrige en 2.14.
+
+TESTS
+Chromium : cinq langues, retour au francais, memorisation apres rechargement,
+conservation des donnees et des valeurs des listes (statut, type, meuble).
+Formats desktop, iPhone 13 et iPad : ouverture Agrandir, correction sur photo originale,
+selection d'un cadre enregistre et suppression de sa copie de travail, sans supprimer
+le livre. Donnees fictives uniquement en memoire de test, absentes de cette archive.
+Pas de test sur appareils physiques ni d'appel reel a Gemini ou GitHub.
+
+MISE A JOUR
+Faire une sauvegarde avant de remplacer les fichiers.
+Sur GitHub : envoyer le contenu du dossier, y compris i18n.js, index.html, sw.js et assets.
+Conserver la meme adresse de lancement. Fermer puis rouvrir l'application.
+Ne pas supprimer les donnees Safari pour actualiser le cache.

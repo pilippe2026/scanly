@@ -701,7 +701,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.8';
+const VERSION = '2.14';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -861,7 +861,12 @@ async function gemini(parts, {json = false, system = null, history = null, think
       const body = {contents: [...(history || []), {role: 'user', parts}], generationConfig: {temperature: json ? 0.2 : 0.7}};
       if (json) body.generationConfig.responseMimeType = 'application/json';
       const tc = thinkCfg(model, think); if (tc) body.generationConfig.thinkingConfig = tc;
-      if (system) body.systemInstruction = {parts: [{text: system}]};
+      const uiLang = window.SCANLY_I18N?.get() || 'fr';
+      const narrativeLang = {fr:'French',en:'English',es:'Spanish',ko:'Korean',de:'German'}[uiLang];
+      const languageRule = uiLang === 'fr' ? '' : (json
+        ? `Language rule: preserve all JSON keys, enum values, book titles, authors, series, publisher names and ISBNs exactly as required by the task or printed on the book. Do not translate identification metadata. Only free-form summaries, descriptions and explanatory prose should be written in ${narrativeLang}.`
+        : `Respond in ${narrativeLang}. Keep book titles, author names, series and user-defined furniture names in their original language.`);
+      if (system || languageRule) body.systemInstruction = {parts: [{text: [system, languageRule].filter(Boolean).join('\n')}]};
       const t0 = performance.now(); let r;
       try { r = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
         {method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': cfg.key}, body: JSON.stringify(body)}, timeout); }
@@ -2665,6 +2670,10 @@ async function exportCsv() {
 function openSettings() {
   const cur = cfg.model, last = localStorage.getItem('scanly_lastsave');
   openModal(`<div class="dhead"><h3>Paramètres</h3><button class="x" data-close>×</button></div><div class="mbody">
+    <div class="step">Langue de l’application</div>
+    <label class="l" for="pLanguage">Langue</label>
+    <select class="fld" id="pLanguage" aria-label="Langue de l’application" data-no-i18n>${Object.entries(window.SCANLY_I18N?.languages || {fr:'Français',en:'English',es:'Español',ko:'한국어',de:'Deutsch'}).map(([code,name]) => `<option value="${code}" ${code === (window.SCANLY_I18N?.get() || 'fr') ? 'selected' : ''}>${name}</option>`).join('')}</select>
+    <p class="hint">Le choix est mémorisé sur cet appareil. Les titres, noms de meubles et données existantes ne sont pas traduits.</p>
     <div class="step">Univers général</div>
     <div class="thcards" id="pTheme">${Object.entries(THEMES).map(([k, t]) => `<div class="thcard ${k === theme ? 'on' : ''}" data-th="${k}" title="${esc(t.tip || '')}"><img src="${t.img}" alt=""><b>${I(k)}${t.name}</b></div>`).join('')}</div>
     <p class="hint">Chaque meuble peut avoir son propre univers : liste ci-dessous, ou bouton épingle en haut à droite de la pièce.</p>
@@ -3724,5 +3733,6 @@ window.syncBoot = syncBoot; window.bindSyncSettings = bindSyncSettings;
 
 (function(){const lib=document.getElementById('v-lib'),btn=document.getElementById('smartMode');let quick=localStorage.getItem('scanly_smart_read')==='1';function update(){lib.classList.toggle('smart-read',quick);btn.setAttribute('aria-pressed',String(quick));btn.classList.toggle('on',quick);btn.textContent=quick?'Immersion 3D':'Lecture rapide';btn.title=quick?'Revenir aux perspectives 3D':'Vue frontale et effets réduits';}btn.addEventListener('click',function(e){e.stopPropagation();quick=!quick;localStorage.setItem('scanly_smart_read',quick?'1':'0');update();});update();})();
 </script>
+<script src="i18n.js"></script>
 </body>
 </html>
