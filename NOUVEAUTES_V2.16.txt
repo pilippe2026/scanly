@@ -1,0 +1,54 @@
+SCANLY V2.16 - BASES BIBLIOGRAPHIQUES ET COUVERTURES
+Base exclusive : SCANLY V2.15 fournie par utilisateur.
+
+FICHE OUVRAGE
+- Completer (bases de livres) : Google Books + Open Library, puis complement BnF
+  uniquement pour les champs manquants et un ISBN exact.
+- Verifier avec la BnF : recherche ISBN ou titre/auteur, jusqu'a cinq notices.
+  Verifier l'edition et le tome avant de choisir. Seuls les champs vides sont completes.
+  Auteur, editeur, annee, pages et ISBN sont repris si disponibles.
+  Une reference BnF et la liste des champs completes sont conservees dans le livre.
+- Ajouter une couverture : choisir une photo depuis Photos/Fichiers/PC.
+  Elle est conservee avec le livre et protegee contre le remplacement automatique.
+  Utiliser le meme bouton pour la remplacer par une autre photo.
+
+RECHERCHES
+- Cache local limite a 150 reponses, pendant 30 jours, conserve apres rechargement.
+- Requetes Open Library espacees d'au moins 1,1 seconde.
+- Google Books : recherche ISBN ne retient que les identifiants correspondants.
+- Open Library : recherche ISBN via l'API d'edition, et non l'annee du premier ouvrage.
+- Parametres > Sources bibliographiques : activer/desactiver le complement BnF
+  automatique, ou effacer le cache sans toucher aux livres.
+- Les champs ajoutes et les couvertures suivent la sauvegarde et la synchronisation
+  des livres existantes. Le cache et le choix BnF automatique restent propres a l'appareil.
+
+LIMITES
+- BnF n'est pas une source de couvertures. Pas de correction du decoupage photo.
+- Le service BnF peut etre inaccessible selon le reseau ou les autorisations navigateur
+  (CORS). Aucun proxy tiers ajoute. Message d'erreur, puis les autres bases restent utilisables.
+- Le premier complement peut etre plus long ; le cache evite les recherches repetees.
+- L'acces BnF reel est bloque par la politique reseau de l'environnement de test.
+  L'acces depuis GitHub Pages/Safari reste a confirmer sur l'appareil de l'utilisateur.
+
+PRESERVATION
+Code tactile V2.15 et tous les visuels conserves a l'identique.
+Langues, cadres, traitements photo et synchronisation existants conserves.
+Nouveaux boutons traduits dans les cinq langues. Quelques messages techniques restent en francais.
+
+TESTS
+Chromium PC et emulation iPhone/iPad avec reponses de bases SIMULEES :
+ISBN exact, refus d'ISBN different, champs deja saisis preserves, cache persistant,
+photo de couverture sauvegardee et protegee, panne BnF non bloquante.
+Test manuel de choix de notice, filtre Google ISBN, edition Open Library : valides.
+Pas de test sur appareils physiques, Gemini ou GitHub reels.
+
+MISE A JOUR
+Sauvegarder avant mise a jour. Archive et dossier : SCANLY V2.16.
+Sur GitHub envoyer le CONTENU du dossier, dont book_sources.js, i18n.js, index.html,
+sw.js et assets, pour conserver index.html a la racine et la meme adresse.
+Fermer et rouvrir l'application. Ne pas supprimer les donnees Safari.
+
+DOCUMENTATION OFFICIELLE
+https://api.bnf.fr/fr/api-sru-catalogue-general
+https://openlibrary.org/developers/api
+https://openlibrary.org/dev/docs/api/covers
