@@ -1,0 +1,17 @@
+SCANLY V2.10 - APPUI DES LIVRES
+
+Application complète, avec les six univers et le mode Lecture rapide.
+Correction ciblée : fronts des livres alignés à 8 unités du bord de tablette,
+profondeur limitée à 64 unités, ombre de contact au niveau de la surface.
+Suppression du soulèvement au survol, à la sélection et à la recherche.
+Angles latéraux réduits de 14 à 7 degrés ; mouvement de caméra atténué.
+Aucun changement des traitements IA, synchronisation ou schéma des données.
+
+Tests : syntaxe JavaScript, démarrage Chromium, six univers, mode rapide,
+affichage desktop et viewport mobile. 36 livres fictifs uniquement en mémoire
+de test : vérification du plan d'appui commun. Aucune donnée de test incluse.
+Tests non réalisés sur appareils physiques iPhone/iPad/Mac ni avec le catalogue réel.
+
+Mise à jour : sauvegarder la bibliothèque, remplacer tous les fichiers
+(y compris assets et sw.js), conserver la même adresse de lancement.
+Fermer et rouvrir l'application pour actualiser le cache.

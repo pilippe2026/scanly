@@ -1,0 +1,15 @@
+SCANLY V2.13 - CADRES NUMEROTES ET MODIFIABLES
+Base V2.12.
+Cadres enregistrés numérotés de gauche à droite sur la photo active.
+Sélection par clic dans le cadre ou sur son numéro, ou par liste numéro/titre.
+Le cadre sélectionné devient une copie de travail avec quatre coins ajustables.
+Glisser dans le cadre pour le déplacer ; glisser un coin pour ajuster le détourage.
+Remplacer la tranche applique la correction au livre sélectionné uniquement.
+Les nouveaux cadres sont identifiés N1, N2... pour éviter la confusion.
+Supprimer le cadre retire la copie de travail, jamais le livre ni son cadre enregistré.
+Confirmation avant abandon d’une correction non appliquée.
+Fonctionnement identique depuis Photo d’origine et depuis Agrandir / Corriger.
+Tests Chromium avec livres fictifs : liste, clic, déplacement, remplacement ciblé,
+conservation des autres livres et suppression de copie de travail.
+Aucun appel IA réel ni test sur appareil physique effectué.
+Sauvegarder avant mise à jour ; conserver la même adresse de lancement.

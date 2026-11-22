@@ -1,0 +1,11 @@
+SCANLY V2.11
+Base : V2.10 fournie par utilisateur.
+Photo d’origine : Supprimer le cadre sélectionné, Effacer les cadres avec confirmation,
+Suppr / Retour arrière, focus du canevas et nettoyage des raccourcis à la fermeture.
+Seuls les cadres de travail sont supprimés, jamais les livres enregistrés.
+Agrandir : précédent / suivant, touches gauche / droite, titre et compteur.
+Ordre de la fiche conservé ; seuls les livres avec tranche photographiée sont parcourus.
+Zoom réajusté à chaque livre et fiche arrière-plan synchronisée.
+Tests Chromium avec données fictives en mémoire : navigation et suppression validées.
+Aucune donnée de test incluse dans cette archive.
+Sauvegarder avant mise à jour. Remplacer les fichiers, garder la même adresse de lancement.

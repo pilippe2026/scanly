@@ -556,6 +556,22 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
 #camBar:has(.ddw.open),#camBar:has(.ddw:hover),#caseBar:has(.ddw.open),#themeBar:has(.ddw.open){z-index:40}
 @media (max-width:420px){.brand .word{display:none}}
 @media (max-width:1400px){.tag,.hbtn .lb,#camBar .ddt .lb{display:none}.scan-grid{grid-template-columns:1fr}#caseBar{max-width:calc(100% - 260px)}}
+
+/* V2.13 : six univers et appui physique des livres */
+#v-lib.th-canopee{--shTop:linear-gradient(#e5cda6,#b48d5e);--shFront:linear-gradient(#f0dbb8,#c69c69,#997348);--shBot:#735b3d;--led:#fff3ce;--ledGlow:#ffe6b473;--glow:#ffebc33d;--glow2:#ffebc308;--plBg:#e5d6bb;--plCol:#294334;--plFont:600 12px var(--fB);--plBorder:1px solid #ad9573;--zone:#f6ebd512;--div:linear-gradient(90deg,#9c774e,#e4c89e,#9c774e)}
+#v-lib.th-loft{--shTop:linear-gradient(#bd9062,#765131);--shFront:linear-gradient(#bc9065,#855c39,#4c3423);--shBot:#302820;--led:#ffd69a;--ledGlow:#ffb4644d;--glow:#ffc2782e;--glow2:#ffc27805;--plBg:#24282b;--plCol:#f0d8b2;--plFont:600 12px var(--fB);--plBorder:1px solid #9d7751;--zone:#1414141f;--div:linear-gradient(90deg,#15191b,#42474b,#15191b)}
+#v-lib.th-bnf{--shTop:linear-gradient(#bb8053,#865334);--shFront:linear-gradient(#c18a5c,#9b633c,#633b25);--shBot:#432a1b;--div:linear-gradient(90deg,#613b24,#bc8659,#613b24);--plBg:linear-gradient(#e5c993,#b28a50);--plCol:#392618;--plBorder:1px solid #9d773e}
+#unit::before{content:"";position:absolute;inset:-12px -16px;pointer-events:none;border:12px solid transparent;border-image:var(--div) 1;transform:translateZ(8px);box-shadow:0 24px 40px #0006,inset 0 0 40px #0002}
+.th-futur #unit::before{border-width:5px}.th-magie #unit::before{border-width:15px}.th-loft #unit::before{border:9px solid #24282b}
+#unit .book,#unit .book:hover,#unit .book.hit,#unit .book.sel,.touch #unit .book:hover{transform:translateZ(var(--bookZ,0px))}
+#unit .book.flash,#unit .book.new{animation:none}
+#unit .book .contact{transform-origin:top;background:linear-gradient(to bottom,#00000018,#00000038);pointer-events:none;backface-visibility:visible}
+#unit .book .fr{border-radius:2px 2px 0 0;box-shadow:inset 1px 0 2px #ffffff20,inset 0 -2px 2px #0004}
+#unit .book:hover .fr{outline:1px solid var(--gold);outline-offset:-1px}
+#unit .book .sl,#unit .book .sr{filter:brightness(1.35)}
+#unit .book.dim{opacity:.12}
+#v-lib.smart-read #fx{display:none}#v-lib.smart-read #scene{transform:none!important;transition:none!important}#v-lib.smart-read .sh-glow{opacity:.15}
+@media(prefers-reduced-motion:reduce){#v-lib #fx{display:none}#v-lib #scene,#v-lib .book{transition:none!important}}
 </style>
 </head>
 <body>
@@ -614,7 +630,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
       <div class="ddw up left"><button class="ddt" data-dd title="Angle de vue et affichage"><span data-i="eye"></span> <span class="lb">Vue</span><span class="car">▴</span></button>
         <div class="dd">
           <button data-cam="left" title="Vue 3D depuis la gauche">◧ 3D gauche</button>
-          <button data-cam="front" title="Vue de face">▣ Face</button>
+          <button type="button" id="smartMode" aria-pressed="false">Lecture rapide</button><button data-cam="front" title="Vue de face">▣ Face</button>
           <button data-cam="right" title="Vue 3D depuis la droite">◨ 3D droite</button>
           <button data-z="0" title="Voir toute la pièce">⤢ Tout voir</button>
           <span class="sep"></span>
@@ -715,10 +731,12 @@ const PATHS = {
 const I = (n, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${PATHS[n] || ''}</svg>`;
 $$('[data-i]').forEach(e => e.innerHTML = I(e.dataset.i));
 const THEMES = {
-  salon: {name: 'Salon', img: 'assets/piece_salon.jpg', unit: {x: 355, y: 70, w: 830, h: 690}},
-  futur: {name: 'Futuriste', img: 'assets/piece_futur.jpg', unit: {x: 330, y: 95, w: 880, h: 590}},
-  magie: {name: 'Bibliothèque magique', short: 'Magique', img: 'assets/piece_magie.jpg', unit: {x: 320, y: 70, w: 900, h: 680}},
-  bnf: {name: 'Grande Bibliothèque', short: 'Grande Biblio.', tip: 'Univers inspiré de la Bibliothèque nationale François-Mitterrand', img: 'assets/piece_bnf.jpg', unit: {x: 320, y: 85, w: 905, h: 660}}
+  salon: {name: 'Salon contemporain', short: 'Salon', img: 'assets/piece_salon.jpg', unit: {x: 355, y: 70, w: 830, h: 690}},
+  futur: {name: 'Nexus futuriste', short: 'Nexus', img: 'assets/piece_futur.jpg', unit: {x: 330, y: 95, w: 880, h: 590}},
+  magie: {name: 'Cabinet des Mystères', short: 'Magique', img: 'assets/piece_magie.jpg', unit: {x: 320, y: 70, w: 900, h: 680}},
+  bnf: {name: 'Bibliothèque Prestige', short: 'Grande Biblio.', tip: 'Univers inspiré de la Bibliothèque nationale François-Mitterrand', img: 'assets/piece_bnf.jpg', unit: {x: 320, y: 85, w: 905, h: 660}},
+ canopee:{name:'Canopée',img:'assets/piece_canopee.jpg',unit:{x:355,y:85,w:830,h:660}},
+ loft:{name:'Atelier Loft',short:'Loft',img:'assets/piece_loft.jpg',unit:{x:340,y:90,w:850,h:655}}
 };
 
 /* ---------- Utilitaires ---------- */
@@ -1121,8 +1139,8 @@ function applyView(mode) {
 }
 function fitStage() { applyView(); }
 function applyCam() {
-  const base = {left: 14, front: 0, right: -14}[CAM.view] || 0, f = 1 / Math.sqrt(VIEW.R);
-  const ry = base * f + (CAM.move ? CAM.mx * 5 * f : 0), rx = CAM.move ? -CAM.my * 3 * f : 0, z = CAM.view === 'front' ? 0 : -40;
+  const base = {left: 7, front: 0, right: -7}[CAM.view] || 0, f = 1 / Math.sqrt(VIEW.R);
+  const ry = base * f + (CAM.move ? CAM.mx * 2 * f : 0), rx = CAM.move ? -CAM.my * 1.5 * f : 0, z = CAM.view === 'front' ? 0 : -40;
   $('#scene').style.transform = `translateZ(${z}px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
   $('#v-lib').classList.toggle('dusk', CAM.dusk);
   $('#unit').style.setProperty('--ledOn', CAM.dusk ? 1 : (rt === 'salon' ? .35 : rt === 'bnf' ? .45 : .7));
@@ -1231,7 +1249,7 @@ function bookDims(b) {
   return {w, h, d: Math.min(U.D - 10, Math.round(h * (tall ? .62 : .58)))};
 }
 function book3D(b, x, yBottom, s, dimmed) {
-  const {w: w0, h: h0, d: d0} = bookDims(b), w = w0 * s, h = h0 * s, d = d0 * Math.max(s, .8);
+  const {w: w0, h: h0, d: d0} = bookDims(b), w = w0 * s, h = h0 * s, d = Math.min(64, d0 * Math.max(s, .8)), supportZ = U.D - 8, backZ = supportZ - d;
   const col = colOf(b), tc = txtCol(col), side = shade(col, .62), deco = hash(b.id) % 3, loan = isLoaned(b);
   const ph = CAM.photo && b.spineImg && !b.faceOut && !b.wish ? spineURL(b) : '';
   const label = b.unknown ? '?' : (b.series && b.volume ? b.series : b.title);
@@ -1243,7 +1261,7 @@ function book3D(b, x, yBottom, s, dimmed) {
       ${b.volume ? `<span class="vol" style="font-size:${Math.max(8, 11 * s)}px">${b.volume}</span>` : ''}
       <span class="st" style="max-height:${h - 60 * s}px;font-size:${Math.max(8, 12 * s)}px">${esc(label)}</span>
       <span class="sa" style="font-size:${Math.max(7, 9.5 * s)}px">${esc(lastName(b))}</span></i>`;
-  return `<div class="${cls}" data-id="${b.id}" data-case="${caseOf(b)}" data-row="${b.row || 1}" style="left:${x.toFixed(1)}px;top:${(yBottom - h).toFixed(1)}px;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px">${front}
+  return `<div class="${cls}" data-id="${b.id}" data-case="${caseOf(b)}" data-row="${b.row || 1}" style="left:${x.toFixed(1)}px;top:${(yBottom - h).toFixed(1)}px;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;--bookZ:${backZ.toFixed(2)}px">${front}<i class="contact" style="top:${h}px;width:${w}px;height:${d}px;transform:rotateX(90deg)"></i>
     ${loan ? `<i class="rib" style="transform:translateZ(${d + 1}px)">PRÊTÉ</i>` : ''}${b.wish ? `<i class="rib wishr" style="transform:translateZ(${d + 1}px)">SOUHAIT</i>` : ''}${b.unknown && w > 14 ? `<i class="rib unkr" style="transform:translateZ(${d + 1}px)">?</i>` : ''}
     <i class="tp" style="width:${w}px;height:${d}px;transform:rotateX(90deg);background:linear-gradient(90deg,${shade(col, .55)} 0 9%,transparent 9% 91%,${shade(col, .55)} 91%),linear-gradient(0deg,rgba(0,0,0,.35),rgba(0,0,0,0) 70%),repeating-linear-gradient(90deg,#e6dcc6 0 1px,#cdbfa3 1px 2px)"></i>
     <i class="sl" style="left:0;width:${d}px;height:${h}px;background:linear-gradient(90deg,${shade(col, .45)},${side});transform:rotateY(-90deg)"></i>
@@ -1444,7 +1462,7 @@ document.addEventListener('click', e => {
   if (t) { t.parentElement.classList.toggle('open'); e.stopPropagation(); }
   else if (e.target.closest('.ddw .dd button[data-case],.ddw .dd button[data-theme],.ddw .dd button[data-cam],.ddw .dd button[data-act],.ddw .dd button[data-z]')) setTimeout(() => $$('.ddw').forEach(w => w.classList.remove('open')), 0);
 }, true);
-/* V2.8 : un menu déroulant ne sort jamais de l'écran */
+/* V2.13 : un menu déroulant ne sort jamais de l'écran */
 function fitDD(w) { const d = w && w.querySelector(':scope>.dd'); if (!d) return; d.style.transform = '';
   requestAnimationFrame(() => { const r = d.getBoundingClientRect(); if (!r.width) return; const m = 8; let dx = 0, dy = 0;
     if (r.right > innerWidth - m) dx = innerWidth - m - r.right; if (r.left + dx < m) dx = m - r.left;
@@ -1975,11 +1993,15 @@ function openBook(idOrBook, isNew = false, nav = false) {
 }
 /* V2.1 : loupe sur la tranche */
 function openLoupe(b) {
-  openModal(`<div class="dhead"><h3>${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody" style="padding:0">
-    <div id="lpW" style="position:relative;height:74vh;overflow:hidden;background:#0b1220;cursor:grab"><img id="lpI" src="${spineURL(b)}" alt="" style="position:absolute;left:50%;top:50%;transform-origin:0 0;image-rendering:auto;user-select:none" draggable="false"></div>
+  const L = (NAV.list || navList()).filter(id => books.some(o => o.id === id && o.spineImg));
+  if (!L.includes(b.id)) L.unshift(b.id);
+  const idx = L.indexOf(b.id);
+  openModal(`<div class="dhead"><h3 style="flex:1;min-width:0">${esc(dispTitle(b))}</h3><div style="display:flex;align-items:center;gap:8px"><button type="button" class="btn s sm" id="lpPrev" aria-label="Livre précédent" ${idx > 0 ? '' : 'disabled'}>‹</button><span aria-live="polite">${idx+1} / ${L.length}</span><button type="button" class="btn s sm" id="lpNext" aria-label="Livre suivant" ${idx < L.length-1 ? '' : 'disabled'}>›</button></div><button class="x" data-close>×</button></div><div class="mbody" style="padding:0">
+    <div style="padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn g sm" id="lpCorrect">Corriger sur la photo d’origine</button><span class="hint">Mode Consulter</span></div><div id="lpW" style="position:relative;height:74vh;overflow:hidden;background:#0b1220;cursor:grab"><img id="lpI" src="${spineURL(b)}" alt="" style="position:absolute;left:50%;top:50%;transform-origin:0 0;image-rendering:auto;user-select:none" draggable="false"></div>
     <p class="hint" style="padding:8px 16px;margin:0">Molette : zoom · glisser : déplacer · double-clic : ajuster</p></div>`, 'sm');
+  $('#lpCorrect').onclick=()=>openOrigin(b,{integrated:true});
   const W = $('#lpW'), I = $('#lpI'); let z = 1, x = 0, y = 0, dn = null;
-  const fit = () => { const k = Math.min(W.clientWidth * .9 / I.naturalWidth, W.clientHeight * .95 / I.naturalHeight); z = k; x = (W.clientWidth - I.naturalWidth * z) / 2; y = (W.clientHeight - I.naturalHeight * z) / 2; draw(); };
+  const fit = () => { if(!I.naturalWidth||!I.naturalHeight||!W.isConnected)return; const k = Math.min(W.clientWidth * .9 / I.naturalWidth, W.clientHeight * .95 / I.naturalHeight); z = k; x = (W.clientWidth - I.naturalWidth * z) / 2; y = (W.clientHeight - I.naturalHeight * z) / 2; draw(); };
   const draw = () => { I.style.left = '0'; I.style.top = '0'; I.style.transform = `translate(${x}px,${y}px) scale(${z})`; };
   I.onload = fit; if (I.complete) setTimeout(fit, 0);
   W.addEventListener('wheel', e => { e.preventDefault(); const r = W.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, f = Math.exp(-e.deltaY * .0015), nz = clamp(z * f, .2, 30);
@@ -1987,7 +2009,12 @@ function openLoupe(b) {
   W.onmousedown = e => { dn = {x: e.clientX - x, y: e.clientY - y}; W.style.cursor = 'grabbing'; e.preventDefault(); };
   const mv = e => { if (!dn) return; x = e.clientX - dn.x; y = e.clientY - dn.y; draw(); }, up = () => { dn = null; if (W) W.style.cursor = 'grab'; };
   window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up); W.ondblclick = fit;
-  $$('#mbox [data-close]').forEach(x => x.addEventListener('click', () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); }));
+  // Use explicit target to include only books with a photographed spine.
+  const navigate = async delta => { const id=L[idx+delta]; if(!id)return; const full=NAV.list||L; const diff=full.indexOf(id)-full.indexOf(b.id); await goNav(diff); const target=books.find(o=>o.id===NAV.cur); if(target && target.id===id)openLoupe(target); };
+  $('#lpPrev').onclick=()=>navigate(-1); $('#lpNext').onclick=()=>navigate(1);
+  const key=e=>{if(!W.isConnected||!$('#modal').classList.contains('on')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();e.stopImmediatePropagation();navigate(e.key==='ArrowRight'?1:-1);}};
+  document.addEventListener('keydown',key,true);
+  modalExtraCleanup=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);document.removeEventListener('keydown',key,true);};
 }
 /* V2.1 : séparation manuelle d'une tranche en plusieurs livres */
 
@@ -2007,17 +2034,20 @@ JSON : [{"k":1,"titre":"…","auteur":"…","serie":null,"tome":null,"editeur":"
   const rr = await gemini(parts, {json: true, think: 'low', timeout: 120000});
   (Array.isArray(rr) ? rr : (rr.livres || [])).forEach(o => { const m = list[(+o.k || 0) - 1]; if (m && o.titre) m.res = o; });
 }
-async function openOrigin(b) {
+async function openOrigin(b, options = {}) {
+  const integrated = !!options.integrated;
+  const L=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&o.spineImg));
+  const idx=L.indexOf(b.id);
   const imp = origImport(b); if (!imp) return toast('Photo d\'origine introuvable pour ce livre');
   let pi = b.srcRef?.pi ?? 0, src = (imp.hd && imp.hd[pi]) || (imp.photos && imp.photos[pi]);
   const nPh = Math.max(imp.hd?.length || 0, imp.photos?.length || 0);
-  openModal(`<div class="dhead"><h3>Photo d'origine – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody" style="padding:12px 16px">
+  openModal(`<div class="dhead"><h3 style="flex:1;min-width:0">${integrated ? 'Corriger – ' : "Photo d’origine – "}${esc(dispTitle(b))}</h3>${integrated ? `<div style="display:flex;gap:6px;align-items:center"><button type="button" class="btn s sm" id="ogPrev" ${idx>0?'':'disabled'} aria-label="Livre précédent">‹</button><span id="ogCount">${idx+1} / ${L.length}</span><button type="button" class="btn s sm" id="ogNext" ${idx<L.length-1?'':'disabled'} aria-label="Livre suivant">›</button></div>` : ''}<button class="x" data-close>×</button></div><div class="mbody" style="padding:12px 16px">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <div class="seg" id="ogMode"><button data-m="draw" class="on" title="Glisser sur la photo pour tracer un cadre autour d'un livre">▭ Tracer un cadre</button><button data-m="pan" title="Glisser pour déplacer la photo">✥ Déplacer</button></div>
+      ${integrated ? `<button type="button" class="btn s sm" id="ogBack">Retour à la tranche</button>` : ''}<div class="seg" id="ogMode"><button data-m="draw" class="on" title="Glisser sur la photo pour tracer un cadre autour d'un livre">▭ Tracer un cadre</button><button data-m="pan" title="Glisser pour déplacer la photo">✥ Déplacer</button></div>
       <button class="btn s sm" id="ogFit">⤢ Toute la photo</button><button class="btn s sm" id="ogBook">◎ Ce livre</button>
       ${nPh > 1 ? `<select class="tsel" id="ogPh">${Array.from({length: nPh}, (_, i) => `<option value="${i}" ${i === pi ? 'selected' : ''}>Photo ${i + 1}/${nPh}</option>`).join('')}</select>` : ''}
       <label class="btn s sm" style="cursor:pointer" title="Utiliser un autre fichier photo (si la photo d'origine n'est pas disponible ou trop petite)">📁 Autre photo…<input type="file" id="ogFile" accept="image/*" hidden></label>
-      <span class="tsp"></span><span class="hint" id="ogN">Aucun cadre</span>
+      <button type="button" class="btn k sm" id="ogDelete" disabled title="Supprimer uniquement le cadre tracé sélectionné">Supprimer le cadre</button><button type="button" class="btn s sm" id="ogClear" disabled>Effacer les cadres</button><label style="display:flex;align-items:center;gap:6px">Cadre enregistré<select class="tsel" id="ogSelect" aria-label="Sélectionner un cadre enregistré"><option value="">Choisir un cadre…</option></select></label><span class="tsp"></span><span class="hint" id="ogN" aria-live="polite">Aucun cadre</span>
     </div>
     <div id="ogW" style="position:relative;height:60vh;background:#0b1220;border-radius:10px;overflow:hidden"><canvas id="ogC" style="display:block;width:100%;height:100%"></canvas>
       <div id="ogEmpty" class="camoff" style="display:none">Photo d'origine non conservée pour cet import (import ancien).<br>Clique sur « 📁 Autre photo… » pour choisir le fichier photo sur ton PC.</div></div>
@@ -2027,19 +2057,34 @@ async function openOrigin(b) {
       <button class="btn g" id="ogAdd" disabled title="Chaque cadre devient un nouveau livre, placé à côté de celui-ci et lu par l'IA">＋ Ajouter comme nouveau(x) livre(s)</button></div></div>`);
   const C = $('#ogC'), W = $('#ogW'), x = C.getContext('2d');
   let img = null, z = 1, ox = 0, oy = 0, mode = 'draw', frames = [], sel = -1, act = null;
-  const others = () => books.filter(o => o.importId === imp.id && o.quad && (o.srcRef?.pi ?? 0) === pi && o !== b);
+  modalLeaveGuard=()=>!frames.length || confirm('Des cadres ne sont pas appliqués. Les abandonner ? Les livres enregistrés restent inchangés.');
+  if(integrated){
+    $('#ogBack').onclick=()=>{if(!modalLeaveGuard())return;modalLeaveGuard=null;openLoupe(b);};
+    const navigate=async delta=>{const id=L[L.indexOf(b.id)+delta];if(!id||!modalLeaveGuard())return;modalLeaveGuard=null;await goNav((NAV.list||L).indexOf(id)-(NAV.list||L).indexOf(b.id));if(NAV.cur===id)openOrigin(books.find(o=>o.id===id),{integrated:true});};
+    $('#ogPrev').onclick=()=>navigate(-1);$('#ogNext').onclick=()=>navigate(1);
+  }
+  const savedFrames = () => books.filter(o => (o.srcRef?.imp || o.importId) === imp.id && o.quad && (o.srcRef?.pi ?? 0) === pi).sort((a,c)=>{const qa=quadBox(quadPx(a.quad,img)),qc=quadBox(quadPx(c.quad,img));return qa.x0-qc.x0 || qa.y0-qc.y0;});
+  const chooseSaved = o => { if(!o || !modalLeaveGuard())return; frames=[];sel=-1;act=null;b=o;NAV.cur=o.id;openBook(o.id,false,true);const Q=quadPx(o.quad,img).map(p=>p.slice());Q.savedId=o.id;frames.push(Q);sel=0;draw(); };
+  $('#ogSelect').onchange=e=>{const o=books.find(o=>o.id===e.target.value);if(o)chooseSaved(o);};
+
   const toS = p => [p[0] * z + ox, p[1] * z + oy], toI = (sx, sy) => [(sx - ox) / z, (sy - oy) / z];
   const size = () => { const r = W.getBoundingClientRect(); C.width = Math.round(r.width * devicePixelRatio); C.height = Math.round(r.height * devicePixelRatio); x.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); };
   const poly = (Q, col, w, fill) => { x.beginPath(); Q.forEach((p, i) => { const [a, c] = toS(p); i ? x.lineTo(a, c) : x.moveTo(a, c); }); x.closePath(); if (fill) { x.fillStyle = fill; x.fill(); } x.strokeStyle = col; x.lineWidth = w; x.stroke(); };
   const draw = () => { const r = W.getBoundingClientRect(); x.clearRect(0, 0, r.width, r.height); if (!img) return;
     x.imageSmoothingQuality = 'high'; x.drawImage(img, ox, oy, img.naturalWidth * z, img.naturalHeight * z);
-    others().forEach(o => poly(quadPx(o.quad, img), 'rgba(255,255,255,.55)', 1));
-    if (b.quad && (b.srcRef?.pi ?? 0) === pi) poly(quadPx(b.quad, img), '#D4AF7C', 2.5);
+    const saved=savedFrames();
+    const numberLabel=(Q,n,col)=>{const [a,c]=toS(Q[0]);x.font='bold 12px Arial';const txt=String(n),w=Math.max(24,x.measureText(txt).width+12);x.fillStyle=col;x.fillRect(a,c-24,w,21);x.fillStyle='#0b1220';x.fillText(txt,a+6,c-9);};
+    saved.forEach((o,i)=>{const Q=quadPx(o.quad,img);poly(Q,o.id===b.id?'#D4AF7C':'rgba(255,255,255,.75)',o.id===b.id?2.5:1);numberLabel(Q,i+1,o.id===b.id?'#D4AF7C':'#e2e8f0');});
+    const pick=$('#ogSelect');pick.innerHTML='<option value="">Choisir un cadre…</option>'+saved.map((o,i)=>`<option value="${esc(o.id)}" ${o.id===b.id?'selected':''}>${i+1} · ${esc(dispTitle(o))}</option>`).join('');
+    if(integrated){const at=L.indexOf(b.id);$('#ogCount').textContent=at>=0?(at+1)+' / '+L.length:'Hors sélection';$('#ogPrev').disabled=at<=0;$('#ogNext').disabled=at<0||at>=L.length-1;}
+    const heading=$('#mbox h3');heading.textContent=(integrated?'Corriger – ':"Photo d’origine – ")+dispTitle(b);
+    $('#ogRep').textContent='Remplacer la tranche de « '+dispTitle(b)+' »';
+
     frames.forEach((Q, i) => { poly(Q, i === sel ? '#2ab8ee' : '#ff00c8', 2, i === sel ? 'rgba(42,184,238,.15)' : 'rgba(255,0,200,.10)');
       Q.forEach(p => { const [a, c] = toS(p); x.beginPath(); x.arc(a, c, 6, 0, 7); x.fillStyle = '#D4AF7C'; x.fill(); x.strokeStyle = '#0B1F44'; x.lineWidth = 2; x.stroke(); });
-      const [a, c] = toS(Q[0]); x.font = 'bold 13px Arial'; x.fillStyle = '#fff'; x.fillText(String(i + 1), a + 4, c - 8); });
+      const n=Q.savedId?saved.findIndex(o=>o.id===Q.savedId)+1:'N'+(i+1);numberLabel(Q,n,i===sel?'#2ab8ee':'#ff80e5'); });
     $('#ogN').textContent = frames.length ? `${frames.length} cadre${frames.length > 1 ? 's' : ''}` : 'Aucun cadre';
-    $('#ogAdd').disabled = !frames.length; $('#ogRep').disabled = !(frames.length && (sel >= 0 || frames.length === 1)); };
+    $('#ogDelete').disabled = sel < 0; $('#ogClear').disabled = !frames.length; $('#ogAdd').disabled = !frames.length; $('#ogRep').disabled = !(frames.length && (sel >= 0 || frames.length === 1)); };
   const fitAll = () => { const r = W.getBoundingClientRect(); z = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight) * .98; ox = (r.width - img.naturalWidth * z) / 2; oy = (r.height - img.naturalHeight * z) / 2; draw(); };
   const fitBook = () => { const r = W.getBoundingClientRect(); const Q = b.quad && (b.srcRef?.pi ?? 0) === pi ? quadPx(b.quad, img) : null; if (!Q) return fitAll();
     const bb = quadBox(Q), h = bb.y1 - bb.y0, w = bb.x1 - bb.x0; z = Math.min(r.height * .8 / h, r.width * .9 / (w + h * 1.2));
@@ -2053,28 +2098,36 @@ async function openOrigin(b) {
     if (e.button === 2 || e.button === 1 || mode === 'pan' || e.altKey) { act = {t: 'pan', sx, sy, ox, oy}; C.style.cursor = 'grabbing'; return; }
     const h = hit(sx, sy); if (h) { sel = h.i; act = {t: 'corner', ...h}; draw(); return; }
     const fi = frames.findIndex(Q => inside(Q, p)); if (fi >= 0) { sel = fi; act = {t: 'move', i: fi, p, Q: frames[fi].map(q => q.slice())}; draw(); return; }
+    const saved=savedFrames();const existing=[...saved].reverse().find(o=>{const Q=quadPx(o.quad,img),[a,c]=toS(Q[0]);return inside(Q,p)||(sx>=a&&sx<=a+Math.max(24,String(saved.indexOf(o)+1).length*8+12)&&sy>=c-24&&sy<=c);});
+    if(existing){chooseSaved(existing);return;}
     act = {t: 'new', p}; frames.push([p.slice(), p.slice(), p.slice(), p.slice()]); sel = frames.length - 1; draw(); };
   const mv = e => { if (!act || !img) return; const [sx, sy] = pos(e), p = toI(sx, sy);
     if (act.t === 'pan') { ox = act.ox + sx - act.sx; oy = act.oy + sy - act.sy; }
     else if (act.t === 'corner') frames[act.i][act.k] = p;
-    else if (act.t === 'move') { const dx = p[0] - act.p[0], dy = p[1] - act.p[1]; frames[act.i] = act.Q.map(q => [q[0] + dx, q[1] + dy]); }
+    else if (act.t === 'move') { const dx = p[0] - act.p[0], dy = p[1] - act.p[1]; const id=frames[act.i].savedId;frames[act.i] = act.Q.map(q => [q[0] + dx, q[1] + dy]);frames[act.i].savedId=id; }
     else if (act.t === 'new') { const a = act.p; frames[sel] = [[a[0], a[1]], [p[0], a[1]], [p[0], p[1]], [a[0], p[1]]]; }
     draw(); };
   const up = () => { if (!act) return; if (act.t === 'new') { const Q = frames[sel], bb = quadBox(Q); if (bb.x1 - bb.x0 < 3 / z || bb.y1 - bb.y0 < 8 / z) { frames.splice(sel, 1); sel = -1; }
       else { const L = [...Q].sort((p, q) => p[1] - q[1]), T = L.slice(0, 2).sort((p, q) => p[0] - q[0]), B = L.slice(2).sort((p, q) => p[0] - q[0]); frames[sel] = [T[0], T[1], B[1], B[0]]; } }
     act = null; C.style.cursor = mode === 'pan' ? 'grab' : 'crosshair'; draw(); };
   window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
-  const key = e => { if ((e.key === 'Delete' || e.key === 'Backspace') && sel >= 0 && !/INPUT|SELECT/.test(document.activeElement.tagName)) { frames.splice(sel, 1); sel = -1; draw(); e.preventDefault(); e.stopPropagation(); } };
+  const deleteFrame = () => { if (sel < 0 || sel >= frames.length) return; act = null; frames.splice(sel, 1); sel = frames.length ? Math.min(sel, frames.length - 1) : -1; draw(); };
+  $('#ogDelete').onclick = deleteFrame;
+  $('#ogClear').onclick = () => { if (!frames.length || !confirm('Effacer tous les cadres tracés ? Les livres enregistrés restent inchangés.')) return; act = null; frames = []; sel = -1; draw(); };
+  C.tabIndex = 0; C.setAttribute('aria-label','Photo d’origine : tracer ou sélectionner un cadre');
+  C.addEventListener('mousedown', () => C.focus());
+  const key = e => { if (!$('#modal').classList.contains('on') || !C.isConnected) return; if(integrated && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && (e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();e.stopImmediatePropagation();$('#'+(e.key==='ArrowRight'?'ogNext':'ogPrev')).click();return;} if ((e.key === 'Delete' || e.key === 'Backspace') && sel >= 0 && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); e.stopImmediatePropagation(); deleteFrame(); } };
   document.addEventListener('keydown', key, true);
   const cleanup = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); document.removeEventListener('keydown', key, true); window.removeEventListener('resize', onRs); };
+  modalExtraCleanup = cleanup;
   const onRs = () => { size(); draw(); }; window.addEventListener('resize', onRs);
-  $$('#mbox [data-close]').forEach(el => el.addEventListener('click', cleanup));
+
   C.addEventListener('wheel', e => { if (!img) return; e.preventDefault(); const [sx, sy] = pos(e), f = Math.exp(-e.deltaY * .0015), nz = clamp(z * f, .05, 40); ox = sx - (sx - ox) * nz / z; oy = sy - (sy - oy) * nz / z; z = nz; draw(); }, {passive: false});
   $('#ogMode').onclick = e => { const m = e.target.closest('[data-m]'); if (!m) return; mode = m.dataset.m; $$('#ogMode button').forEach(x2 => x2.classList.toggle('on', x2 === m)); C.style.cursor = mode === 'pan' ? 'grab' : 'crosshair'; };
   C.style.cursor = 'crosshair';
   $('#ogFit').onclick = () => img && fitAll(); $('#ogBook').onclick = () => img && fitBook();
-  if ($('#ogPh')) $('#ogPh').onchange = e => { pi = +e.target.value; frames = []; sel = -1; load((imp.hd && imp.hd[pi]) || (imp.photos && imp.photos[pi])); };
-  $('#ogFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = await srcToImg(u); URL.revokeObjectURL(u);
+  if ($('#ogPh')) $('#ogPh').onchange = e => { if(!modalLeaveGuard()){e.target.value=pi;return;} pi = +e.target.value; frames = []; sel = -1; load((imp.hd && imp.hd[pi]) || (imp.photos && imp.photos[pi])); };
+  $('#ogFile').onchange = async e => { const f = e.target.files[0]; if (!f || !modalLeaveGuard()) return; const u = URL.createObjectURL(f), im = await srcToImg(u); URL.revokeObjectURL(u);
     const d = resize(im, 2200, .85); imp.hd = imp.hd || []; imp.hd[pi] = d; await DB.put('imports', imp); frames = []; sel = -1; load(d); toast('Photo associée à cet import'); };
   const sizeOf = sp => b.pxMed ? {hU: Math.round(clamp(170 * sp.hpx / b.pxMed, 90, 300)), wU: Math.round(clamp(170 * sp.wpx / b.pxMed, 6, 95))}
     : {hU: b.hU || undefined, wU: b.hU ? Math.round(clamp(b.hU * sp.wpx / Math.max(1, sp.hpx), 6, 95)) : undefined};
@@ -2086,7 +2139,7 @@ async function openOrigin(b) {
     try { const L = [{read: rd.crop}]; await readSpinesAI(L); const o = L[0].res;
       if (o && o.titre && norm(o.titre) !== norm(b.title || '')) { if (!b.title || b.unknown || confirm(`L'IA lit sur ce cadre : « ${o.titre} »${o.tome ? ' – tome ' + o.tome : ''}${o.auteur ? ' (' + o.auteur + ')' : ''}.\nRemplacer le titre actuel « ${b.title} » ?`))
         Object.assign(b, {title: o.titre, author: o.auteur || b.author, series: o.serie || '', volume: parseInt(o.tome) || null, publisher: o.editeur || b.publisher, unknown: false}); } } catch (e) { toast('Lecture IA : ' + e.message, 4000); }
-    await saveBook(b); cleanup(); closeModal(); renderAll(); openBook(b.id, false, true);
+    await saveBook(b); frames=[]; modalLeaveGuard=null; cleanup(); closeModal(); renderAll(); openBook(b.id, false, true); if(integrated)openLoupe(b);
     showUndo('Tranche reprise sur la photo d\'origine', async () => { Object.assign(b, prev); await saveBook(b); renderAll(); toast('Tranche précédente rétablie'); }); };
   // --- Ajouter comme nouveau(x) livre(s)
   $('#ogAdd').onclick = async () => { if (!frames.length) return; $('#ogAdd').innerHTML = '<span class="spin"></span> Découpe et lecture…';
@@ -2104,7 +2157,7 @@ async function openOrigin(b) {
       const sib = books.concat(made).filter(o => o.orig && o.importId === imp.id && o.orig.caseId === ob.caseId && o.orig.row === ob.row).sort((p, q) => p.orig.position - q.orig.position); sib.forEach((o, i) => o.orig.position = i + 1); }
     made.forEach(m => books.push(m)); imp.count = (imp.count || 0) + made.length; await DB.put('imports', imp);
     await DB.putMany('books', row.concat(made.filter(m => !row.includes(m))));
-    cleanup(); closeModal(); renderAll(); openBook(b.id, false, true);
+    frames=[]; modalLeaveGuard=null; cleanup(); closeModal(); renderAll(); openBook(b.id, false, true); if(integrated){NAV.list=navList();openLoupe(b);}
     toast(`${made.length} livre(s) ajouté(s) : ${made.map(dispTitle).join(', ')}`, 6000);
     showUndo(`${made.length} livre(s) ajouté(s) depuis la photo`, async () => { const ids = new Set(made.map(m => m.id)); await DB.delMany('books', [...ids]); books = books.filter(o => !ids.has(o.id));
       const L = renumber(b.caseId, b.row || 1); await DB.putMany('books', L); renderAll(); toast('Ajout annulé'); });
@@ -2207,8 +2260,10 @@ function addManual() {
    SCANNER
    ===================================================================== */
 let shots = [], detected = [], stream = null;
-function openModal(html, size = '') { $('#mbox').className = 'mbox ' + size; $('#mbox').innerHTML = html; $('#mbox').onclick = null; $('#modal').classList.add('on'); }
-function closeModal() { $('#modal').classList.remove('on'); stopCam(); }
+let modalExtraCleanup = null, modalLeaveGuard = null;
+function runModalCleanup(){if(modalExtraCleanup){const fn=modalExtraCleanup;modalExtraCleanup=null;fn();}}
+function openModal(html, size = '') { modalLeaveGuard=null; runModalCleanup(); $('#mbox').className = 'mbox ' + size; $('#mbox').innerHTML = html; $('#mbox').onclick = null; $('#modal').classList.add('on'); }
+function closeModal() { if(modalLeaveGuard&&!modalLeaveGuard())return false;modalLeaveGuard=null;runModalCleanup(); $('#modal').classList.remove('on'); stopCam(); }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeModal(); });
 function stopCam() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
 function openScan(caseId = null, mode = '') {
@@ -3666,6 +3721,8 @@ window.syncBoot = syncBoot; window.bindSyncSettings = bindSyncSettings;
   if (IS_IOS && !standalone && !localStorage.getItem('scanly_a2hs')) { localStorage.setItem('scanly_a2hs', '1');
     setTimeout(() => toast('Astuce : Partager ⬆ puis « Sur l\'écran d\'accueil » pour installer SCANLY comme une app', 8000), 2500); }
 })();
+
+(function(){const lib=document.getElementById('v-lib'),btn=document.getElementById('smartMode');let quick=localStorage.getItem('scanly_smart_read')==='1';function update(){lib.classList.toggle('smart-read',quick);btn.setAttribute('aria-pressed',String(quick));btn.classList.toggle('on',quick);btn.textContent=quick?'Immersion 3D':'Lecture rapide';btn.title=quick?'Revenir aux perspectives 3D':'Vue frontale et effets réduits';}btn.addEventListener('click',function(e){e.stopPropagation();quick=!quick;localStorage.setItem('scanly_smart_read',quick?'1':'0');update();});update();})();
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
-SCANLY V2.8 - Votre bibliotheque, en un scan.
+SCANLY V2.13 - Votre bibliotheque, en un scan.
 =============================================
-V2.8 : CORRECTIONS iPHONE / iPAD
+V2.13 : CORRECTIONS iPHONE / iPAD
 - Menus Vue et Outils (et meuble / univers) : ils restent toujours dans l'ecran et passent
   au-dessus du bouton ＋.
 - Scan : la camera ARRIERE est utilisee par defaut (scan, rafale, code-barres).

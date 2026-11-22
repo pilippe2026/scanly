@@ -1,0 +1,15 @@
+SCANLY V2.12 - CONSULTER ET CORRIGER DANS AGRANDIR
+Base : V2.11 jointe.
+Agrandir : bouton Corriger sur la photo d’origine.
+Mode correction dans la même fenêtre : photo complète centrée sur le livre,
+tracer et ajuster les cadres, supprimer un cadre ou tous les cadres,
+remplacer la tranche, ajouter des livres, toute la photo, ce livre, autre photo.
+Retour à la tranche ; précédent/suivant et touches gauche/droite conservés.
+Confirmation avant abandon des cadres lors du retour, navigation ou fermeture.
+Après remplacement ou ajout : retour à la tranche agrandie.
+Les fonctions de traitement existantes sont réutilisées.
+Tests Chromium : modes, navigation, confirmation, remplacement et ajout sans IA,
+retour à la tranche et affichage à largeur mobile. Données fictives de test
+uniquement en mémoire, non incluses dans l’archive. Pas de test sur appareils
+physiques ni d’appel IA réel.
+Sauvegarder avant mise à jour. Remplacer les fichiers, garder la même adresse.
