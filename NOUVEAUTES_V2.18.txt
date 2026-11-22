@@ -1,0 +1,93 @@
+SCANLY V2.18 - AMELIORATIONS COMPLETES ET LISTE DE SOUHAITS
+Base exclusive : SCANLY V2.17 fournie par Philippe.
+
+A VERIFIER
+Nouvel onglet et entree de menu : non reconnus, confiance disponible < 75 %, couvertures
+manquantes, doublons possibles (ISBN ou titre/auteur/tome ou serie/tome).
+Filtre par type d'alerte, recherche, ouverture de la fiche et de la loupe.
+Valider masque les alertes jusqu'a une modification bibliographique ou un nouveau doublon.
+Les alertes et la confiance IA sont indicatives, jamais des certitudes.
+
+CORRIGER EN SERIE
+Enregistrer et suivant dans la fiche, le detourage, Redresser auto, la separation,
+le rognage de couverture et Photo d'origine. Le dernier livre desactive ce bouton.
+Comparaison avant/apres dans le detourage, avant/apercu dans Redresser auto.
+Une tranche precedente est conservee pour revenir a l'etat anterieur depuis la fiche.
+Aides longues repliables. Barre d'action fixe dans le cadre de la fenetre, hors du
+contenu defilant : appliquer/enregistrer, suivant, annuler.
+
+REPRISE DE ZONE
+Choisir Insérer avant ce livre pour placer le livre manquant entre deux livres.
+Sur la meme photo, une position peut etre suggeree selon les cadres : verifier avant
+application. Fin de l'etagere reste disponible. Les positions sont renumerotees.
+Le livre de reference doit appartenir a la meme etagere. Aucun livre n'est supprime.
+
+QUALITE PHOTO / RELECTURE
+Avant scan et reanalyse de zone : controle local indicatif de resolution, nettete,
+photo tres large et zones tres claires. Avertissement avec choix de continuer.
+Ce controle ne garantit pas la reconnaissance et ne compte pas les livres.
+A verifier > Relire les elements incertains : choisir les livres, lecture par petits
+lots, tranches reprises dans la meilleure photo conservee lorsque disponible.
+Verifier et modifier les propositions avant application. Notes, couverture et place
+conservees. Pas de nouvelle analyse de toute l'etagere. Consomme des appels Gemini.
+
+EDITIONS
+Fiche > Choisir une edition : propositions Google Books, plus Open Library par ISBN.
+Affichage couverture, titre, sous-titre, auteur, editeur, annee, ISBN et source.
+Serie et tome sont a confirmer manuellement, pas deduits des voisins.
+Choix explicite avant remplacement bibliographique ; couverture personnelle protegee.
+La BnF reste disponible via son bouton existant. Couvertures selon disponibilite.
+
+SECURITE
+Points de restauration complets dans une base locale separee, maximum trois points.
+Creation avant operations importantes : suppression, separation, zone, recuperation
+inter-appareils, import, correction de couverture/detourage/redressement et operations
+groupees. Creation manuelle et restauration depuis Parametres > Points de restauration.
+Pas de cle Gemini ni de jeton GitHub dans ces points. Hors synchronisation.
+Si stockage insuffisant, demande explicite avant de continuer sans point.
+Restaurer remplace la bibliotheque locale et desactive la synchronisation automatique
+sur cet appareil : verifier puis reactiver volontairement dans Parametres.
+Les points consomment de l'espace. Ils ne remplacent PAS une sauvegarde exportee,
+notamment en cas de suppression des donnees du navigateur ou de perte de l'appareil.
+
+TACTILE
+Parametres > Confort et securite > Duree de l'appui long : 0,45 / 0,6 / 0,9 seconde.
+Le glissement immediat deplace toujours la vue. Le second doigt annule le rangement.
+Souris PC et outils photo de V2.17 conserves.
+
+SOUHAITS
+Nouvel onglet Souhaits, aussi accessible par menu et Parametres.
+Cartes avec couverture ou visuel de remplacement, serie, tome, motif, priorite,
+prix cible et lien d'achat facultatif. Recherche, filtres de priorite et tri.
+Budget cible = somme des prix cibles renseignes, pas un prix verifie ou suivi en ligne.
+Ajout manuel, avertissement si deja possede/souhaite, suppression via corbeille.
+Les souhaits existants sont conserves avec priorite Normale par defaut.
+Les champs sont modifiables dans la fiche du souhait.
+Achete > Ranger : conserve le meme identifiant, titre, couverture, notes et infos,
+choix meuble/etagere/position, prix paye facultatif, passe en collection sans doublon.
+Le souhait ne disparait de la liste qu'apres validation du rangement.
+Les nouvelles donnees des livres suivent sauvegarde et synchronisation existantes.
+Les liens ne sont ni verifies ni suivis automatiquement. Seuls HTTP/HTTPS sont acceptes.
+
+LANGUES / PRESERVATION
+Nouvelles commandes principales ajoutees aux cinq langues. Quelques aides longues,
+messages techniques et textes dynamiques restent en francais.
+Tous les visuels d'origine et book_sources.js (BnF) conserves a l'identique.
+Aucune donnee de test dans l'archive. Pas de changement du schema principal IndexedDB.
+
+TESTS
+Chromium PC, emulation iPhone 13 et iPad : demarrage, file de verification, souhaits,
+ajout/edition/achat, preservation des champs, restauration, detourage et suivant,
+retour a l'ancienne tranche, barre d'action visible, choix d'appui long et rechargement.
+Tests supplementaires avec resultats IA/bases SIMULES : insertion entre livres,
+relecture ciblee avant validation, choix d'edition, doublon refuse, liens dangereux
+rejetes, conservation de trois points, sauvegarde et suivant dans les outils.
+Les cinq langues des nouvelles commandes ont ete testees.
+Aucun test sur appareils physiques, aucune reconnaissance Gemini reelle, aucune
+verification de synchronisation GitHub reelle. Ces points restent a confirmer.
+
+MISE A JOUR
+Archive et dossier : SCANLY V2.18.
+Faire une sauvegarde exportee avant mise a jour. Sur GitHub envoyer le CONTENU du
+dossier (index.html, i18n.js, book_sources.js, sw.js, assets...) et non le dossier parent.
+Garder la meme adresse. Fermer puis rouvrir l'application. Ne pas effacer les donnees Safari.

@@ -579,6 +579,17 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
 
 .tool-nav{display:flex;align-items:center;gap:5px;flex-shrink:0}.tool-nav span{font-size:12px;white-space:nowrap}.tool-nav button{min-width:32px;min-height:32px}
 @media(max-width:900px){#mbox .dhead h3{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#mbox .dhead{gap:4px}.tool-nav span{font-size:11px}#candidateSp{max-width:100%}}
+
+/* V2.18: review and wishlist, sticky actions and compact help */
+#v-review,#v-wish{overflow:auto;padding:20px 24px 100px;background:var(--cream)}
+.enhance-head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.enhance-head h2{margin:0}.enhance-filters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.enhance-filters .fld{flex:1;min-width:140px}.enhance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px}.enhance-card{display:flex;gap:14px;flex-wrap:wrap;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}.enhance-card>div:last-child{flex:1;min-width:160px}.enhance-card h3{margin:0;overflow-wrap:anywhere}.enhance-cover{width:95px;flex:none}.enhance-cover .cover{height:140px;width:95px;overflow:hidden}.enhance-cover img{max-width:95px;max-height:140px;object-fit:contain}.enhance-line{display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid var(--line)}.enhance-result{padding:14px;border:1px solid var(--line);border-radius:12px;margin:10px 0}.enhance-help{border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:10px}.enhance-help summary,.enhance-compare summary{cursor:pointer;color:var(--navy);font-weight:600}.enhance-compare{margin:10px 0}.enhance-compare-grid{display:flex;gap:14px;justify-content:center}.enhance-compare-grid img{max-height:220px;max-width:120px;object-fit:contain}.enhance-sticky{position:sticky;bottom:0;z-index:5;background:var(--white);padding:10px 0 calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);box-shadow:0 -5px 12px rgba(0,0,0,.08)}
+@media(max-width:900px){#v-review,#v-wish{padding:12px 10px 120px}.enhance-card{gap:10px}.enhance-cover{width:75px}.enhance-cover .cover{width:75px;height:110px}.enhance-cover img{max-width:75px;max-height:110px}.enhance-sticky button{min-height:42px}.toolbar #viewSeg{max-width:100%;overflow-x:auto;flex-shrink:1}.toolbar{overflow-x:auto}}
+
+.tool-action-dock{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:var(--white);box-shadow:0 -4px 12px rgba(0,0,0,.08)}.tool-action-dock button{min-height:38px}.mbox .mbody{min-height:0;flex:1}.enhance-card .phc{width:100%;height:100%}
+@media(max-width:900px){.tool-action-dock{padding-left:10px;padding-right:10px}.tool-action-dock button{font-size:12px;padding:7px 9px}.enhance-card .phc{font-size:11px}.enhance-card .phc b{font-size:13px}}
+
+body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{display:none!important}.toolbar #viewSeg{flex:none!important;max-width:none!important;overflow:visible!important}body.utility-view #viewSeg{max-width:100%!important;overflow-x:auto!important;width:100%;box-sizing:border-box}.enhance-cover{align-self:flex-start}.enhance-cover .phc{height:140px!important;display:flex;box-sizing:border-box;overflow:hidden}.enhance-cover .phv{font-size:34px}.enhance-cover .pht{font-size:11px}.enhance-cover .phs,.enhance-cover .pha{font-size:10px}
+@media(max-width:900px){.enhance-cover .phc{height:110px!important;padding:7px 5px!important}.enhance-cover .phv{font-size:28px;padding:2px 6px}.enhance-cover .phs{display:none}}
 </style>
 </head>
 <body>
@@ -599,13 +610,13 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
     <button class="hbtn" id="hSave" title="Enregistrer une sauvegarde (Ctrl+S)"><span data-i="save"></span></button>
     <button class="hbtn" id="hSet" title="Paramètres"><span data-i="gear"></span></button>
     <div class="ddw down right hmenu"><button class="hbtn ddt" id="hMenu" data-dd title="Menu">☰</button>
-      <div class="dd"><button data-hm="scan">▣ Scanner</button><button data-hm="ai">✦ Assistant IA</button><button data-hm="save">⬇ Sauvegarder</button><button data-hm="set">⚙ Paramètres</button></div></div>
+      <div class="dd"><button data-hm="scan">▣ Scanner</button><button data-hm="ai">✦ Assistant IA</button><button data-hm="save">⬇ Sauvegarder</button><button data-hm="set">⚙ Paramètres</button><button data-hm="review">À vérifier</button><button data-hm="wish">Souhaits</button></div></div>
   </div>
 </header>
 
 <button id="tbToggle" class="tbtog" title="Vues et filtres">▾</button>
 <div class="toolbar">
-  <div class="seg" id="viewSeg"><button data-v="lib" class="on">Pièce 3D</button><button data-v="cat">Catalogue</button><button data-v="list">Liste</button><button data-v="series">Séries</button><button data-v="dash">Tableau de bord</button></div>
+  <div class="seg" id="viewSeg"><button data-v="lib" class="on">Pièce 3D</button><button data-v="cat">Catalogue</button><button data-v="list">Liste</button><button data-v="series">Séries</button><button data-v="dash">Tableau de bord</button><button data-v="review">À vérifier</button><button data-v="wish">Souhaits</button></div>
   <div class="chips" id="chips"></div>
   <div class="tsp"></div>
   <select class="tsel" id="fStatus"><option value="">Tous statuts</option><option>À lire</option><option>En cours</option><option>Lu</option><option>Prêté</option><option value="__unk">À identifier</option><option value="__wish">Souhaits</option></select>
@@ -669,7 +680,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
   <section class="view" id="v-cat"><div class="stats" id="stats"></div><div class="grid" id="grid"></div></section>
   <section class="view" id="v-list"><div id="listBar"></div><table class="list" id="tlist"></table></section>
   <section class="view" id="v-series"></section>
-  <section class="view" id="v-dash"></section>
+  <section class="view" id="v-dash"></section><section class="view" id="v-review"></section><section class="view" id="v-wish"></section>
 </main>
 
 <div class="fab" id="fab">
@@ -709,7 +720,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.17';
+const VERSION = '2.18';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -1018,6 +1029,7 @@ async function coverFor(b, avoid) {
   return null;
 }
 async function fixCovers(btn) {
+  if(!await safetyPoint18('Avant correction groupée des couvertures'))return;
   const bad = sharedCovers(), todo = books.filter(b => !b.wish && !b.coverManual && b.title && (!b.cover || bad.has(ckey(b.cover))));
   if (!todo.length) return toast('Toutes les couvertures sont déjà en place');
   let n = 0, k = 0; const lbl = btn ? btn.innerHTML : '';
@@ -1085,9 +1097,10 @@ const caseOf = b => b && b.caseId && cases.some(c => c.id === b.caseId) ? b.case
    RENDU GÉNÉRAL
    ===================================================================== */
 function renderAll() {
+  reviewCache18=new Map();
   const own = books.filter(b => !b.wish).length, w = books.length - own, u = books.filter(b => b.unknown).length;
   $('#hcount').textContent = own + ' ouvrage' + (own > 1 ? 's' : '') + (u ? ` · ${u} à identifier` : '') + (w ? ` · ${w} souhait${w > 1 ? 's' : ''}` : '');
-  renderToolbar(); renderRoom(); renderCat(); renderList(); renderSeries(); renderDash(); updUndoBtns();
+  renderToolbar(); renderRoom(); renderCat(); renderList(); renderSeries(); renderDash();renderReviewQueue18();renderWishlist18(); updUndoBtns();
 }
 function opt(arr, all, cur) { return `<option value="">${all}</option>` + arr.map(v => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(v)}</option>`).join(''); }
 function renderToolbar() {
@@ -1691,7 +1704,7 @@ function renderList() {
 $('#grid').onclick = e => { const b = e.target.closest('.bk'); if (b) openBook(b.dataset.id); };
 $('#tlist').onclick = e => { const ck = e.target.closest('[data-chk]'); if (ck) { ck.checked ? SEL.add(ck.dataset.chk) : SEL.delete(ck.dataset.chk); ck.closest('tr').classList.toggle('chk', ck.checked); renderListBar(); return renderSelBar(); } const th = e.target.closest('th[data-s]'); if (th) { F.sort = th.dataset.s; $('#fSort').value = F.sort; return renderAll(); } const tr = e.target.closest('tr[data-id]'); if (tr) openBook(tr.dataset.id); };
 
-function setView(v) { $$('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v)); if (v === 'lib') applyView(); }
+function setView(v) {document.body.classList.toggle('utility-view',v==='wish'||v==='review'); $$('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v)); if (v === 'lib') applyView();if(v==='review')renderReviewQueue18();if(v==='wish')renderWishlist18();requestAnimationFrame(()=>$('#viewSeg button.on')?.scrollIntoView({block:'nearest',inline:'nearest'})); }
 $('#viewSeg').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
 $('#chips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; F.type = c.dataset.t; renderAll(); };
 [['#fStatus', 'status'], ['#fAuthor', 'author'], ['#fGenre', 'genre'], ['#fSort', 'sort']].forEach(([s, k]) => $(s).onchange = e => { F[k] = e.target.value; if (k === 'status' && F.status === '__wish' && !CAM.ghost) { CAM.ghost = true; localStorage.setItem('scanly_ghost', '1'); } renderAll(); });
@@ -1843,7 +1856,7 @@ function returnLoan(b) { b.status = b.prevStatus && b.prevStatus !== 'Prêté' ?
    FICHE LIVRE (livre 3D, photo de la tranche, place d'origine)
    ===================================================================== */
 let NAV = {list: null, src: ''}, bookDirty = false;
-function navList() { // ordre de la vue d'où la fiche a été ouverte
+function navList() {if($('#v-review').classList.contains('on'))return reviewRows18().map(b=>b.id);if($('#v-wish').classList.contains('on'))return wishRows18().map(b=>b.id); // ordre de la vue d'où la fiche a été ouverte
   if ($('#v-cat').classList.contains('on') || $('#v-list').classList.contains('on')) return visible().map(b => b.id);
   const els = $$('#unit .book'); if (els.length) return els.map(el => ({id: el.dataset.id, r: +el.dataset.row, x: parseFloat(el.style.left)})).sort((a, b) => a.r - b.r || a.x - b.x).map(o => o.id);
   return sorted(books.slice()).map(b => b.id);
@@ -1907,7 +1920,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
     ${b.bnfRef ? `<p class="hint">Complément BnF${b.bnfRef.url ? ` · <a href="${esc(b.bnfRef.url)}" target="_blank" rel="noopener">Notice BnF</a>` : ''}</p>` : ''}
     ${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}
     ${b.description ? `<div class="desc">${esc(b.description).slice(0, 900)}${b.description.length > 900 ? '…' : ''}</div>` : ''}
-    <div class="btns">${b.wish && !isNew ? `<button class="btn g" id="bGot">Je l'ai acheté</button>` : ''}${!isNew ? `<button class="btn s" id="bLoc">Voir dans la pièce</button>` : ''}${!isNew && !b.spineImg && origImport(b) ? `<button class="btn g" id="bOrigPhoto">📷 Reprendre sur la photo d'origine</button>` : ''}${!isNew && origDiff(b) ? `<button class="btn g" id="bOrig">↩ Remettre à sa place d'origine</button>` : ''}<button class="btn s" id="bFace">${b.faceOut ? 'Remettre sur la tranche' : 'Mettre en vitrine'}</button><button class="btn s" id="bGB">Compléter (bases de livres)</button><button class="btn s" id="bBnf">Vérifier avec la BnF</button><button type="button" class="btn s" id="bCoverOpen">Ajouter une couverture</button><button type="button" class="btn s" id="bZone">Rescanner une zone</button><button class="btn s" id="bAI">Infos IA</button></div>
+    <div class="btns">${b.wish && !isNew ? `<button class="btn g" id="bGot">Je l'ai acheté</button>` : ''}${!isNew ? `<button class="btn s" id="bLoc">Voir dans la pièce</button>` : ''}${!isNew && !b.spineImg && origImport(b) ? `<button class="btn g" id="bOrigPhoto">📷 Reprendre sur la photo d'origine</button>` : ''}${!isNew && origDiff(b) ? `<button class="btn g" id="bOrig">↩ Remettre à sa place d'origine</button>` : ''}<button class="btn s" id="bFace">${b.faceOut ? 'Remettre sur la tranche' : 'Mettre en vitrine'}</button><button class="btn s" id="bGB">Compléter (bases de livres)</button><button type="button" class="btn s" id="bEdition">Choisir une édition</button><button class="btn s" id="bBnf">Vérifier avec la BnF</button><button type="button" class="btn s" id="bCoverOpen">Ajouter une couverture</button><button type="button" class="btn s" id="bZone">Rescanner une zone</button>${b.previousSpine18?'<button type="button" class="btn s" id="bSpinePrevious">Revenir à la tranche précédente</button>':''}<button class="btn s" id="bAI">Infos IA</button></div>
     <label class="l">Titre</label><input class="fld" id="eTitle" value="${esc(b.title)}" placeholder="${b.unknown ? 'Titre à compléter' : ''}">
     <label class="l">Auteur(s)</label><input class="fld" id="eAuthor" value="${esc(b.author)}">
     <div class="g2"><div><label class="l">Série</label><input class="fld" id="eSeries" value="${esc(b.series)}"></div><div><label class="l">Tome</label><input class="fld" id="eVol" type="number" value="${esc(b.volume)}"></div></div>
@@ -1924,6 +1937,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
     <div class="step" style="margin-top:16px">Prêt</div>
     <div class="g3"><div><label class="l">Prêté à</label><input class="fld" id="eLoan" value="${esc(b.loanTo)}" placeholder="Nom de la personne"></div><div><label class="l">Date du prêt</label><input class="fld" id="eLoanD" type="date" value="${esc(b.loanDate)}"></div><div><label class="l">Retour prévu</label><input class="fld" id="eLoanR" type="date" value="${esc(b.loanDue)}"></div></div>
     ${isLoaned(b) ? `<div class="btns" style="margin-top:8px"><button class="btn s sm" id="bRet">Le livre m'a été rendu</button></div>` : '<p class="hint">Sans date de retour, un rappel est prévu 30 jours après le prêt.</p>'}
+    ${b.wish ? wishFields18(b) : ''}
     <label class="l">Notes personnelles</label><textarea class="fld" id="eNotes">${esc(b.notes)}</textarea>`,
     `<div class="btns" style="padding:12px 18px;border-top:1px solid var(--line);margin:0"><button class="btn p" id="bSave">${isNew ? 'Ajouter à ma bibliothèque' : 'Enregistrer'}</button>${isNew ? '' : '<button class="btn k" id="bDel">Supprimer</button>'}</div>`);
   initViewer(); renderNav(isNew ? null : b.id);
@@ -1931,6 +1945,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
   let rating = b.rating || 0;
   $('#bStars').onclick = e => { const s = e.target.closest('b'); if (!s) return; rating = +s.dataset.r === rating ? 0 : +s.dataset.r; $$('#bStars b').forEach(x => x.classList.toggle('on', +x.dataset.r <= rating)); };
   const read = async () => {
+    if(b.wish)readWishFields18(b);
     const n = v => v === '' ? null : Number(v), price = n($('#ePrice').value), hadLoan = !!b.loanTo;
     let cid = $('#eCase').value || null;
     if (cid === '__new') { const nm = prompt('Nom du nouveau meuble :', 'Nouveau meuble'); cid = nm ? (await newCase(nm)).id : (b.caseId || null); }
@@ -1961,6 +1976,8 @@ function openBook(idOrBook, isNew = false, nav = false) {
     renderAll(); toast(isNew ? `« ${dispTitle(b)} » ajouté à ta bibliothèque` : 'Enregistré');
     if (isNew) setTimeout(() => { const el = $(`#unit .book[data-id="${b.id}"]`); if (el) { el.classList.add('new'); focusBook(b.id); } }, 50);
   };
+  if(!isNew){const list=NAV.list||navList(),next=list[list.indexOf(b.id)+1],btn=document.createElement('button');btn.type='button';btn.className='btn p';btn.id='bookSaveNext';btn.textContent='Enregistrer et suivant';btn.disabled=!next;$('#bSave').after(btn);btn.onclick=async()=>{NAV.after=next;await $('#bSave').onclick();};}
+  if($('#bSpinePrevious'))$('#bSpinePrevious').onclick=async()=>{if(!confirm('Revenir à la tranche précédente ?'))return;if(!await safetyPoint18('Avant restauration de tranche'))return;const old=b.previousSpine18;for(const k of spineFields18)if(k in old)b[k]=old[k];else delete b[k];delete b.previousSpine18;await saveBook(b);renderAll();openBook(b.id,false,true);};
   if ($('#bDel')) $('#bDel').onclick = async () => { if (await deleteBooks([b.id], `« ${dispTitle(b)} »`)) closeDrawer(); };
   const updFromIsbn = async (isbn, btn) => {
     await read(); const prev = {...b}, lbl = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Recherche…';
@@ -1977,8 +1994,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if ($('#bLoc')) $('#bLoc').onclick = () => showInRoom(b.id);
   if ($('#bOrig')) $('#bOrig').onclick = async () => { closeDrawer(); setView('lib'); curCase = b.orig.caseId || curCase; await reorderByOrig([b], `Remise en place de « ${dispTitle(b)} »`); showUndo(`« ${dispTitle(b)} » remis à sa place d'origine`); setTimeout(() => showInRoom(b.id), 50); };
   if ($('#bRet')) $('#bRet').onclick = async () => { await read(); returnLoan(b); await saveBook(b); reopen(); toast('Retour enregistré'); };
-  if ($('#bGot')) $('#bGot').onclick = async e => { await read(); e.currentTarget.innerHTML = '<span class="spin"></span>'; b.wish = false; b.addedAt = Date.now();
-    if (/– Tome \d+$/.test(b.title) || !b.cover) await enrich(b); await saveBook(b); reopen(); toast('Ajouté à ta collection'); };
+  if ($('#bGot')) $('#bGot').onclick = async () => {await read();await saveBook(b);openWishPurchase18(b);};
   if ($('#bIdent')) $('#bIdent').onclick = async e => { const btn = e.currentTarget; btn.innerHTML = '<span class="spin"></span> Lecture…';
     try { const img = await srcToImg(b.spineImg), c = document.createElement('canvas'), k = Math.min(4, 900 / Math.max(img.naturalWidth, img.naturalHeight));
       c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k); const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, c.width, c.height);
@@ -2003,6 +2019,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
       box.onclick=async e=>{const btn=e.target.closest('[data-bnf]');if(!btn)return;const r=rows[+btn.dataset.bnf];if(!confirm('Compléter les champs vides avec cette notice ?'))return;const changed=SCANLY_SOURCES.fill(b,r);if(!isNew)await saveBook(b);closeModal();reopen();toast(changed.length?'Champs complétés avec la BnF':'Aucun champ vide à compléter');};
     } catch(e){if($('#bnfResults'))$('#bnfResults').textContent='BnF inaccessible (réseau ou accès navigateur). Les autres bases restent disponibles. '+e.message;}
   };
+  $('#bEdition').onclick=async()=>{if(await prepareToolBook())editionPicker18(b);};
   $('#bCoverOpen').onclick = async () => {if(await prepareToolBook())openCoverTool(b);};
   $('#bZone').onclick = async () => {if(await prepareToolBook())openZoneTool(b);};
   $('#bGB').onclick = async e => { await read(); if (!b.title) return toast('Saisis d\'abord le titre'); e.currentTarget.innerHTML = '<span class="spin"></span> Recherche…'; await enrich(b, true); if (!isNew) await saveBook(b); reopen(); toast('Fiche complétée'); };
@@ -2013,6 +2030,58 @@ function openBook(idOrBook, isNew = false, nav = false) {
 }
 /* V2.1 : loupe sur la tranche */
 /* V2.17: shared tool navigation, non-destructive cover crop and zone re-scan. */
+/* SCANLY V2.18: review queue, wishlist, safety points and correction ergonomics. */
+const spineFields18=['spineImg','spineOrig','quad','srcRef','color','wU','hU'];
+function preserveSpine18(b){if(!books.some(o=>o===b)||!b.spineImg)return;const prev={};for(const k of spineFields18)if(k in b)prev[k]=JSON.parse(JSON.stringify(b[k]));b.previousSpine18=prev;}
+let reviewCache18=new Map();
+const REVIEW18={filter:'all',q:'',limit:60};
+const WISH18={q:'',priority:'',sort:'priority',limit:60};
+const SAFETY18={db:null,queue:Promise.resolve(),restoring:false};
+const textNorm18=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N} ]+/gu,' ').replace(/\s+/g,' ').trim();
+function sameEdition18(a,b){const ia=String(a.isbn||'').replace(/[^0-9X]/gi,''),ib=String(b.isbn||'').replace(/[^0-9X]/gi,'');if(ia&&ib)return SCANLY_SOURCES.isbn13(ia)===SCANLY_SOURCES.isbn13(ib);if(a.series&&b.series&&a.volume&&b.volume)return textNorm18(a.series)===textNorm18(b.series)&&+a.volume===+b.volume;return !!a.title&&textNorm18(a.title)===textNorm18(b.title)&&(!a.author||!b.author||textNorm18(a.author)===textNorm18(b.author)||sim(a.author,b.author)>.7)&&(+a.volume||0)===(+b.volume||0);}
+function reviewFingerprint18(b){return JSON.stringify([b.title,b.author,b.isbn,b.cover,b.scanConfidence??b.confidence,b.series,b.volume,b.spineImg?.length,books.filter(o=>o.id!==b.id&&!o.wish&&sameEdition18(o,b)).length]);}
+function reviewReasons18(b){if(reviewCache18.has(b.id))return reviewCache18.get(b.id);if(b.wish)return [];const reasons=[];if(b.unknown||!b.title)reasons.push('unknown');if((b.scanConfidence??b.confidence)!=null&&+(b.scanConfidence??b.confidence)<.75)reasons.push('uncertain');if(!b.cover)reasons.push('cover');if(books.some(o=>o.id!==b.id&&!o.wish&&sameEdition18(o,b)))reasons.push('duplicate');if(b.reviewValidated===reviewFingerprint18(b)){reviewCache18.set(b.id,[]);return [];}reviewCache18.set(b.id,reasons);return reasons;}
+const reviewLabels18={unknown:'Non reconnu',uncertain:'Reconnaissance incertaine',cover:'Couverture manquante',duplicate:'Doublon possible'};
+function reviewRows18(){return sorted(books.filter(b=>{const r=reviewReasons18(b);return r.length&&(REVIEW18.filter==='all'||r.includes(REVIEW18.filter))&&textNorm18([b.title,b.author,b.series,b.isbn].join(' ')).includes(textNorm18(REVIEW18.q));}));}
+function openReviewBook18(id,tool){NAV.list=reviewRows18().map(b=>b.id);NAV.cur=id;openBook(id,false,true);if(tool)openBookTool(books.find(b=>b.id===id),tool);}
+function renderReviewQueue18(){reviewCache18=new Map();const root=$('#v-review');if(!root)return;const rows=reviewRows18(),all=books.filter(b=>reviewReasons18(b).length);root.innerHTML=`<div class="enhance-head"><h2>À vérifier <span class="badge">${all.length}</span></h2><button type="button" class="btn s" id="reviewReread">Relire les éléments incertains</button></div><p class="hint">Les alertes sont indicatives. Un doublon possible n’est jamais supprimé automatiquement. « Valider » masque les alertes de cette fiche jusqu’à une modification de ses informations.</p><div class="enhance-filters"><input class="fld" id="reviewSearch" value="${esc(REVIEW18.q)}" placeholder="Rechercher"><select class="fld" id="reviewFilter"><option value="all">Toutes les alertes</option>${Object.entries(reviewLabels18).map(([k,v])=>`<option value="${k}" ${REVIEW18.filter===k?'selected':''}>${v}</option>`).join('')}</select></div><div class="enhance-grid">${rows.slice(0,REVIEW18.limit).map(b=>`<article class="enhance-card"><div class="enhance-cover">${coverHTML(b)}</div><div><h3 data-no-i18n>${esc(dispTitle(b))}</h3><p data-no-i18n>${esc(b.author)}</p><p class="hint" data-no-i18n>${esc(locOf(b))}</p><div>${reviewReasons18(b).map(k=>`<span class="badge">${reviewLabels18[k]}</span>`).join(' ')}</div><div class="btns"><button type="button" class="btn s sm" data-review-open="${b.id}">Corriger</button>${b.spineImg?`<button type="button" class="btn s sm" data-review-tool="${b.id}">Agrandir</button>`:''}<button type="button" class="btn s sm" data-review-valid="${b.id}">Valider</button></div></div></article>`).join('')||'<p>Aucun élément à vérifier.</p>'}</div>${rows.length>REVIEW18.limit?'<button type="button" class="btn s" id="reviewMore">Afficher davantage</button>':''}`;
+ $('#reviewFilter').onchange=e=>{REVIEW18.filter=e.target.value;REVIEW18.limit=60;renderReviewQueue18();};$('#reviewSearch').onchange=e=>{REVIEW18.q=e.target.value;REVIEW18.limit=60;renderReviewQueue18();};$('#reviewReread').onclick=()=>rereadUncertain18();if($('#reviewMore'))$('#reviewMore').onclick=()=>{REVIEW18.limit+=60;renderReviewQueue18();};
+ root.onclick=async e=>{const a=e.target.closest('[data-review-open],[data-review-tool],[data-review-valid]');if(!a)return;if(a.dataset.reviewValid){const b=books.find(b=>b.id===a.dataset.reviewValid);b.reviewValidated=reviewFingerprint18(b);await saveBook(b);renderAll();}else openReviewBook18(a.dataset.reviewOpen||a.dataset.reviewTool,a.dataset.reviewTool?'loupe':null);};
+}
+async function rereadUncertain18(){const rows=reviewRows18().filter(b=>b.spineImg&&(b.unknown||(b.scanConfidence??b.confidence)!=null&&(b.scanConfidence??b.confidence)<.75));if(!rows.length)return toast('Aucune tranche incertaine à relire.');if(!cfg.key)return toast('Clé API Gemini manquante (⚙ Paramètres)');
+ openModal(`<div class="dhead"><h3>Relire les éléments incertains</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Choisis uniquement les livres à relire. Aucune fiche ne sera modifiée sans confirmation.</p><div id="rereadChoices">${rows.slice(0,100).map((b,i)=>`<label class="enhance-line"><input type="checkbox" data-reread="${b.id}" ${i<12?'checked':''}><img src="${spineURL(b)}" style="height:60px;max-width:50px"><span data-no-i18n>${esc(dispTitle(b))}</span></label>`).join('')}</div><button type="button" class="btn p" id="rereadRun">Relire la sélection</button><p id="rereadMsg" aria-live="polite"></p></div>`);
+ $('#rereadRun').onclick=async()=>{const ids=$$('[data-reread]:checked').map(e=>e.dataset.reread),selected=rows.filter(b=>ids.includes(b.id));if(!selected.length)return;let busy=true;modalLeaveGuard=()=>!busy;$('#rereadRun').disabled=true;const results=[];
+ try{for(let i=0;i<selected.length;i+=8){$('#rereadMsg').textContent=`${Math.min(i+8,selected.length)} / ${selected.length}`;const batch=selected.slice(i,i+8),items=[];for(const b of batch){let src=b.spineImg;const imp=origImport(b),full=imp?.hd?.[b.srcRef?.pi??0];if(full&&b.quad){const im=await srcToImg(full);src=extractQuad(im,quadPx(b.quad,im),800).crop;}items.push({read:src});}await readSpinesAI(items);items.forEach((it,k)=>results.push({book:batch[k],res:it.res||null}));}busy=false;modalLeaveGuard=null;showRereadResults18(results);}catch(e){busy=false;$('#rereadMsg').textContent=e.message;$('#rereadRun').disabled=false;}}
+}
+function showRereadResults18(results){openModal(`<div class="dhead"><h3>Vérifier la nouvelle lecture</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Vérifie les propositions. Les notes, la couverture et l’emplacement restent inchangés.</p>${results.map((r,i)=>`<div data-rr="${i}" class="enhance-result"><label><input type="checkbox" data-rr-use ${r.res?.titre?'checked':'disabled'}> Appliquer</label><p data-no-i18n>Avant : ${esc(dispTitle(r.book))} · ${esc(r.book.author)}</p>${r.res?`<label class="l">Titre</label><input class="fld" data-rr-title value="${esc(r.res.titre||'')}"><label class="l">Auteur</label><input class="fld" data-rr-author value="${esc(r.res.auteur||'')}"><div class="g2"><div><label class="l">Série</label><input class="fld" data-rr-series value="${esc(r.res.serie||'')}"></div><div><label class="l">Tome</label><input class="fld" type="number" data-rr-volume value="${parseInt(r.res.tome)||''}"></div></div>`:'<p>Lecture non concluante. Reprendre une photo rapprochée.</p>'}</div>`).join('')}<button type="button" class="btn p" id="rrApply">Appliquer les propositions choisies</button></div>`);$('#rrApply').onclick=async()=>{const selected=$$('[data-rr]').filter(e=>e.querySelector('[data-rr-use]').checked);if(!selected.length)return;if(!await safetyPoint18('Avant relecture IA'))return;for(const el of selected){const r=results[+el.dataset.rr],b=r.book,title=el.querySelector('[data-rr-title]').value.trim();if(!title)continue;Object.assign(b,{title,author:el.querySelector('[data-rr-author]').value.trim(),series:el.querySelector('[data-rr-series]').value.trim(),volume:parseInt(el.querySelector('[data-rr-volume]').value)||null,unknown:false,scanConfidence:null,confidence:null,reviewReadAt:Date.now()});delete b.reviewValidated;await saveBook(b);}closeModal();renderAll();toast('Propositions enregistrées');};}
+function wishPriority18(b){return ['high','normal','low'].includes(b.wishPriority)?b.wishPriority:'normal';}
+function wishDuplicates18(b){return books.filter(o=>o.id!==b.id&&sameEdition18(o,b));}
+function wishRows18(){const rows=books.filter(b=>b.wish&&textNorm18([b.title,b.author,b.series,b.isbn,b.wishReason].join(' ')).includes(textNorm18(WISH18.q))&&(!WISH18.priority||wishPriority18(b)===WISH18.priority));const rank={high:0,normal:1,low:2};return rows.sort((a,b)=>WISH18.sort==='title'?dispTitle(a).localeCompare(dispTitle(b),'fr',{numeric:true}):WISH18.sort==='price'?(Number(a.wishTarget)||Infinity)-(Number(b.wishTarget)||Infinity):rank[wishPriority18(a)]-rank[wishPriority18(b)]||norm(a.series||a.title).localeCompare(norm(b.series||b.title),'fr',{numeric:true})||(+a.volume||0)-(+b.volume||0));}
+function safeBuyLink18(s){try{const u=new URL(s);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch(e){return '';}}
+function renderWishlist18(){const root=$('#v-wish');if(!root)return;const rows=wishRows18(),all=books.filter(b=>b.wish),priced=all.filter(b=>Number(b.wishTarget)>0),total=priced.reduce((n,b)=>n+Number(b.wishTarget),0);root.innerHTML=`<div class="enhance-head"><h2>Liste de souhaits <span class="badge">${all.length}</span></h2><button type="button" class="btn p" id="wishNew">Ajouter un souhait</button></div><p class="hint">Budget cible renseigné : ${total.toFixed(2)} € pour ${priced.length} souhait(s). Les prix et liens sont saisis par toi, sans suivi automatique.</p><div class="enhance-filters"><input class="fld" id="wishSearch" value="${esc(WISH18.q)}" placeholder="Rechercher"><select class="fld" id="wishPriority"><option value="">Toutes priorités</option><option value="high" ${WISH18.priority==='high'?'selected':''}>Haute</option><option value="normal" ${WISH18.priority==='normal'?'selected':''}>Normale</option><option value="low" ${WISH18.priority==='low'?'selected':''}>Basse</option></select><select class="fld" id="wishSort"><option value="priority">Priorité puis série</option><option value="title" ${WISH18.sort==='title'?'selected':''}>Titre</option><option value="price" ${WISH18.sort==='price'?'selected':''}>Prix cible</option></select></div><div class="enhance-grid">${rows.slice(0,WISH18.limit).map(b=>{const dup=wishDuplicates18(b),url=safeBuyLink18(b.wishLink);return `<article class="enhance-card"><div class="enhance-cover">${coverHTML(b)}</div><div><h3 data-no-i18n>${esc(dispTitle(b))}</h3><p data-no-i18n>${esc(b.author)}${b.series?' · '+esc(b.series)+(b.volume?' · '+b.volume:''):''}</p><span class="badge">${{high:'Haute',normal:'Normale',low:'Basse'}[wishPriority18(b)]}</span>${b.wishTarget?`<span class="badge">${Number(b.wishTarget).toFixed(2)} €</span>`:''}<p data-no-i18n>${esc(b.wishReason||'')}</p>${dup.length?`<p class="badge k">${dup.some(o=>!o.wish)?'Déjà possédé':'Déjà souhaité'}</p>`:''}<div class="btns"><button type="button" class="btn s sm" data-wish-edit="${b.id}">Modifier</button><button type="button" class="btn p sm" data-wish-buy="${b.id}">Acheté › Ranger</button>${url?`<a class="btn s sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Lien d’achat</a>`:''}<button type="button" class="btn s sm" data-wish-delete="${b.id}">Supprimer</button></div></div></article>`;}).join('')||'<p>Aucun souhait.</p>'}</div>${rows.length>WISH18.limit?'<button type="button" class="btn s" id="wishMore">Afficher davantage</button>':''}`;
+ $('#wishNew').onclick=()=>openWishForm18();$('#wishSearch').onchange=e=>{WISH18.q=e.target.value;WISH18.limit=60;renderWishlist18();};$('#wishPriority').onchange=e=>{WISH18.priority=e.target.value;renderWishlist18();};$('#wishSort').onchange=e=>{WISH18.sort=e.target.value;renderWishlist18();};if($('#wishMore'))$('#wishMore').onclick=()=>{WISH18.limit+=60;renderWishlist18();};root.onclick=async e=>{const a=e.target.closest('[data-wish-edit],[data-wish-buy],[data-wish-delete]');if(!a)return;const id=a.dataset.wishEdit||a.dataset.wishBuy||a.dataset.wishDelete,b=books.find(b=>b.id===id);if(a.dataset.wishEdit){NAV.list=wishRows18().map(b=>b.id);openBook(id,false,true);}else if(a.dataset.wishBuy)openWishPurchase18(b);else await deleteBooks([id],'Souhait supprimé');};
+}
+function wishFields18(b){return `<div class="step">Liste de souhaits</div><div class="g2"><div><label class="l">Priorité</label><select class="fld" id="eWishPriority">${[['high','Haute'],['normal','Normale'],['low','Basse']].map(([k,v])=>`<option value="${k}" ${wishPriority18(b)===k?'selected':''}>${v}</option>`).join('')}</select></div><div><label class="l">Prix cible (€)</label><input class="fld" type="number" min="0" step="0.01" id="eWishTarget" value="${esc(b.wishTarget??'')}"></div></div><label class="l">Motif du souhait</label><input class="fld" id="eWishReason" value="${esc(b.wishReason||'')}"><label class="l">Lien d’achat facultatif</label><input class="fld" type="url" id="eWishLink" value="${esc(b.wishLink||'')}"><p class="hint">Les prix et liens ne sont pas vérifiés automatiquement.</p>${wishDuplicates18(b).length?'<p class="badge k">Livre déjà possédé ou déjà souhaité : vérifie avant d’acheter.</p>':''}`;}
+function readWishFields18(b){if(!$('#eWishPriority'))return;const price=$('#eWishTarget').value.trim();b.wishPriority=$('#eWishPriority').value;b.wishTarget=price===''?null:clamp(Number(price)||0,0,100000);b.wishReason=$('#eWishReason').value.trim();b.wishLink=safeBuyLink18($('#eWishLink').value.trim());}
+function openWishForm18(){openModal(`<div class="dhead"><h3>Ajouter un souhait</h3><button class="x" data-close>×</button></div><div class="mbody"><label class="l">Titre</label><input class="fld" id="wishTitle"><label class="l">Auteur</label><input class="fld" id="wishAuthor"><div class="g2"><div><label class="l">Série</label><input class="fld" id="wishSeries"></div><div><label class="l">Tome</label><input class="fld" type="number" min="1" id="wishVolume"></div></div><label class="l">ISBN</label><input class="fld" id="wishISBN">${wishFields18({})}<button type="button" class="btn p" id="wishCreate">Ajouter un souhait</button><p id="wishMsg" aria-live="polite"></p></div>`,'sm');$('#wishCreate').onclick=async()=>{const create=$('#wishCreate');if(create.disabled)return;const b=newBook({title:$('#wishTitle').value.trim(),author:$('#wishAuthor').value.trim(),series:$('#wishSeries').value.trim(),volume:parseInt($('#wishVolume').value)||null,isbn:$('#wishISBN').value.trim(),wish:true,caseId:null,position:null});if(!b.title){$('#wishMsg').textContent='Le titre est obligatoire';return;}readWishFields18(b);const dup=wishDuplicates18(b);if(dup.length&&!confirm('Ce livre est déjà possédé ou souhaité. Ajouter quand même ?'))return;create.disabled=true;try{await saveBook(b);closeModal();renderAll();setView('wish');}finally{if(create.isConnected)create.disabled=false;}};}
+function openWishPurchase18(b){if(!b?.wish)return;const owned=wishDuplicates18(b).filter(o=>!o.wish);openModal(`<div class="dhead"><h3>Acheté › Ranger</h3><button class="x" data-close>×</button></div><div class="mbody"><h3 data-no-i18n>${esc(dispTitle(b))}</h3>${owned.length?'<p class="badge k">Ce livre est déjà possédé. Vérifie l’édition.</p>':''}<label class="l">Meuble</label><select class="fld" id="purchaseCase" data-no-i18n>${cases.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}<option value="__new">Nouveau meuble…</option></select><label class="l">Étagère</label><input class="fld" type="number" min="1" max="15" value="1" id="purchaseRow"><label class="l">Position (vide = à la fin)</label><input class="fld" type="number" min="1" id="purchasePos"><label class="l">Prix payé (€), facultatif</label><input class="fld" type="number" min="0" step=".01" id="purchasePrice"><button type="button" class="btn p" id="purchaseSave">Ranger le livre acheté</button></div>`,'sm');$('#purchaseSave').onclick=async()=>{if(owned.length&&!confirm('Ranger un exemplaire supplémentaire ?'))return;if(!await safetyPoint18('Avant achat et rangement'))return;let cid=$('#purchaseCase').value;if(cid==='__new'){const name=prompt('Nom du nouveau meuble :','Nouveau meuble');if(!name)return;cid=(await newCase(name)).id;}const row=clamp(parseInt($('#purchaseRow').value)||1,1,15),pos=parseInt($('#purchasePos').value)||null,price=$('#purchasePrice').value.trim(),c=cases.find(c=>c.id===cid);b.wish=false;b.wishPurchasedAt=new Date().toISOString();b.caseId=cid;b.row=row;b.addedAt=Date.now();if(price!==''){b.price=clamp(Number(price)||0,0,100000);b.priceSource='Manuel';}const list=books.filter(o=>o.id!==b.id&&o.caseId===cid&&(o.row||1)===row&&!o.wish).sort((a,c)=>(a.position||999)-(c.position||999));list.splice(pos?clamp(pos-1,0,list.length):list.length,0,b);list.forEach((o,i)=>o.position=i+1);if(c&&c.rows<row){c.rows=row;await DB.put('cases',c);}await DB.putMany('books',list);await saveBook(b);closeModal();renderAll();openBook(b.id,false,true);toast('Ajouté à ta collection');};}
+function safetyDB18(){if(SAFETY18.db)return Promise.resolve(SAFETY18.db);return new Promise((resolve,reject)=>{const req=indexedDB.open('SCANLY_SafetyPoints',1);req.onupgradeneeded=()=>req.result.createObjectStore('points',{keyPath:'id'});req.onsuccess=()=>{SAFETY18.db=req.result;resolve(req.result);};req.onerror=()=>reject(req.error);});}
+async function safetyPoint18(label,mandatory=true){if(SAFETY18.restoring)return true;const task=SAFETY18.queue.then(async()=>{try{const db=await safetyDB18(),point={id:Date.now()+'_'+uid(),at:Date.now(),label,version:VERSION,books:await DB.all('books'),cases:await DB.all('cases'),imports:await DB.all('imports'),trash:await DB.all('trash'),seriesMeta:JSON.parse(JSON.stringify(SMETA)),theme};await new Promise((resolve,reject)=>{const tx=db.transaction('points','readwrite'),store=tx.objectStore('points');store.put(point);const req=store.getAll();req.onsuccess=()=>req.result.sort((a,b)=>b.at-a.at).slice(3).forEach(p=>store.delete(p.id));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});return true;}catch(e){return mandatory?confirm('Point de restauration impossible (stockage plein ou indisponible). Continuer sans cette protection ?'):false;}});SAFETY18.queue=task.catch(()=>{});return task;}
+async function openSafety18(){const db=await safetyDB18();const points=await new Promise((resolve,reject)=>{const r=db.transaction('points').objectStore('points').getAll();r.onsuccess=()=>resolve(r.result.sort((a,b)=>b.at-a.at));r.onerror=()=>reject(r.error);});openModal(`<div class="dhead"><h3>Points de restauration</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Trois états complets sont conservés sur cet appareil, hors synchronisation. Restaurer remplace la bibliothèque locale. Une sauvegarde exportée reste recommandée.</p><button type="button" class="btn s" id="safetyNew">Créer un point maintenant</button>${points.map((p,i)=>`<div class="enhance-result"><b>${esc(p.label)}</b><p>${new Date(p.at).toLocaleString('fr-FR')} · ${p.books.length} livres</p><button type="button" class="btn s" data-safety="${i}">Restaurer</button></div>`).join('')||'<p>Aucun point disponible.</p>'}</div>`);$('#safetyNew').onclick=async()=>{if(await safetyPoint18('Point manuel'))openSafety18();};$$('[data-safety]').forEach(btn=>btn.onclick=async()=>{const p=points[+btn.dataset.safety];if(!confirm('Remplacer la bibliothèque locale par ce point de restauration ?'))return;if(!await safetyPoint18('Avant restauration'))return;if(SY.busy)return toast('Termine la synchronisation avant de restaurer.');clearTimeout(SY.timer);localStorage.setItem('scanly_sync_auto','0');SAFETY18.restoring=true;try{await new Promise((resolve,reject)=>{const tx=DB.db.transaction(['books','cases','imports','trash'],'readwrite');for(const k of ['books','cases','imports','trash']){const st=tx.objectStore(k);st.clear();(p[k]||[]).forEach(o=>st.put(o));}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});SMETA=p.seriesMeta||{};localStorage.setItem('scanly_series',JSON.stringify(SMETA));if(p.theme&&THEMES[p.theme]){theme=p.theme;localStorage.setItem('scanly_theme',theme);rt=activeTheme();applyTheme();}await load();SEL.clear();SY.dirty=true;SY.last=null;UNDO.stack=[];UNDO.redo=[];persistUndo();closeModal();renderAll();toast('Bibliothèque restaurée. Vérifie avant de synchroniser.');}finally{SAFETY18.restoring=false;}});}
+function toolSaveNext18(b,kind,selector){const save=$(selector);if(!save)return;const list=toolList(b,kind),id=list[list.indexOf(b.id)+1];const btn=document.createElement('button');btn.type='button';btn.className='btn p';btn.id='toolSaveNext';btn.textContent='Enregistrer et suivant';btn.disabled=!id||save.disabled;save.after(btn);const observer=new MutationObserver(()=>btn.disabled=!id||save.disabled);observer.observe(save,{attributes:true,attributeFilter:['disabled']});const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();observer.disconnect();};btn.onclick=async()=>{if(btn.disabled)return;btn.disabled=true;const old=b.updatedAt;try{await save.onclick?.({currentTarget:save,target:save});if(b.updatedAt===old&&!(!save.isConnected&&books.some(o=>o.id===b.id)))return;modalLeaveGuard=null;closeModal();NAV.cur=id;openBook(id,false,true);await openBookTool(books.find(o=>o.id===id),kind);}finally{if(btn.isConnected)btn.disabled=!id||save.disabled;}};}
+function nextCompare18(b,kind){const src=b.spineImg;if(!src)return;const image=$('#qePrev')||$('#spI');if(!image)return;const wrapper=document.createElement('details');wrapper.className='enhance-compare';wrapper.innerHTML=`<summary>Comparer avant / après</summary><div class="enhance-compare-grid"><div><p>Avant</p><img src="${src}"></div><div><p>Aperçu</p><img id="compareAfter18" src="${image.src}"></div></div>`;$('#mbox .mbody').prepend(wrapper);const obs=new MutationObserver(()=>{const after=$('#compareAfter18');if(after)after.src=image.src;});obs.observe(image,{attributes:true,attributeFilter:['src']});const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();obs.disconnect();};}
+async function photoQuality18(src){const im=await srcToImg(src),w=imgW(im),h=imgH(im),c=document.createElement('canvas'),k=Math.min(1,800/Math.max(w,h));c.width=Math.round(w*k);c.height=Math.round(h*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);const data=x.getImageData(0,0,c.width,c.height).data,gray=i=>(data[i]*.299+data[i+1]*.587+data[i+2]*.114);let n=0,sum=0,sum2=0,glare=0;for(let y=1;y<c.height-1;y+=2)for(let a=1;a<c.width-1;a+=2){const i=(y*c.width+a)*4,g=gray(i),lap=gray(i-4)+gray(i+4)+gray(i-c.width*4)+gray(i+c.width*4)-4*g;n++;sum+=lap;sum2+=lap*lap;if(g>248)glare++;}const variance=n?sum2/n-(sum/n)**2:0;return {w,h,blur:variance<35,glare:n?glare/n:0,low:w<1000||h<400,wide:w/Math.max(1,h)>4,variance};}
+async function checkPhotos18(urls){const warnings=[];for(let i=0;i<urls.length;i++){try{const q=await photoQuality18(urls[i]),r=[];if(q.low)r.push('résolution limitée');if(q.blur)r.push('netteté possiblement insuffisante');if(q.wide)r.push('photo très large : plusieurs clichés rapprochés peuvent aider');if(q.glare>.2)r.push('zones très claires : vérifier les reflets');if(r.length)warnings.push(`Photo ${i+1} (${q.w} × ${q.h}) : ${r.join(', ')}`);}catch(e){warnings.push(`Photo ${i+1} : contrôle impossible`);}}return !warnings.length||confirm(warnings.join('\n')+'\n\nContrôle indicatif, sans garantie. Continuer le scan ?');}
+function enhanceModal18(){const body=$('#mbox .mbody');if(!body)return;body.classList.add('enhanced-tools');body.querySelectorAll('p.hint').forEach(p=>{if(p.textContent.length<140||p.closest('details'))return;const d=document.createElement('details');d.className='enhance-help';const summary=document.createElement('summary');summary.textContent='Aide';p.before(d);d.append(summary,p);});
+ const actions=['#qeOk','#straightRun','#straightSave','#spOk','#cropApply','#ogRep','#ogAdd','#zoneApply','#rrApply','#purchaseSave','#toolSaveNext'].map(sel=>$(sel)).filter(Boolean);
+ const old=$('#mbox .tool-action-dock');if(old)old.remove();if(!actions.length)return;
+ const dock=document.createElement('div');dock.className='tool-action-dock';const observer=new MutationObserver(()=>{actions.forEach((source,i)=>{const btn=dock.children[i];if(btn){btn.disabled=source.disabled;btn.innerHTML=source.innerHTML;}});});
+ actions.forEach(source=>{const clone=document.createElement('button');clone.type='button';clone.className=source.className;clone.innerHTML=source.innerHTML;clone.disabled=source.disabled;clone.onclick=()=>source.click();dock.appendChild(clone);observer.observe(source,{attributes:true,childList:true,characterData:true,subtree:true,attributeFilter:['disabled']});});const cancel=document.createElement('button');cancel.type='button';cancel.className='btn s';cancel.textContent='Annuler';cancel.onclick=()=>closeModal();dock.appendChild(cancel);$('#mbox').appendChild(dock);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();observer.disconnect();};}
+
+function attachToolEnhance18(b,kind){const selector={quad:'#qeOk',straight:'#straightSave',split:'#spOk',cover:'#cropApply',origin:'#ogRep'}[kind];if(selector)toolSaveNext18(b,kind,selector);if(kind==='quad')nextCompare18(b,kind);enhanceModal18();}
+function holdDelay18(){return {short:450,normal:600,long:900}[localStorage.getItem('scanly_hold_delay')]||600;}
+async function editionPicker18(b){const original=JSON.parse(JSON.stringify(b));openModal(`<div class="dhead"><h3>Choisir une édition</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Vérifie titre, tome, éditeur, année et ISBN. Une couverture personnelle reste protégée. Aucune édition n’est appliquée automatiquement.</p><div class="g2"><div><label class="l">Série à conserver ou corriger</label><input class="fld" id="editionSeries" value="${esc(b.series||'')}"></div><div><label class="l">Tome lu sur l’édition (ne pas déduire)</label><input class="fld" type="number" min="1" id="editionVolume" value="${b.volume||''}"></div></div><div id="editionRows" aria-live="polite">Recherche…</div></div>`);try{let items=await gBooks(b.isbn?'isbn:'+b.isbn:'intitle:'+b.title+(b.author?' inauthor:'+b.author:''),8);const rows=items.map(it=>{const v=it.volumeInfo||{},ids=v.industryIdentifiers||[];return {it,title:v.title,subtitle:v.subtitle,author:(v.authors||[]).join(', '),publisher:v.publisher,year:v.publishedDate,isbn:(ids.find(x=>x.type==='ISBN_13')||ids[0])?.identifier,cover:v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail,source:'Google Books'};});if(b.isbn){const ol=await olByIsbn(b.isbn);if(ol)rows.push({title:ol.title,subtitle:ol.subtitle,author:(ol.author_name||[]).join(', '),publisher:(ol.publisher||[])[0],year:ol.publish_year?.[0],isbn:b.isbn,cover:ol.coverUrl,source:'Open Library',ol});}const root=$('#editionRows');if(!root)return;root.innerHTML=rows.map((r,i)=>`<article class="enhance-card"><img src="${esc((r.cover||'').replace('http:','https:'))}" style="max-width:90px;max-height:130px;object-fit:contain" alt=""><div data-no-i18n><h3>${esc(r.title)}</h3><p>${esc(r.subtitle||'')}<br>${esc(r.author)}<br>${esc(r.publisher||'')} · ${esc(r.year||'')}<br>ISBN ${esc(r.isbn||'')} · ${r.source}</p></div><button type="button" class="btn s" data-edition="${i}">Choisir cette édition</button></article>`).join('')||'<p>Aucune édition trouvée. Vérifie l’ISBN ou utilise la BnF.</p>';root.onclick=async e=>{const btn=e.target.closest('[data-edition]');if(!btn)return;const r=rows[+btn.dataset.edition];if(!confirm('Remplacer les informations bibliographiques par cette édition ? Notes, statut et emplacement sont conservés.'))return;if(!await safetyPoint18('Avant choix d’édition'))return;if(r.it){applyGB(b,r.it,true);b.title=r.title||b.title;}else{for(const k of ['title','author','publisher','isbn'])if(r[k])b[k]=r[k];if(r.year)b.year=parseInt(r.year)||b.year;if(r.ol.number_of_pages_median)b.pages=r.ol.number_of_pages_median;if(!b.coverManual&&r.cover)b.cover=r.cover;}b.series=$('#editionSeries').value.trim();b.volume=parseInt($('#editionVolume').value)||null;b.editionSource=r.source;b.unknown=false;await saveBook(b);closeModal();renderAll();openBook(b.id,false,true);};}catch(e){if($('#editionRows'))$('#editionRows').textContent=e.message;}}
+
 async function prepareToolBook(){if(!bookDirty)return true;if(!confirm('Enregistrer les modifications de la fiche avant d’ouvrir cet outil ? Annuler reste sur la fiche.'))return false;const save=$('#bSave');if(save?.onclick)await save.onclick();return !bookDirty;}
 function toolList(b, kind){const list=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&(['cover','bnf','zone'].includes(kind)||o.spineImg)));if(!list.includes(b.id))list.unshift(b.id);return list;}
 function toolNav(b,kind,guard=()=>true){
@@ -2028,8 +2097,10 @@ async function openBookTool(b,kind){
  if(kind==='quad'){
   const imp=b.srcRef?.imp?imports.find(i=>i.id===b.srcRef.imp):null,hd=imp?.hd?.[b.srcRef?.pi]||imp?.photos?.[b.srcRef?.pi];
   const src=hd&&b.quad?hd:(b.spineOrig||b.spineImg),quad=hd&&b.quad?b.quad:(b.srcRef?.orig?b.quad:null);
-  return openQuadEditor({src,quad,title:`Ajuster le détourage – ${dispTitle(b)}`,toolBook:b,onSave:async(qn,sp)=>{if(!(hd&&b.quad)&&!b.spineOrig)b.spineOrig=b.spineImg;if(!(hd&&b.quad))b.srcRef={orig:true};applySpine(b,sp,qn);await saveBook(b);renderAll();openBook(b.id,false,true);toast('Détourage enregistré');await openBookTool(b,'quad');}});
+  return openQuadEditor({src,quad,title:`Ajuster le détourage – ${dispTitle(b)}`,toolBook:b,onSave:async(qn,sp)=>{preserveSpine18(b);if(!(hd&&b.quad)&&!b.spineOrig)b.spineOrig=b.spineImg;if(!(hd&&b.quad))b.srcRef={orig:true};applySpine(b,sp,qn);await saveBook(b);renderAll();openBook(b.id,false,true);toast('Détourage enregistré');await openBookTool(b,'quad');}});
  }
+ if(kind==='loupe')return openLoupe(b);
+ if(kind==='origin')return openOrigin(b);
  if(kind==='split')return openSplit(b);
  if(kind==='cover')return openCoverTool(b);
  if(kind==='zone')return openZoneTool(b);
@@ -2038,12 +2109,12 @@ async function openBookTool(b,kind){
   openModal(`<div class="dhead"><h3 data-no-i18n>Redresser auto – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Le résultat est un aperçu. Enregistre pour l’appliquer à ce livre uniquement.</p><div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap"><div><p>Avant</p><img src="${spineURL(b)}" style="height:48vh;max-width:38vw;object-fit:contain"></div><div><p>Aperçu</p><img id="straightPreview" src="${spineURL(b)}" style="height:48vh;max-width:38vw;object-fit:contain"></div></div><div class="btns"><button type="button" class="btn s" id="straightRun">Redresser auto</button><button type="button" class="btn p" id="straightSave" disabled>Enregistrer</button></div><p id="straightMsg" class="hint" aria-live="polite"></p></div>`,'sm');
   let draft=null,busy=false;const guard=()=>!busy&&(!draft||confirm('Un aperçu non enregistré sera abandonné. Continuer ?'));modalLeaveGuard=guard;toolNav(b,'straight',guard);
   $('#straightRun').onclick=async()=>{const root=$('#straightPreview');busy=true;try{const copy=JSON.parse(JSON.stringify(b));await restraighten(copy);if(!root.isConnected)return;draft=copy;root.src=copy.spineImg;$('#straightSave').disabled=false;}catch(e){if(root.isConnected)$('#straightMsg').textContent=e.message;}finally{busy=false;}};
-  $('#straightSave').onclick=async()=>{if(!draft||busy)return;busy=true;for(const k of ['spineImg','spineOrig','quad','srcRef','color','wU','hU'])if(k in draft)b[k]=draft[k];await saveBook(b);draft=null;busy=false;renderAll();toast('Tranche redressée');};return;
+  $('#straightSave').onclick=async()=>{if(!draft||busy)return;if(!await safetyPoint18('Avant redressement'))return;busy=true;preserveSpine18(b);for(const k of ['spineImg','spineOrig','quad','srcRef','color','wU','hU'])if(k in draft)b[k]=draft[k];await saveBook(b);draft=null;busy=false;renderAll();toast('Tranche redressée');};attachToolEnhance18(b,'straight');return;
  }
 }
 function openCoverTool(b){
  openModal(`<div class="dhead"><h3 data-no-i18n>Couverture – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Choisis une photo, puis rogne-la avant de l’enregistrer. Les recherches automatiques ne remplaceront pas ta couverture personnelle.</p>${b.cover?`<img src="${esc(b.cover)}" style="max-height:48vh;max-width:100%;object-fit:contain"><div class="btns"><button type="button" class="btn s" id="coverCropCurrent">Rogner la couverture actuelle</button></div>`:''}<label class="btn p" style="cursor:pointer">Choisir une photo<input type="file" id="coverPick" accept="image/*" hidden></label><p id="coverMsg" class="hint"></p></div>`,'sm');toolNav(b,'cover');
- const start=src=>openRectCrop({src,b,kind:'cover',title:`Rogner la couverture – ${dispTitle(b)}`,label:'Enregistrer la couverture',onApply:async result=>{const im=await srcToImg(result.src);b.cover=resize(im,1400,.9);b.coverOriginal=result.fullSrc;b.coverManual=true;b.coverSource='Photo personnelle';if(books.some(o=>o.id===b.id))await saveBook(b);renderAll();openBook(books.some(o=>o.id===b.id)?b.id:b,!books.some(o=>o.id===b.id),true);openCoverTool(b);toast('Couverture personnelle enregistrée');}});
+ const start=src=>openRectCrop({src,b,kind:'cover',title:`Rogner la couverture – ${dispTitle(b)}`,label:'Enregistrer la couverture',onApply:async result=>{if(!await safetyPoint18('Avant rognage de couverture'))return;const im=await srcToImg(result.src);b.cover=resize(im,1400,.9);b.coverOriginal=result.fullSrc;b.coverManual=true;b.coverSource='Photo personnelle';if(books.some(o=>o.id===b.id))await saveBook(b);renderAll();openBook(books.some(o=>o.id===b.id)?b.id:b,!books.some(o=>o.id===b.id),true);openCoverTool(b);toast('Couverture personnelle enregistrée');}});
  $('#coverPick').onchange=async e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);try{const im=await srcToImg(u);const c=document.createElement('canvas'),k=Math.min(1,3200/Math.max(imgW(im),imgH(im)));c.width=Math.round(imgW(im)*k);c.height=Math.round(imgH(im)*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);await start(c.toDataURL('image/jpeg',.94));}catch(err){toast('Image non lisible : '+err.message);}finally{URL.revokeObjectURL(u);}};
  if($('#coverCropCurrent'))$('#coverCropCurrent').onclick=()=>start(b.coverOriginal||b.cover).catch(e=>toast('Image distante inaccessible : choisis le fichier photo. '+e.message));
 }
@@ -2065,6 +2136,7 @@ async function openRectCrop({src,b,kind='zone',title,label='Analyser la zone',on
  if($('#cropRotate'))$('#cropRotate').onclick=()=>{const c=document.createElement('canvas');c.width=full.height;c.height=full.width;const t=c.getContext('2d');t.translate(c.width,0);t.rotate(Math.PI/2);t.drawImage(full,0,0);full=c;R={x:0,y:0,w:full.width,h:full.height};dirty=true;fit();};
  const onResize=()=>fit();window.addEventListener('resize',onResize);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();window.removeEventListener('resize',onResize);pointers.clear();};
  $('#cropApply').onclick=async()=>{if(busy)return;clampR();if(R.w<8||R.h<8){$('#cropMsg').textContent='Zone trop petite.';return;}busy=true;$('#cropApply').disabled=true;try{const c=document.createElement('canvas');c.width=Math.round(R.w);c.height=Math.round(R.h);c.getContext('2d').drawImage(full,R.x,R.y,R.w,R.h,0,0,c.width,c.height);const result={src:c.toDataURL('image/jpeg',.94),rect:{x:R.x/full.width,y:R.y/full.height,w:R.w/full.width,h:R.h/full.height},fullSrc:full.toDataURL('image/jpeg',.92),fullW:full.width,fullH:full.height};dirty=false;modalLeaveGuard=null;await onApply(result);}catch(e){if(C.isConnected){$('#cropMsg').textContent=e.message;$('#cropApply').disabled=false;modalLeaveGuard=guard;}}finally{busy=false;}};
+ if(kind==='cover')attachToolEnhance18(b,'cover');else enhanceModal18();
  fit();
 }
 async function openZoneTool(b){
@@ -2076,38 +2148,42 @@ async function openZoneTool(b){
  $('#zoneFile').onchange=e=>file(e).catch(err=>toast(err.message));$('#zoneCamera').onchange=e=>file(e).catch(err=>toast(err.message));
 }
 async function rescanZone(anchor,result,context){
+ if(!await checkPhotos18([result.src])){modalLeaveGuard=null;return openZoneTool(anchor);}
  const prevMode=localStorage.getItem('scanly_mode');localStorage.setItem('scanly_mode',context.mode);let records=[];
  openModal(`<div class="dhead"><h3>Analyse de la zone</h3></div><div class="mbody"><p id="sMsg" aria-live="polite">Lecture IA…</p><p class="hint">Aucune modification de la bibliothèque avant validation.</p></div>`,'sm');modalLeaveGuard=()=>false;
  try{const img=await srcToImg(result.src),{list}=await recognize([result.src]);
   records=list.filter(d=>Array.isArray(d.boite)&&d.boite.length===4&&d.boite.every(Number.isFinite)&&d.boite[2]>d.boite[0]&&d.boite[3]>d.boite[1]).slice(0,150).map(d=>{d.boite=d.boite.map(v=>clamp(v,0,1000));const sp=spineFromDetection(img,d.boite,d.coins),q=sp.quad||[[d.boite[1]/1000,d.boite[0]/1000],[d.boite[3]/1000,d.boite[0]/1000],[d.boite[3]/1000,d.boite[2]/1000],[d.boite[1]/1000,d.boite[2]/1000]],quad=q.map(p=>[result.rect.x+p[0]*result.rect.w,result.rect.y+p[1]*result.rect.h]);
    const candidates=books.filter(b=>b.caseId===anchor.caseId);let match=null,score=0;for(const b of candidates){let sc=0;if(!context.newPhoto&&b.quad&&(b.srcRef?.imp||b.importId)===context.imp?.id&&(b.srcRef?.pi??0)===context.pi){const a=quadBox(quad),c=quadBox(b.quad),inter=Math.max(0,Math.min(a.x1,c.x1)-Math.max(a.x0,c.x0))*Math.max(0,Math.min(a.y1,c.y1)-Math.max(a.y0,c.y0)),area=(a.x1-a.x0)*(a.y1-a.y0);sc=area?inter/area:0;}if(d.titre&&norm(d.titre)===norm(b.title)&&(parseInt(d.tome)||null)===(b.volume||null))sc=Math.max(sc,.8);if(sc>score){score=sc;match=b;}}
-   return {d,sp,quad,title:d.titre||'',author:d.auteur||'',series:d.serie||'',volume:parseInt(d.tome)||null,row:clamp((context.baseRow||anchor.row||1)+(parseInt(d.rangee)||1)-1,1,15),match:score>.45?match:null,action:score>.45?'ignore':'add',target:score>.45?match.id:'',replaceInfo:false};});
+   const right=!context.newPhoto?candidates.filter(b=>!b.wish&&b.quad&&(b.srcRef?.imp||b.importId)===context.imp?.id&&(b.srcRef?.pi??0)===context.pi&&(b.row||1)===clamp((context.baseRow||anchor.row||1)+(parseInt(d.rangee)||1)-1,1,15)&&quadBox(b.quad).x0>quadBox(quad).x0).sort((a,b)=>quadBox(a.quad).x0-quadBox(b.quad).x0)[0]:null;
+   return {d,sp,quad,beforeId:right?.id||'',title:d.titre||'',author:d.auteur||'',series:d.serie||'',volume:parseInt(d.tome)||null,row:clamp((context.baseRow||anchor.row||1)+(parseInt(d.rangee)||1)-1,1,15),match:score>.45?match:null,action:score>.45?'ignore':'add',target:score>.45?match.id:'',replaceInfo:false};});
  }catch(e){modalLeaveGuard=null;openModal(`<div class="dhead"><h3>Analyse interrompue</h3><button class="x" data-close>×</button></div><div class="mbody"><p>${esc(e.message)}</p><p>Aucun livre modifié.</p><button type="button" class="btn s" id="zoneRetry">Reprendre la zone</button></div>`,'sm');$('#zoneRetry').onclick=()=>openZoneTool(anchor);return;
  }finally{if(prevMode==null)localStorage.removeItem('scanly_mode');else localStorage.setItem('scanly_mode',prevMode);}
  showZoneReview(anchor,result,context,records);
 }
 function showZoneReview(anchor,result,context,records){
- openModal(`<div class="dhead"><h3>Vérifier la nouvelle analyse</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Les doublons possibles sont ignorés par défaut. Ajouter crée un livre ; Remplacer corrige un livre choisi sans changer ses notes, sa couverture ni son rangement. Aucun livre existant n’est supprimé.</p><div id="zoneReview">${records.map((r,i)=>`<div data-zr="${i}" style="display:flex;gap:10px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line)"><img src="${r.sp.crop}" style="height:110px;max-width:90px;object-fit:contain"><div style="flex:1;min-width:180px"><label class="l">Titre</label><input class="fld" data-zk="title" value="${esc(r.title)}"><label class="l">Auteur</label><input class="fld" data-zk="author" value="${esc(r.author)}"><div class="g2"><div><label class="l">Série</label><input class="fld" data-zk="series" value="${esc(r.series)}"></div><div><label class="l">Tome</label><input class="fld" type="number" min="1" data-zk="volume" value="${r.volume||''}"></div></div><label class="l">Étagère</label><input class="fld" type="number" min="1" max="15" data-zk="row" value="${r.row}"><p class="hint" data-no-i18n>${r.match?'Doublon possible : '+esc(dispTitle(r.match)):'Nouveau candidat'} · confiance ${Math.round((+r.d.confiance||0)*100)} %</p><select class="fld" data-zk="action"><option value="ignore" ${r.action==='ignore'?'selected':''}>Ignorer</option><option value="add" ${r.action==='add'?'selected':''}>Ajouter</option><option value="replace" ${r.action==='replace'?'selected':''}>Remplacer la tranche d’un livre</option></select><label class="l">Livre à corriger (si remplacement)</label><select class="fld" data-zk="target" data-no-i18n><option value="">Choisir…</option>${books.filter(b=>b.caseId===anchor.caseId).map(b=>`<option value="${b.id}" ${r.target===b.id?'selected':''}>${esc(dispTitle(b))} · ${b.row||1}</option>`).join('')}</select><label class="hint"><input type="checkbox" data-zk="replaceInfo" ${r.replaceInfo?'checked':''}> Remplacer aussi titre, auteur, série et tome par les champs ci-dessus</label><button type="button" class="btn s sm" data-zone-crop="${i}">Ajuster le détourage</button><button type="button" class="btn s sm" data-zone-split="${i}">Séparer ce candidat</button></div></div>`).join('')||'<p>Aucun livre détecté. Essaie une photo plus rapprochée ou un cadre manuel.</p>'}</div><div class="btns"><button type="button" class="btn s" id="zoneBack">Reprendre la zone</button><button type="button" class="btn p" id="zoneApply" ${records.length?'':'disabled'}>Appliquer les choix</button></div><p id="zoneApplyMsg" class="hint" aria-live="polite"></p></div>`);
+ openModal(`<div class="dhead"><h3>Vérifier la nouvelle analyse</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Les doublons possibles sont ignorés par défaut. Ajouter crée un livre ; Remplacer corrige un livre choisi sans changer ses notes, sa couverture ni son rangement. Aucun livre existant n’est supprimé.</p><div id="zoneReview">${records.map((r,i)=>`<div data-zr="${i}" style="display:flex;gap:10px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line)"><img src="${r.sp.crop}" style="height:110px;max-width:90px;object-fit:contain"><div style="flex:1;min-width:180px"><label class="l">Titre</label><input class="fld" data-zk="title" value="${esc(r.title)}"><label class="l">Auteur</label><input class="fld" data-zk="author" value="${esc(r.author)}"><div class="g2"><div><label class="l">Série</label><input class="fld" data-zk="series" value="${esc(r.series)}"></div><div><label class="l">Tome</label><input class="fld" type="number" min="1" data-zk="volume" value="${r.volume||''}"></div></div><label class="l">Étagère</label><input class="fld" type="number" min="1" max="15" data-zk="row" value="${r.row}"><p class="hint" data-no-i18n>${r.match?'Doublon possible : '+esc(dispTitle(r.match)):'Nouveau candidat'} · confiance ${Math.round((+r.d.confiance||0)*100)} %</p><select class="fld" data-zk="action"><option value="ignore" ${r.action==='ignore'?'selected':''}>Ignorer</option><option value="add" ${r.action==='add'?'selected':''}>Ajouter</option><option value="replace" ${r.action==='replace'?'selected':''}>Remplacer la tranche d’un livre</option></select><label class="l">Insérer avant ce livre (si ajout)</label><select class="fld" data-zk="beforeId" data-no-i18n><option value="">Fin de l’étagère</option>${books.filter(b=>!b.wish&&b.caseId===anchor.caseId&&(b.row||1)===r.row).sort((a,b)=>(a.position||999)-(b.position||999)).map(b=>`<option value="${b.id}" ${r.beforeId===b.id?'selected':''}>${esc(dispTitle(b))}</option>`).join('')}</select><label class="l">Livre à corriger (si remplacement)</label><select class="fld" data-zk="target" data-no-i18n><option value="">Choisir…</option>${books.filter(b=>b.caseId===anchor.caseId).map(b=>`<option value="${b.id}" ${r.target===b.id?'selected':''}>${esc(dispTitle(b))} · ${b.row||1}</option>`).join('')}</select><label class="hint"><input type="checkbox" data-zk="replaceInfo" ${r.replaceInfo?'checked':''}> Remplacer aussi titre, auteur, série et tome par les champs ci-dessus</label><button type="button" class="btn s sm" data-zone-crop="${i}">Ajuster le détourage</button><button type="button" class="btn s sm" data-zone-split="${i}">Séparer ce candidat</button></div></div>`).join('')||'<p>Aucun livre détecté. Essaie une photo plus rapprochée ou un cadre manuel.</p>'}</div><div class="btns"><button type="button" class="btn s" id="zoneBack">Reprendre la zone</button><button type="button" class="btn p" id="zoneApply" ${records.length?'':'disabled'}>Appliquer les choix</button></div><p id="zoneApplyMsg" class="hint" aria-live="polite"></p></div>`);
  let applied=false,busy=false;modalLeaveGuard=()=>!busy&&(applied||confirm('Abandonner ces résultats non appliqués ? La bibliothèque reste inchangée.'));
  $('#zoneReview').onchange=e=>{const row=e.target.closest('[data-zr]'),key=e.target.dataset.zk;if(!row||!key)return;const r=records[+row.dataset.zr];r[key]=key==='replaceInfo'?e.target.checked:key==='volume'?(parseInt(e.target.value)||null):key==='row'?clamp(parseInt(e.target.value)||1,1,15):e.target.value;};
  $('#zoneReview').onclick=e=>{const crop=e.target.closest('[data-zone-crop]');if(crop){if(busy)return;modalLeaveGuard=null;openCandidateCrop(anchor,result,context,records,+crop.dataset.zoneCrop);return;}const btn=e.target.closest('[data-zone-split]');if(!btn)return;const i=+btn.dataset.zoneSplit,r=records[i];if(busy)return;modalLeaveGuard=null;openCandidateSplit(anchor,result,context,records,i);};
  $('#zoneBack').onclick=()=>{if(!modalLeaveGuard())return;modalLeaveGuard=null;openZoneTool(anchor);};
  $('#zoneApply').onclick=async()=>{
   const chosen=records.filter(r=>r.action!=='ignore');if(!chosen.length){$('#zoneApplyMsg').textContent='Aucun ajout ni remplacement sélectionné.';return;}
+  for(const r of chosen)if(r.action==='add'&&r.beforeId&&!books.some(b=>b.id===r.beforeId&&b.caseId===anchor.caseId&&(b.row||1)===r.row)){$('#zoneApplyMsg').textContent='Le livre de référence ne correspond pas à l’étagère choisie. Choisis une autre position.';return;}
   const targets=new Set();for(const r of chosen)if(r.action==='replace'){if(!books.some(b=>b.id===r.target)||targets.has(r.target)){$('#zoneApplyMsg').textContent='Choisis un livre différent pour chaque remplacement.';return;}targets.add(r.target);}
   if(!confirm(`Appliquer ${chosen.filter(r=>r.action==='add').length} ajout(s) et ${targets.size} remplacement(s) ?`))return;
   busy=true;$('#zoneApply').disabled=true;
+  if(!await safetyPoint18('Avant application d’une zone rescannée')){busy=false;$('#zoneApply').disabled=false;return;}
   const beforeBooks=JSON.parse(JSON.stringify(books)),beforeImports=JSON.parse(JSON.stringify(imports)),beforeCases=JSON.parse(JSON.stringify(cases));SY.mute++;
   try{
    let imp=context.imp,pi=context.pi;
    if(!imp){imp={id:'imp_'+uid(),date:new Date().toISOString(),caseId:anchor.caseId,count:0,photos:[],hd:[]};imports.push(imp);}
    if(context.newPhoto||!context.imp){pi=Math.max(imp.hd?.length||0,imp.photos?.length||0);imp.hd=imp.hd||[];imp.photos=imp.photos||[];imp.hd[pi]=result.fullSrc;const im=await srcToImg(result.fullSrc);imp.photos[pi]=resize(im,900,.65);}
    const made=[],changed=[];
-   for(const r of chosen){const b=r.action==='replace'?books.find(b=>b.id===r.target):newBook({caseId:anchor.caseId,row:r.row,position:nextPos(anchor.caseId,r.row),title:r.title,author:r.author,series:r.series,volume:r.volume,type:TYPES.includes(r.d.type)?r.d.type:anchor.type,unknown:!r.title,importId:imp.id});
-    b.spineImg=r.sp.crop;b.quad=r.quad;b.srcRef={imp:imp.id,pi};b.color=r.sp.color;b.spineOrig=null;
+   for(const r of chosen){const b=r.action==='replace'?books.find(b=>b.id===r.target):newBook({caseId:anchor.caseId,row:r.row,position:nextPos(anchor.caseId,r.row),title:r.title,author:r.author,series:r.series,volume:r.volume,type:TYPES.includes(r.d.type)?r.d.type:anchor.type,unknown:!r.title,scanConfidence:Number.isFinite(+r.d.confiance)?clamp(+r.d.confiance,0,1):null,importId:imp.id});
+    if(r.action==='replace')preserveSpine18(b);b.spineImg=r.sp.crop;b.quad=r.quad;b.srcRef={imp:imp.id,pi};b.color=r.sp.color;b.spineOrig=null;
     const h=b.hU||anchor.hU||170;b.hU=h;b.wU=clamp(Math.round(h*r.sp.wpx/Math.max(1,r.sp.hpx)),6,95);
     if(r.action==='replace'&&r.replaceInfo){Object.assign(b,{title:r.title,author:r.author,series:r.series,volume:r.volume,unknown:!r.title});}
-    if(r.action==='add'){b.orig={caseId:b.caseId,row:b.row,position:b.position};books.push(b);made.push(b);}changed.push(b);
+    if(r.action==='add'){books.push(b);const row=books.filter(o=>o.caseId===b.caseId&&(o.row||1)===b.row&&!o.wish&&o.id!==b.id).sort((a,c)=>(a.position||999)-(c.position||999));const at=r.beforeId?row.findIndex(o=>o.id===r.beforeId):-1;row.splice(at<0?row.length:at,0,b);row.forEach((o,i)=>{o.position=i+1;if(!changed.some(c=>c.id===o.id))changed.push(o);});b.orig={caseId:b.caseId,row:b.row,position:b.position};made.push(b);}if(!changed.some(c=>c.id===b.id))changed.push(b);
    }
    imp.count=(imp.count||0)+made.length;const c=cases.find(c=>c.id===anchor.caseId);if(c)c.rows=Math.max(c.rows||3,...made.map(b=>b.row));await new Promise((resolve,reject)=>{const tx=DB.db.transaction(['books','imports','cases'],'readwrite');changed.forEach(b=>tx.objectStore('books').put(b));tx.objectStore('imports').put(imp);if(c)tx.objectStore('cases').put(c);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Enregistrement annulé'));});SY.mute--;SY.dirty=true;if(syncOn()&&SY.auto){clearTimeout(SY.timer);SY.timer=setTimeout(()=>syncPush(),20000);}
    applied=true;busy=false;modalLeaveGuard=null;closeModal();renderAll();openBook(anchor.id,false,true);
@@ -2272,7 +2348,7 @@ async function openOrigin(b, options = {}) {
   const sizeOf = sp => b.pxMed ? {hU: Math.round(clamp(170 * sp.hpx / b.pxMed, 90, 300)), wU: Math.round(clamp(170 * sp.wpx / b.pxMed, 6, 95))}
     : {hU: b.hU || undefined, wU: b.hU ? Math.round(clamp(b.hU * sp.wpx / Math.max(1, sp.hpx), 6, 95)) : undefined};
   // --- Remplacer la tranche du livre courant
-  $('#ogRep').onclick = async () => { const Q = frames[sel >= 0 ? sel : 0]; if (!Q) return; $('#ogRep').innerHTML = '<span class="spin"></span>';
+  $('#ogRep').onclick = async () => {if(!await safetyPoint18('Avant correction sur photo originale'))return; const Q = frames[sel >= 0 ? sel : 0]; if (!Q) return; $('#ogRep').innerHTML = '<span class="spin"></span>';
     const prev = {spineImg: b.spineImg, quad: b.quad, color: b.color, wU: b.wU, hU: b.hU, srcRef: b.srcRef ? {...b.srcRef} : null};
     const sp = extractQuad(img, Q), rd = extractQuad(img, Q, 600), qn = quadNorm(Q, img);
     b.spineImg = sp.crop; b.color = sp.color; b.quad = qn; b.srcRef = {imp: imp.id, pi}; Object.assign(b, sizeOf(sp));
@@ -2282,7 +2358,7 @@ async function openOrigin(b, options = {}) {
     await saveBook(b); frames=[]; modalLeaveGuard=null; cleanup(); closeModal(); renderAll(); openBook(b.id, false, true); if(integrated)openLoupe(b);
     showUndo('Tranche reprise sur la photo d\'origine', async () => { Object.assign(b, prev); await saveBook(b); renderAll(); toast('Tranche précédente rétablie'); }); };
   // --- Ajouter comme nouveau(x) livre(s)
-  $('#ogAdd').onclick = async () => { if (!frames.length) return; $('#ogAdd').innerHTML = '<span class="spin"></span> Découpe et lecture…';
+  $('#ogAdd').onclick = async () => {if(!await safetyPoint18('Avant ajout depuis photo originale'))return; if (!frames.length) return; $('#ogAdd').innerHTML = '<span class="spin"></span> Découpe et lecture…';
     const bc = b.quad && (b.srcRef?.pi ?? 0) === pi ? (quadBox(quadPx(b.quad, img)).x0 + quadBox(quadPx(b.quad, img)).x1) / 2 : null;
     const items = frames.map(Q => { const sp = extractQuad(img, Q), rd = extractQuad(img, Q, 600), bb = quadBox(Q); return {Q, sp, read: rd.crop, cx: (bb.x0 + bb.x1) / 2}; }).sort((p, q) => p.cx - q.cx);
     try { await readSpinesAI(items); } catch (e) { toast('Lecture IA : ' + e.message, 4000); }
@@ -2302,7 +2378,7 @@ async function openOrigin(b, options = {}) {
     showUndo(`${made.length} livre(s) ajouté(s) depuis la photo`, async () => { const ids = new Set(made.map(m => m.id)); await DB.delMany('books', [...ids]); books = books.filter(o => !ids.has(o.id));
       const L = renumber(b.caseId, b.row || 1); await DB.putMany('books', L); renderAll(); toast('Ajout annulé'); });
     const known = made.filter(m => !m.unknown); if (known.length) bgComplete(known, true, true); };
-  await load(src);
+  await load(src);attachToolEnhance18(b,'origin');
 }
 function openSplit(b) {
   openModal(`<div class="dhead"><h3>Séparer en plusieurs livres</h3><button class="x" data-close>×</button></div><div class="mbody">
@@ -2316,6 +2392,7 @@ function openSplit(b) {
     $('#spN').textContent = (cuts.length + 1) + ' livre' + (cuts.length ? 's' : ''); $('#spOk').disabled = !cuts.length; };
   W.onclick = e => { const l = e.target.closest('.spl'); if (l) { cuts.splice(+l.dataset.i, 1); return draw(); } const r = I.getBoundingClientRect(), f = (e.clientX - r.left) / r.width; if (f > .03 && f < .97) { cuts.push(f); cuts.sort((a, c) => a - c); draw(); } };
   $('#spOk').onclick = async () => {
+    if(!await safetyPoint18('Avant séparation de livres'))return;
     splitBusy=true;$('#spOk').innerHTML = '<span class="spin"></span>'; const im = await srcToImg(b.spineImg), w = im.naturalWidth, h = im.naturalHeight, originalWidth=b.wU, originalQuad=b.quad?b.quad.map(p=>p.slice()):null,originalRef=b.srcRef?{...b.srcRef}:null, fr = [0, ...cuts, 1], made = [];
     pushUndo(`Séparation de « ${dispTitle(b)} »`);
     const row = books.filter(x => x.caseId === b.caseId && (x.row || 1) === (b.row || 1)).sort((p, q) => (p.position || 0) - (q.position || 0)), at = row.indexOf(b);
@@ -2336,6 +2413,7 @@ function openSplit(b) {
     await DB.putMany('books', row); cuts=[];splitBusy=false;modalLeaveGuard=null;closeModal();renderAll();openBook(b.id,false,true);openSplit(b);
     showUndo(`« ${made.map(dispTitle).join(' », « ')} » séparés`); if (made.some(m => !m.unknown)) bgComplete(made.filter(m => !m.unknown), true, false);
   };
+  attachToolEnhance18(b,'split');
 }
 function showInRoom(id) {
   const b = books.find(x => x.id === id); if (!b) return;
@@ -2404,7 +2482,7 @@ function addManual() {
 let shots = [], detected = [], stream = null;
 let modalExtraCleanup = null, modalLeaveGuard = null;
 function runModalCleanup(){if(modalExtraCleanup){const fn=modalExtraCleanup;modalExtraCleanup=null;fn();}}
-function openModal(html, size = '') { modalLeaveGuard=null; runModalCleanup(); $('#mbox').className = 'mbox ' + size; $('#mbox').innerHTML = html; $('#mbox').onclick = null; $('#modal').classList.add('on'); }
+function openModal(html, size = '') { modalLeaveGuard=null; runModalCleanup(); $('#mbox').className = 'mbox ' + size; $('#mbox').innerHTML = html; $('#mbox').onclick = null; $('#modal').classList.add('on');queueMicrotask(enhanceModal18); }
 function closeModal() { if(modalLeaveGuard&&!modalLeaveGuard())return false;modalLeaveGuard=null;runModalCleanup(); $('#modal').classList.remove('on'); stopCam(); }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeModal(); });
 function stopCam() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
@@ -2503,6 +2581,7 @@ $('#edOk').onclick = () => {
 /* --- Analyse : lecture des tranches + découpe, vraie couleur et vraie taille --- */
 function scanMode() { return localStorage.getItem('scanly_mode') === 'precise' ? 'precise' : 'fast'; }
 async function analyze() {
+  if(!await checkPhotos18(shots))return;
   { const r = document.querySelector('input[name=smode]:checked'); if (r) localStorage.setItem('scanly_mode', r.value); }
   window.SCAN_T = {t0: performance.now(), steps: []};
   const merge = $('#sMerge').checked && shots.length > 1;
@@ -2528,7 +2607,7 @@ async function analyze() {
         const row = (parseInt(d.rangee) || 1) + rowOff; maxRow = Math.max(maxRow, row);
         const title = d.titre && !d.illisible ? String(d.titre).trim() : '';
         const b = newBook({title, unknown: !title, author: title ? d.auteur || '' : '', series: d.serie || '', volume: parseInt(d.tome) || null, publisher: d.editeur || '',
-          type: TYPES.includes(d.type) ? d.type : 'Autre', isbn: d.isbn || '', thickness: d.epaisseur, height: d.hauteur, confidence: title ? d.confiance : 0, row, position: parseInt(d.position) || 999});
+          type: TYPES.includes(d.type) ? d.type : 'Autre', isbn: d.isbn || '', thickness: d.epaisseur, height: d.hauteur, confidence: title ? d.confiance : 0,scanConfidence:title&&Number.isFinite(+d.confiance)?clamp(+d.confiance,0,1):0, row, position: parseInt(d.position) || 999});
         if (sp) { b.color = sp.color; b.spineImg = sp.crop; if (med[ii]) { b.pxMed = med[ii]; b.hU = Math.round(clamp(170 * sp.hpx / med[ii], 90, 300)); b.wU = Math.round(clamp(170 * sp.wpx / med[ii], 6, 95)); } }
         b._shot = batch[ii]; b._box = box;
         if (sp && sp.quad) { b.quad = sp.quad; const xs = sp.quad.map(p => p[0] * 1000), ys = sp.quad.map(p => p[1] * 1000); b._box = [Math.min(...ys), Math.min(...xs), Math.max(...ys), Math.max(...xs)]; }
@@ -2791,6 +2870,7 @@ async function importFile(f) {
     if (!Array.isArray(bk)) throw new Error('fichier non reconnu');
     bk.forEach(b => { if (b.shelfId && !b.caseId) b.caseId = b.shelfId; delete b.shelfId; if (b.loan && !b.loanTo) { b.loanTo = b.loan; delete b.loan; } });
     if (!confirm(`Importer ${bk.length} ouvrage(s) et ${cs.length} meuble(s) depuis « ${f.name} » ?\nLes ouvrages déjà présents (même identifiant) seront mis à jour.`)) return;
+    if(!await safetyPoint18('Avant import de sauvegarde'))return;
     await DB.putMany('cases', cs.map(c => ({rows: 3, createdAt: Date.now(), ...c}))); await DB.putMany('books', bk);
     if (Array.isArray(d.imports)) await DB.putMany('imports', d.imports);
     if (d.seriesMeta) { SMETA = {...SMETA, ...d.seriesMeta}; localStorage.setItem('scanly_series', JSON.stringify(SMETA)); }
@@ -2811,6 +2891,9 @@ function openSettings() {
     <label class="l" for="pLanguage">Langue</label>
     <select class="fld" id="pLanguage" aria-label="Langue de l’application" data-no-i18n>${Object.entries(window.SCANLY_I18N?.languages || {fr:'Français',en:'English',es:'Español',ko:'한국어',de:'Deutsch'}).map(([code,name]) => `<option value="${code}" ${code === (window.SCANLY_I18N?.get() || 'fr') ? 'selected' : ''}>${name}</option>`).join('')}</select>
     <p class="hint">Le choix est mémorisé sur cet appareil. Les titres, noms de meubles et données existantes ne sont pas traduits.</p>
+    <div class="step">Confort et sécurité</div>
+    <label class="l">Durée de l’appui long tactile</label><select class="fld" id="pHoldDelay"><option value="short" ${localStorage.getItem('scanly_hold_delay')==='short'?'selected':''}>Court (0,45 s)</option><option value="normal" ${!localStorage.getItem('scanly_hold_delay')||localStorage.getItem('scanly_hold_delay')==='normal'?'selected':''}>Normal (0,6 s)</option><option value="long" ${localStorage.getItem('scanly_hold_delay')==='long'?'selected':''}>Long (0,9 s)</option></select>
+    <div class="btns"><button type="button" class="btn s" id="pSafety">Points de restauration</button><button type="button" class="btn s" id="pReview">À vérifier</button><button type="button" class="btn s" id="pWish">Souhaits</button></div>
     <div class="step">Sources bibliographiques</div>
     <p class="hint">Google Books et Open Library restent les sources principales. La BnF complète uniquement les champs manquants pour un ISBN exact. Les recherches sont mémorisées localement 30 jours.</p>
     <label class="hint"><input type="checkbox" id="pBnfAuto" ${localStorage.getItem('scanly_bnf_auto')!=='0'?'checked':''}> Complément BnF automatique pour les fiches incomplètes</label>
@@ -2870,11 +2953,15 @@ function openSettings() {
   $('#pEnr').onclick = async e => { const todo = books.filter(b => !b.wish && b.title && (!b.cover || !b.year || !b.isbn)); if (!todo.length) return toast('Toutes les fiches sont complètes');
     closeModal(); bgComplete(todo, true, true); };
   $('#pWipe').onclick = async () => { if (!confirm('Effacer TOUTE la bibliothèque ? Pense à enregistrer une sauvegarde avant.') || !confirm('Confirmer la suppression définitive ?')) return;
+    if(!await safetyPoint18('Avant effacement de bibliothèque'))return;
     await DB.clear('books'); await DB.clear('cases'); await DB.clear('imports'); books = []; cases = []; imports = []; UNDO.stack = []; UNDO.redo = []; persistUndo(); renderAll(); closeModal(); toast('Bibliothèque vidée'); };
   const loadTrash = async () => { if (!$('#pTrash')) return; $('#pTrash').innerHTML = await trashHTML(); };
   loadTrash();
   $('#pTrash').onclick = async e => { const r = e.target.closest('[data-rest]'); if (r) { await restoreTrash(r.dataset.rest === '__all' ? null : r.dataset.rest); return loadTrash(); }
     if (e.target.id === 'trEmpty' && confirm('Vider définitivement la corbeille ?')) { await DB.clear('trash'); loadTrash(); } };
+  $('#pHoldDelay').onchange=e=>localStorage.setItem('scanly_hold_delay',e.target.value);
+  $('#pSafety').onclick=()=>openSafety18().catch(e=>toast(e.message));
+  $('#pReview').onclick=()=>{closeModal();setView('review');};$('#pWish').onclick=()=>{closeModal();setView('wish');};
   $('#pBnfAuto').onchange=e=>localStorage.setItem('scanly_bnf_auto',e.target.checked?'1':'0');
   $('#pBiblioClear').onclick=()=>{SCANLY_SOURCES.clear();toast('Cache des recherches effacé');};
   if (window.bindSyncSettings) bindSyncSettings();
@@ -2901,7 +2988,7 @@ $('#viewSeg').addEventListener('click', () => setTimeout(() => { document.body.c
 matchMedia('(orientation:landscape)').addEventListener('change', () => setTimeout(() => applyView(), 300));
 $('#dBack').onclick = () => closeDrawer();
 document.addEventListener('click', e => { const b = e.target.closest('[data-hm]'); if (!b) return; $$('.ddw.open').forEach(w => w.classList.remove('open'));
-  ({scan: () => $('#hScan').click(), ai: () => $('#hAI').click(), save: () => $('#hSave').click(), set: () => openSettings()})[b.dataset.hm](); });
+  ({scan: () => $('#hScan').click(), ai: () => $('#hAI').click(), save: () => $('#hSave').click(), set: () => openSettings(),review:()=>setView('review'),wish:()=>setView('wish')})[b.dataset.hm](); });
 $('#undo').onclick = e => { if (e.target.id !== 'undoBtn') $('#undo').classList.remove('on'); };
 document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase(), typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName), libOn = $('#v-lib').classList.contains('on') && !$('#modal').classList.contains('on') && !$('#drawer').classList.contains('on');
@@ -3045,6 +3132,7 @@ async function newFromIsbn(isbn) {
 async function deleteBooks(ids, label, ask = true) {
   const set = new Set(ids), L = books.filter(b => set.has(b.id)); if (!L.length) return false;
   if (ask && !confirm(L.length === 1 ? `Supprimer « ${dispTitle(L[0])} » ?\nIl ira dans la corbeille (restaurable).` : `Supprimer ${L.length} livres ?\nIls iront dans la corbeille (restaurables depuis Paramètres › Corbeille).`)) return false;
+  if(!await safetyPoint18('Avant suppression de livres'))return false;
   const batch = 'del_' + uid(), now = Date.now();
   await DB.putMany('trash', L.map(b => ({...b, trashBatch: batch, deletedAt: now, trashLabel: label || `${L.length} livre(s)`})));
   await DB.delMany('books', [...set]); books = books.filter(b => !set.has(b.id)); L.forEach(b => SEL.delete(b.id));
@@ -3214,11 +3302,13 @@ async function restraighten(b) {
   applySpine(b, sp, quadNorm(q.quad, img)); return true;
 }
 function applySpine(b, sp, qn) {
+  if(!b.previousSpine18||b.previousSpine18.spineImg!==b.spineImg)preserveSpine18(b);
   b.quad = qn; b.spineImg = sp.crop; b.color = sp.color;
   if (b.pxMed) { b.hU = Math.round(clamp(170 * sp.hpx / b.pxMed, 90, 300)); b.wU = Math.round(clamp(170 * sp.wpx / b.pxMed, 6, 95)); }
   else if (b.hU) b.wU = Math.round(clamp(b.hU * sp.wpx / Math.max(1, sp.hpx), 6, 95));
 }
 async function restraightenMany(list, btn) {
+  if(!await safetyPoint18('Avant redressement groupé'))return;
   const L = list.filter(b => b.spineImg); if (!L.length) return toast('Aucune tranche photographiée à redresser');
   let n = 0; const lbl = btn ? btn.innerHTML : '';
   for (const b of L) { try { if (await restraighten(b)) { await DB.put('books', b); n++; } } catch (e) { console.warn(e); }
@@ -3263,7 +3353,8 @@ async function openQuadEditor({src, quad, title = 'Ajuster le détourage', onSav
   const guard=()=>JSON.stringify(Q)===originalQ||confirm('Le détourage non enregistré sera abandonné. Continuer ?');modalLeaveGuard=guard;
   modalExtraCleanup=()=>{cleanup();clearTimeout(pt);};
   if(toolBook)toolNav(toolBook,'quad',guard);
-  $('#qeOk').onclick = async () => { const sp = extractQuad(img, Q);modalLeaveGuard=null; closeModal(); await onSave(quadNorm(Q, img), sp); };
+  $('#qeOk').onclick = async () => { if(toolBook&&!await safetyPoint18('Avant détourage'))return;const sp = extractQuad(img, Q);modalLeaveGuard=null; closeModal(); await onSave(quadNorm(Q, img), sp); };
+  if(toolBook)attachToolEnhance18(toolBook,'quad');
   $$('#mbox [data-close]').forEach(b => b.addEventListener('click', cleanup));
 }
 
@@ -3771,6 +3862,7 @@ async function syncPull(h) {
     const todo = [...need].filter(k => !local.has(k) && map.has(IMGP + k + '.txt')); let n = 0;
     await pool(todo, 5, async k => { const bl = await gh('/git/blobs/' + map.get(IMGP + k + '.txt')); local.set(k, utf8b64(bl.content)); n++; syncMsg(`<span class="spin"></span> Images ${n}/${todo.length}…`); });
     const d = intern(core, local);
+    if(!await safetyPoint18('Avant récupération depuis un autre appareil')){SY.busy=false;syncPill();return;}
     SY.mute++;
     try { for (const st of ['books', 'cases', 'imports', 'trash']) { await DB.clear(st); if ((d[st] || []).length) await DB.putMany(st, d[st]); } } finally { SY.mute--; }
     if (d.seriesMeta) { SMETA = d.seriesMeta; localStorage.setItem('scanly_series', JSON.stringify(SMETA)); }
@@ -3871,7 +3963,7 @@ window.syncBoot = syncBoot; window.bindSyncSettings = bindSyncSettings;
       st.armed=true;st.down=true;lastTap.t=0;item.classList.add('touch-ready');
       fire('mousedown',st.last,st.target);
       if(navigator.vibrate)navigator.vibrate(20);
-    },600);}
+    },holdDelay18());}
   },{passive:false});
   document.addEventListener('touchmove',e=>{
     if(pinch&&e.touches.length===2){e.preventDefault();const [a,b]=e.touches,d=Math.max(1,Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)),f=d/pinch.d;pinch.d=d;

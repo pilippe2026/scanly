@@ -1,4 +1,4 @@
-SCANLY V2.17 – INSTALLATION SUR iPHONE, iPAD ET MAC
+SCANLY V2.18 – INSTALLATION SUR iPHONE, iPAD ET MAC
 ==================================================
 Gratuit, sans App Store, sans validation Apple. 10 minutes, une seule fois.
 
@@ -82,7 +82,7 @@ UTILISATION AU DOIGT (iPhone / iPad)
 - Double-toucher un livre : zoom ; double-toucher a cote des livres : zoom sur l'etagere.
 - Pincer : zoom ; glisser le fond : se deplacer ; menu Vue > "Tout voir" pour revenir.
 - Glisser immediatement, meme sur un livre : deplacer la vue.
-- Maintenir 0,6 s sans bouger sur un livre ou le rond dore : puis glisser pour ranger.
+- Maintenir le delai choisi (0,6 s par defaut) sans bouger sur un livre ou le rond dore : puis glisser pour ranger.
 - Selection : activer Outils > Selection, puis toucher les livres.
 - Bouton ＋ (en bas a droite) : Prendre une photo (appareil photo de l'iPhone, pleine
   resolution), Importer des photos (Photos / Fichiers), Ajouter un livre.
