@@ -1,3 +1,79 @@
+SCANLY V2.17 - OUTILS EN SERIE, COUVERTURES ROGNEES, REPRISE DE ZONE
+Base exclusive : SCANLY V2.16 jointe par Philippe.
+
+1. PASSER D'UN LIVRE A L'AUTRE DANS LES OUTILS
+- Ajuster le detourage : precedent / suivant, compteur, fleches clavier.
+  Appliquer enregistre le livre courant et conserve l'outil ouvert.
+- Redresser auto : nouvelle fenetre Avant / Apercu, precedent / suivant.
+  Redresser auto calcule l'apercu sans modifier le livre ; Enregistrer l'applique.
+- Separer en plusieurs livres : precedent / suivant et confirmation avant abandon
+  des coupures. La fenetre reste ouverte apres application.
+- Photo d'origine : navigation disponible aussi depuis le bouton de la fiche.
+- Couverture et reprise de zone : navigation entre les livres.
+- Verification BnF : navigation entre les fiches.
+- Les livres sans tranche sont exclus des outils qui exigent une tranche.
+- Une fiche modifiee doit etre enregistree avant d'ouvrir ces outils.
+- Un cadrage, un apercu ou des coupures non appliques declenchent une confirmation
+  avant navigation ou fermeture. Enregistrer/Appliquer avant de passer au suivant
+  pour conserver la correction ; confirmer l'abandon la supprime.
+
+2. AJOUTER UNE COUVERTURE ET ROGNER
+Fiche > Ajouter une couverture > Choisir une photo.
+Tracer un rectangle, ajuster ses coins, zoomer, deplacer ou tourner de 90 degres.
+Enregistrer la couverture applique le rognage au livre courant uniquement.
+La photo de couverture d'origine est conservee pour un rognage ulterieur.
+La couverture personnelle reste protegee contre les recherches automatiques.
+Les couvertures distantes peuvent refuser le rognage (CORS) : choisir le fichier local.
+
+3. RESCANNER UNE ZONE APRES IMPORT
+Fiche > Rescanner une zone, ou Photo d'origine > Rescanner une zone.
+- Photo d'origine : reutiliser la meilleure photo conservee de cet import.
+- Nouvelle photo rapprochee / Prendre une photo : fichier ou appareil photo arriere.
+- Tracer la zone utile, zoomer, choisir la premiere etagere et Rapide / Precise.
+- Analyser la zone : le moteur existant ne traite que le recadrage.
+- Verifier les resultats : titre, auteur, serie, tome, etagere modifiables.
+- Ignorer / Ajouter / Remplacer la tranche d'un livre choisi.
+- Doublons possibles (position sur la meme photo ou titre/tome identiques) ignores
+  par defaut ; cette detection est indicative et doit etre verifiee.
+- Ajuster le detourage et Separer ce candidat permettent de corriger avant ajout.
+  Apres separation, relire les morceaux avec l'IA est optionnel. Les nouveaux
+  morceaux restent ignores tant que l'utilisateur n'a pas choisi Ajouter/Remplacer.
+- Aucun livre existant n'est supprime automatiquement. Un remplacement conserve
+  notes, couverture, statut et rangement. Remplacer aussi les informations est une
+  option explicite, decochee par defaut.
+- Les ajouts sont places en fin de l'etagere choisie ; leur position reste modifiable.
+- Une nouvelle photo est ajoutee a l'import seulement lors de la validation,
+  sans ecraser l'ancienne. Les cadres sont relies a la photo correspondante.
+- Enregistrement groupe livres/import/meuble dans une transaction IndexedDB.
+- Annuler pendant 10 secondes restaure l'etat precedent.
+
+LIMITES
+Zoomer une photo floue ne recree pas les details : preferer une vraie nouvelle photo
+rapprochee, nette et sans reflet. La reanalyse consomme des appels Gemini.
+Qualite de reconnaissance et quotas dependants du service et de la photo.
+Pas de suppression automatique d'un ancien livre lors de sa separation dans la
+nouvelle analyse : ignorer/corriger l'ancien livre ou le supprimer volontairement
+apres verification des nouveaux livres.
+Quelques titres de fenetres et messages techniques restent en francais ; commandes
+principales ajoutees au dictionnaire des cinq langues.
+
+PRESERVATION / TESTS
+Gestion tactile V2.15, six univers et module BnF V2.16 conserves a l'identique.
+Tests Chromium PC et emulation iPhone/iPad : navigation, rognage tactile, sauvegarde,
+reanalyse avec detections SIMULEES, doublons ignores, ajout/remplacement, donnees
+preservees, rechargement, abandon refuse, separation, coordonnees sur photo originale,
+annulation, nouvelle photo non destructive et erreur IA sans modification.
+Donnees fictives de test non incluses. Aucun appel Gemini reel, aucune verification
+sur appareils physiques ou synchronisation GitHub reelle.
+
+MISE A JOUR
+Archive : SCANLY V2.17.zip ; dossier : SCANLY V2.17.
+Faire une sauvegarde avant de remplacer les fichiers. Sur GitHub envoyer le CONTENU
+du dossier (index.html, i18n.js, book_sources.js, sw.js, assets...) et non le dossier
+parent. Garder la meme adresse. Fermer puis rouvrir l'application.
+Ne pas effacer les donnees Safari pour actualiser l'application.
+
+
 SCANLY V2.16 - BASES BIBLIOGRAPHIQUES ET COUVERTURES
 Base exclusive : SCANLY V2.15 fournie par utilisateur.
 

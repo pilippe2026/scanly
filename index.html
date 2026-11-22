@@ -576,6 +576,9 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
 /* V2.15: stationary hold feedback, without lifting books. */
 #unit .book.touch-ready .fr{outline:3px solid #D4AF7C;outline-offset:2px}
 #unit .shgrip.touch-ready{box-shadow:0 0 0 3px #D4AF7C}
+
+.tool-nav{display:flex;align-items:center;gap:5px;flex-shrink:0}.tool-nav span{font-size:12px;white-space:nowrap}.tool-nav button{min-width:32px;min-height:32px}
+@media(max-width:900px){#mbox .dhead h3{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#mbox .dhead{gap:4px}.tool-nav span{font-size:11px}#candidateSp{max-width:100%}}
 </style>
 </head>
 <body>
@@ -706,7 +709,7 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.16';
+const VERSION = '2.17';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -1904,7 +1907,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
     ${b.bnfRef ? `<p class="hint">Complément BnF${b.bnfRef.url ? ` · <a href="${esc(b.bnfRef.url)}" target="_blank" rel="noopener">Notice BnF</a>` : ''}</p>` : ''}
     ${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}
     ${b.description ? `<div class="desc">${esc(b.description).slice(0, 900)}${b.description.length > 900 ? '…' : ''}</div>` : ''}
-    <div class="btns">${b.wish && !isNew ? `<button class="btn g" id="bGot">Je l'ai acheté</button>` : ''}${!isNew ? `<button class="btn s" id="bLoc">Voir dans la pièce</button>` : ''}${!isNew && !b.spineImg && origImport(b) ? `<button class="btn g" id="bOrigPhoto">📷 Reprendre sur la photo d'origine</button>` : ''}${!isNew && origDiff(b) ? `<button class="btn g" id="bOrig">↩ Remettre à sa place d'origine</button>` : ''}<button class="btn s" id="bFace">${b.faceOut ? 'Remettre sur la tranche' : 'Mettre en vitrine'}</button><button class="btn s" id="bGB">Compléter (bases de livres)</button><button class="btn s" id="bBnf">Vérifier avec la BnF</button><label class="btn s" style="cursor:pointer">Ajouter une couverture<input type="file" id="bCoverFile" accept="image/*" hidden></label><button class="btn s" id="bAI">Infos IA</button></div>
+    <div class="btns">${b.wish && !isNew ? `<button class="btn g" id="bGot">Je l'ai acheté</button>` : ''}${!isNew ? `<button class="btn s" id="bLoc">Voir dans la pièce</button>` : ''}${!isNew && !b.spineImg && origImport(b) ? `<button class="btn g" id="bOrigPhoto">📷 Reprendre sur la photo d'origine</button>` : ''}${!isNew && origDiff(b) ? `<button class="btn g" id="bOrig">↩ Remettre à sa place d'origine</button>` : ''}<button class="btn s" id="bFace">${b.faceOut ? 'Remettre sur la tranche' : 'Mettre en vitrine'}</button><button class="btn s" id="bGB">Compléter (bases de livres)</button><button class="btn s" id="bBnf">Vérifier avec la BnF</button><button type="button" class="btn s" id="bCoverOpen">Ajouter une couverture</button><button type="button" class="btn s" id="bZone">Rescanner une zone</button><button class="btn s" id="bAI">Infos IA</button></div>
     <label class="l">Titre</label><input class="fld" id="eTitle" value="${esc(b.title)}" placeholder="${b.unknown ? 'Titre à compléter' : ''}">
     <label class="l">Auteur(s)</label><input class="fld" id="eAuthor" value="${esc(b.author)}">
     <div class="g2"><div><label class="l">Série</label><input class="fld" id="eSeries" value="${esc(b.series)}"></div><div><label class="l">Tome</label><input class="fld" id="eVol" type="number" value="${esc(b.volume)}"></div></div>
@@ -1984,29 +1987,24 @@ function openBook(idOrBook, isNew = false, nav = false) {
       $('#eTitle').value = o.titre; if (o.auteur) $('#eAuthor').value = o.auteur; if (o.serie) $('#eSeries').value = o.serie; if (o.tome) $('#eVol').value = o.tome; if (o.editeur) $('#ePub').value = o.editeur; if (TYPES.includes(o.type)) $('#eType').value = o.type;
       btn.textContent = `Proposé (confiance ${Math.round((o.confiance || 0) * 100)} %) – vérifie puis Enregistrer`; toast('Champs pré-remplis : vérifie puis clique sur Enregistrer');
     } catch (er) { btn.textContent = 'Identifier avec l\'IA'; toast(er.message, 4000); } };
-  if ($('#bQuad')) $('#bQuad').onclick = async () => {
-    const imp = b.srcRef?.imp ? imports.find(i => i.id === b.srcRef.imp) : null, hd = imp?.hd?.[b.srcRef.pi];
-    const src = hd && b.quad ? hd : (b.spineOrig || b.spineImg), quad = hd && b.quad ? b.quad : (b.srcRef?.orig ? b.quad : null);
-    closeDrawer();
-    openQuadEditor({src, quad, title: `Détourage de « ${dispTitle(b)} »`, onSave: async (qn, sp) => {
-      if (!(hd && b.quad) && !b.spineOrig) b.spineOrig = b.spineImg; if (!(hd && b.quad)) b.srcRef = {orig: true};
-      applySpine(b, sp, qn); await saveBook(b); renderAll(); openBook(b.id); toast('Détourage enregistré'); }});
-  };
-  if ($('#bLoupe')) $('#bLoupe').onclick = () => openLoupe(b);
-  if ($('.spinebox img')) { $('.spinebox img').style.cursor = 'zoom-in'; $('.spinebox img').onclick = () => openLoupe(b); }
-  if ($('#bSplit')) $('#bSplit').onclick = () => openSplit(b);
-  if ($('#bOrigPhoto')) $('#bOrigPhoto').onclick = () => openOrigin(b);
+  if ($('#bQuad')) $('#bQuad').onclick = async () => {if(await prepareToolBook())openBookTool(b,'quad');};
+  if ($('#bLoupe')) $('#bLoupe').onclick = async () => {if(await prepareToolBook())openLoupe(b);};
+  if ($('.spinebox img')) { $('.spinebox img').style.cursor = 'zoom-in'; $('.spinebox img').onclick = async () => {if(await prepareToolBook())openLoupe(b);}; }
+  if ($('#bSplit')) $('#bSplit').onclick = async () => {if(await prepareToolBook())openSplit(b);};
+  if ($('#bOrigPhoto')) $('#bOrigPhoto').onclick = async () => {if(await prepareToolBook())openOrigin(b);};
   if ($('#bZoomRoom')) $('#bZoomRoom').onclick = () => { closeDrawer(); setView('lib'); if (curCase !== ALL) curCase = caseOf(b); renderRoom(true); setTimeout(() => zoomBook(b.id), 80); };
-  if ($('#bStraight')) $('#bStraight').onclick = async e => { e.currentTarget.innerHTML = '<span class="spin"></span>'; await restraighten(b); await saveBook(b); reopen(); toast('Tranche redressée – « Ajuster le détourage » pour affiner'); };
+  if ($('#bStraight')) $('#bStraight').onclick = async () => {if(await prepareToolBook())openBookTool(b,'straight');};
   $('#bFace').onclick = async () => { await read(); b.faceOut = !b.faceOut; if (!isNew) await saveBook(b); reopen(); toast(b.faceOut ? 'Livre mis en vitrine (couverture visible)' : 'Livre remis sur la tranche'); };
   $('#bBnf').onclick = async () => { await read(); if (!b.title && !b.isbn) return toast('Saisis un titre ou un ISBN');
     openModal(`<div class="dhead"><h3>Vérifier avec la BnF</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Seuls les champs vides seront complétés. Vérifie l’édition et le tome avant de choisir une notice.</p><div id="bnfResults" aria-live="polite">Recherche…</div></div>`,'sm');
+    toolNav(b,'bnf');
     try { const rows=await SCANLY_SOURCES.lookup(b);const box=$('#bnfResults');if(!box)return;
       box.innerHTML=rows.length?rows.map((r,i)=>`<div style="padding:12px;border-bottom:1px solid var(--line)"><b data-no-i18n>${esc(r.title)}</b><p data-no-i18n>${esc(r.subtitle)}<br>${esc(r.author)}<br>${esc(r.publisher)} · ${r.year||''} · ISBN ${esc(r.isbn)}</p>${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener">Notice BnF</a>`:''}<button class="btn s" data-bnf="${i}">Compléter les champs vides</button></div>`).join(''):'Aucune notice trouvée.';
       box.onclick=async e=>{const btn=e.target.closest('[data-bnf]');if(!btn)return;const r=rows[+btn.dataset.bnf];if(!confirm('Compléter les champs vides avec cette notice ?'))return;const changed=SCANLY_SOURCES.fill(b,r);if(!isNew)await saveBook(b);closeModal();reopen();toast(changed.length?'Champs complétés avec la BnF':'Aucun champ vide à compléter');};
     } catch(e){if($('#bnfResults'))$('#bnfResults').textContent='BnF inaccessible (réseau ou accès navigateur). Les autres bases restent disponibles. '+e.message;}
   };
-  $('#bCoverFile').onchange = async e => { const f=e.target.files[0];if(!f)return;try{await read();const u=URL.createObjectURL(f);let img;try{img=await srcToImg(u);}finally{URL.revokeObjectURL(u);}b.cover=resize(img,900,.85);b.coverManual=true;b.coverSource='Photo personnelle';if(!isNew)await saveBook(b);reopen();toast('Couverture personnelle enregistrée');}catch(err){toast('Image non lisible : '+err.message);} };
+  $('#bCoverOpen').onclick = async () => {if(await prepareToolBook())openCoverTool(b);};
+  $('#bZone').onclick = async () => {if(await prepareToolBook())openZoneTool(b);};
   $('#bGB').onclick = async e => { await read(); if (!b.title) return toast('Saisis d\'abord le titre'); e.currentTarget.innerHTML = '<span class="spin"></span> Recherche…'; await enrich(b, true); if (!isNew) await saveBook(b); reopen(); toast('Fiche complétée'); };
   $('#bAI').onclick = async e => { await read(); if (!b.title) return toast('Saisis d\'abord le titre'); e.currentTarget.innerHTML = '<span class="spin"></span> IA…';
     const keep = {price: b.price, src: b.priceSource}; b.description = null; if (b.priceSource === 'Estimation IA') b.price = null;
@@ -2014,6 +2012,125 @@ function openBook(idOrBook, isNew = false, nav = false) {
     if (!isNew) await saveBook(b); reopen(); };
 }
 /* V2.1 : loupe sur la tranche */
+/* V2.17: shared tool navigation, non-destructive cover crop and zone re-scan. */
+async function prepareToolBook(){if(!bookDirty)return true;if(!confirm('Enregistrer les modifications de la fiche avant d’ouvrir cet outil ? Annuler reste sur la fiche.'))return false;const save=$('#bSave');if(save?.onclick)await save.onclick();return !bookDirty;}
+function toolList(b, kind){const list=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&(['cover','bnf','zone'].includes(kind)||o.spineImg)));if(!list.includes(b.id))list.unshift(b.id);return list;}
+function toolNav(b,kind,guard=()=>true){
+ const list=toolList(b,kind),at=list.indexOf(b.id),head=$('#mbox .dhead');if(!head)return;
+ const n=document.createElement('div');n.className='tool-nav';n.innerHTML=`<button type="button" class="btn s sm" id="toolPrev" aria-label="Livre précédent" ${at>0?'':'disabled'}>‹</button><span>${at+1} / ${list.length}</span><button type="button" class="btn s sm" id="toolNext" aria-label="Livre suivant" ${at<list.length-1?'':'disabled'}>›</button>`;head.insertBefore(n,head.querySelector('[data-close]'));
+ const navigate=async d=>{const id=list[at+d];if(!id||!guard())return;modalLeaveGuard=null;if(closeModal()===false)return;NAV.cur=id;openBook(id,false,true);await openBookTool(books.find(o=>o.id===id),kind);};
+ $('#toolPrev').onclick=()=>navigate(-1);$('#toolNext').onclick=()=>navigate(1);
+ const key=e=>{if(!n.isConnected||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();e.stopImmediatePropagation();navigate(e.key==='ArrowRight'?1:-1);}};
+ document.addEventListener('keydown',key,true);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();document.removeEventListener('keydown',key,true);};
+}
+async function openBookTool(b,kind){
+ if(!b)return;
+ if(kind==='quad'){
+  const imp=b.srcRef?.imp?imports.find(i=>i.id===b.srcRef.imp):null,hd=imp?.hd?.[b.srcRef?.pi]||imp?.photos?.[b.srcRef?.pi];
+  const src=hd&&b.quad?hd:(b.spineOrig||b.spineImg),quad=hd&&b.quad?b.quad:(b.srcRef?.orig?b.quad:null);
+  return openQuadEditor({src,quad,title:`Ajuster le détourage – ${dispTitle(b)}`,toolBook:b,onSave:async(qn,sp)=>{if(!(hd&&b.quad)&&!b.spineOrig)b.spineOrig=b.spineImg;if(!(hd&&b.quad))b.srcRef={orig:true};applySpine(b,sp,qn);await saveBook(b);renderAll();openBook(b.id,false,true);toast('Détourage enregistré');await openBookTool(b,'quad');}});
+ }
+ if(kind==='split')return openSplit(b);
+ if(kind==='cover')return openCoverTool(b);
+ if(kind==='zone')return openZoneTool(b);
+ if(kind==='bnf'){openBook(b.id,false,true);$('#bBnf').click();return;}
+ if(kind==='straight'){
+  openModal(`<div class="dhead"><h3 data-no-i18n>Redresser auto – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Le résultat est un aperçu. Enregistre pour l’appliquer à ce livre uniquement.</p><div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap"><div><p>Avant</p><img src="${spineURL(b)}" style="height:48vh;max-width:38vw;object-fit:contain"></div><div><p>Aperçu</p><img id="straightPreview" src="${spineURL(b)}" style="height:48vh;max-width:38vw;object-fit:contain"></div></div><div class="btns"><button type="button" class="btn s" id="straightRun">Redresser auto</button><button type="button" class="btn p" id="straightSave" disabled>Enregistrer</button></div><p id="straightMsg" class="hint" aria-live="polite"></p></div>`,'sm');
+  let draft=null,busy=false;const guard=()=>!busy&&(!draft||confirm('Un aperçu non enregistré sera abandonné. Continuer ?'));modalLeaveGuard=guard;toolNav(b,'straight',guard);
+  $('#straightRun').onclick=async()=>{const root=$('#straightPreview');busy=true;try{const copy=JSON.parse(JSON.stringify(b));await restraighten(copy);if(!root.isConnected)return;draft=copy;root.src=copy.spineImg;$('#straightSave').disabled=false;}catch(e){if(root.isConnected)$('#straightMsg').textContent=e.message;}finally{busy=false;}};
+  $('#straightSave').onclick=async()=>{if(!draft||busy)return;busy=true;for(const k of ['spineImg','spineOrig','quad','srcRef','color','wU','hU'])if(k in draft)b[k]=draft[k];await saveBook(b);draft=null;busy=false;renderAll();toast('Tranche redressée');};return;
+ }
+}
+function openCoverTool(b){
+ openModal(`<div class="dhead"><h3 data-no-i18n>Couverture – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Choisis une photo, puis rogne-la avant de l’enregistrer. Les recherches automatiques ne remplaceront pas ta couverture personnelle.</p>${b.cover?`<img src="${esc(b.cover)}" style="max-height:48vh;max-width:100%;object-fit:contain"><div class="btns"><button type="button" class="btn s" id="coverCropCurrent">Rogner la couverture actuelle</button></div>`:''}<label class="btn p" style="cursor:pointer">Choisir une photo<input type="file" id="coverPick" accept="image/*" hidden></label><p id="coverMsg" class="hint"></p></div>`,'sm');toolNav(b,'cover');
+ const start=src=>openRectCrop({src,b,kind:'cover',title:`Rogner la couverture – ${dispTitle(b)}`,label:'Enregistrer la couverture',onApply:async result=>{const im=await srcToImg(result.src);b.cover=resize(im,1400,.9);b.coverOriginal=result.fullSrc;b.coverManual=true;b.coverSource='Photo personnelle';if(books.some(o=>o.id===b.id))await saveBook(b);renderAll();openBook(books.some(o=>o.id===b.id)?b.id:b,!books.some(o=>o.id===b.id),true);openCoverTool(b);toast('Couverture personnelle enregistrée');}});
+ $('#coverPick').onchange=async e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);try{const im=await srcToImg(u);const c=document.createElement('canvas'),k=Math.min(1,3200/Math.max(imgW(im),imgH(im)));c.width=Math.round(imgW(im)*k);c.height=Math.round(imgH(im)*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);await start(c.toDataURL('image/jpeg',.94));}catch(err){toast('Image non lisible : '+err.message);}finally{URL.revokeObjectURL(u);}};
+ if($('#coverCropCurrent'))$('#coverCropCurrent').onclick=()=>start(b.coverOriginal||b.cover).catch(e=>toast('Image distante inaccessible : choisis le fichier photo. '+e.message));
+}
+async function openRectCrop({src,b,kind='zone',title,label='Analyser la zone',onApply,extra='',initialRect=null}){
+ const image=await srcToImg(src);let full=document.createElement('canvas');full.width=imgW(image);full.height=imgH(image);full.getContext('2d').drawImage(image,0,0);
+ openModal(`<div class="dhead"><h3 data-no-i18n>${esc(title)}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Trace la zone utile. Ajuste les quatre coins. Mode Déplacer : déplacer la photo ; pincer ou utiliser +/− pour zoomer.</p>${extra}<div class="btns"><button type="button" class="btn s" id="cropDraw">Tracer un cadre</button><button type="button" class="btn s" id="cropPan">Déplacer</button><button type="button" class="btn s" id="cropMinus">−</button><button type="button" class="btn s" id="cropPlus">+</button><button type="button" class="btn s" id="cropFit">Toute la photo</button><button type="button" class="btn s" id="cropReset">Réinitialiser</button>${kind==='cover'?'<button type="button" class="btn s" id="cropRotate">↻ 90°</button>':''}</div><div id="cropArea" style="height:52vh;min-height:180px;position:relative;background:#101b2d;border-radius:8px;overflow:hidden"><canvas id="cropCanvas" style="display:block;width:100%;height:100%;touch-action:none"></canvas></div><p id="cropSize" class="hint" aria-live="polite"></p><div class="btns"><button type="button" class="btn s" data-close>Annuler</button><button type="button" class="btn p" id="cropApply">${esc(label)}</button></div><p id="cropMsg" class="hint" aria-live="polite"></p></div>`);
+ const C=$('#cropCanvas'),area=$('#cropArea'),x=C.getContext('2d');let R=initialRect||{x:0,y:0,w:full.width,h:full.height},z=1,ox=0,oy=0,mode='draw',act=null,dirty=false,busy=false;const pointers=new Map();let pinch=null;
+ const guard=()=>!busy&&(!dirty||confirm('Le cadrage non appliqué sera abandonné. Continuer ?'));modalLeaveGuard=guard;toolNav(b,kind,guard);
+ const clampR=()=>{R.x=clamp(R.x,0,full.width-2);R.y=clamp(R.y,0,full.height-2);R.w=clamp(R.w,2,full.width-R.x);R.h=clamp(R.h,2,full.height-R.y);};
+ function draw(){if(!C.isConnected)return;const r=area.getBoundingClientRect();C.width=Math.max(1,Math.round(r.width*devicePixelRatio));C.height=Math.max(1,Math.round(r.height*devicePixelRatio));x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);x.clearRect(0,0,r.width,r.height);x.drawImage(full,ox,oy,full.width*z,full.height*z);x.fillStyle='rgba(0,0,0,.35)';x.beginPath();x.rect(0,0,r.width,r.height);x.rect(ox+R.x*z,oy+R.y*z,R.w*z,R.h*z);x.fill('evenodd');x.strokeStyle='#D4AF7C';x.lineWidth=2;x.strokeRect(ox+R.x*z,oy+R.y*z,R.w*z,R.h*z);for(const [a,c] of [[R.x,R.y],[R.x+R.w,R.y],[R.x+R.w,R.y+R.h],[R.x,R.y+R.h]]){x.beginPath();x.arc(ox+a*z,oy+c*z,8,0,Math.PI*2);x.fillStyle='#D4AF7C';x.fill();}$('#cropSize').textContent=`${Math.round(R.w)} × ${Math.round(R.h)} px`;} 
+ const fit=()=>{const r=area.getBoundingClientRect();z=Math.min(r.width/full.width,r.height/full.height)*.96;ox=(r.width-full.width*z)/2;oy=(r.height-full.height*z)/2;draw();};
+ const pos=e=>{const r=C.getBoundingClientRect();return {sx:e.clientX-r.left,sy:e.clientY-r.top};},ip=p=>({x:clamp((p.sx-ox)/z,0,full.width),y:clamp((p.sy-oy)/z,0,full.height)});
+ const zoom=(f,p)=>{const nz=clamp(z*f,.03,30);ox=p.sx-(p.sx-ox)*nz/z;oy=p.sy-(p.sy-oy)*nz/z;z=nz;draw();};
+ C.onpointerdown=e=>{if(busy)return;e.preventDefault();C.setPointerCapture(e.pointerId);const p=pos(e);pointers.set(e.pointerId,p);if(pointers.size===2){const [a,c]=[...pointers.values()];pinch={d:Math.max(1,Math.hypot(a.sx-c.sx,a.sy-c.sy)),sx:(a.sx+c.sx)/2,sy:(a.sy+c.sy)/2};act=null;return;}const p0=ip(p),corners=[[R.x,R.y],[R.x+R.w,R.y],[R.x+R.w,R.y+R.h],[R.x,R.y+R.h]],k=corners.findIndex(c=>Math.hypot(ox+c[0]*z-p.sx,oy+c[1]*z-p.sy)<18);act=mode==='pan'?{t:'pan',p,ox,oy}:k>=0?{t:'corner',k,R:{...R}}:{t:'new',p:p0};};
+ C.onpointermove=e=>{if(!pointers.has(e.pointerId)||busy)return;const p=pos(e);pointers.set(e.pointerId,p);if(pointers.size===2&&pinch){const [a,c]=[...pointers.values()],d=Math.max(1,Math.hypot(a.sx-c.sx,a.sy-c.sy)),mid={sx:(a.sx+c.sx)/2,sy:(a.sy+c.sy)/2};zoom(d/pinch.d,mid);ox+=mid.sx-pinch.sx;oy+=mid.sy-pinch.sy;pinch={d,...mid};draw();return;}if(!act)return;const q=ip(p);if(act.t==='pan'){ox=act.ox+p.sx-act.p.sx;oy=act.oy+p.sy-act.p.sy;}else{dirty=true;if(act.t==='new')R={x:Math.min(act.p.x,q.x),y:Math.min(act.p.y,q.y),w:Math.abs(q.x-act.p.x),h:Math.abs(q.y-act.p.y)};else{const A=act.R,opp=[[A.x+A.w,A.y+A.h],[A.x,A.y+A.h],[A.x,A.y],[A.x+A.w,A.y]][act.k];R={x:Math.min(q.x,opp[0]),y:Math.min(q.y,opp[1]),w:Math.abs(q.x-opp[0]),h:Math.abs(q.y-opp[1])};}clampR();}draw();};
+ const up=e=>{pointers.delete(e.pointerId);act=null;if(pointers.size<2)pinch=null;};C.onpointerup=up;C.onpointercancel=up;
+ C.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015),pos(e));},{passive:false});
+ $('#cropDraw').onclick=()=>mode='draw';$('#cropPan').onclick=()=>mode='pan';$('#cropPlus').onclick=()=>zoom(1.25,{sx:area.clientWidth/2,sy:area.clientHeight/2});$('#cropMinus').onclick=()=>zoom(.8,{sx:area.clientWidth/2,sy:area.clientHeight/2});$('#cropFit').onclick=fit;$('#cropReset').onclick=()=>{R={x:0,y:0,w:full.width,h:full.height};dirty=true;draw();};
+ if($('#cropRotate'))$('#cropRotate').onclick=()=>{const c=document.createElement('canvas');c.width=full.height;c.height=full.width;const t=c.getContext('2d');t.translate(c.width,0);t.rotate(Math.PI/2);t.drawImage(full,0,0);full=c;R={x:0,y:0,w:full.width,h:full.height};dirty=true;fit();};
+ const onResize=()=>fit();window.addEventListener('resize',onResize);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();window.removeEventListener('resize',onResize);pointers.clear();};
+ $('#cropApply').onclick=async()=>{if(busy)return;clampR();if(R.w<8||R.h<8){$('#cropMsg').textContent='Zone trop petite.';return;}busy=true;$('#cropApply').disabled=true;try{const c=document.createElement('canvas');c.width=Math.round(R.w);c.height=Math.round(R.h);c.getContext('2d').drawImage(full,R.x,R.y,R.w,R.h,0,0,c.width,c.height);const result={src:c.toDataURL('image/jpeg',.94),rect:{x:R.x/full.width,y:R.y/full.height,w:R.w/full.width,h:R.h/full.height},fullSrc:full.toDataURL('image/jpeg',.92),fullW:full.width,fullH:full.height};dirty=false;modalLeaveGuard=null;await onApply(result);}catch(e){if(C.isConnected){$('#cropMsg').textContent=e.message;$('#cropApply').disabled=false;modalLeaveGuard=guard;}}finally{busy=false;}};
+ fit();
+}
+async function openZoneTool(b){
+ const imp=origImport(b),pi=b.srcRef?.pi??0,src=imp?.hd?.[pi]||imp?.photos?.[pi];
+ openModal(`<div class="dhead"><h3 data-no-i18n>Rescanner une zone – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Reprends une zone de la photo enregistrée, ou choisis une nouvelle photo rapprochée. Les livres existants ne seront pas supprimés. Tu vérifieras les résultats avant tout ajout ou remplacement.</p>${src?'<button type="button" class="btn p" id="zoneOriginal">Photo d’origine</button>':''}<label class="btn s" style="cursor:pointer">Nouvelle photo rapprochée<input type="file" id="zoneFile" accept="image/*" hidden></label><label class="btn s" style="cursor:pointer">Prendre une photo<input type="file" id="zoneCamera" accept="image/*" capture="environment" hidden></label></div>`,'sm');toolNav(b,'zone');
+ const start=(s,newPhoto)=>openRectCrop({src:s,b,kind:'zone',title:`Rescanner une zone – ${dispTitle(b)}`,label:'Analyser la zone',extra:`<label class="l">Première étagère de la zone</label><input class="fld" id="zoneBaseRow" type="number" min="1" max="15" value="${b.row||1}"><label class="l">Reconnaissance</label><select class="fld" id="zoneMode"><option value="fast">Rapide</option><option value="precise" selected>Précise</option></select>`,onApply:result=>rescanZone(b,result,{imp,pi,newPhoto,mode:$('#zoneMode')?.value||'precise',baseRow:clamp(parseInt($('#zoneBaseRow')?.value)||b.row||1,1,15)})});
+ if($('#zoneOriginal'))$('#zoneOriginal').onclick=()=>start(src,false);
+ const file=async e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);try{const im=await srcToImg(u);const c=document.createElement('canvas'),k=Math.min(1,4000/Math.max(imgW(im),imgH(im)));c.width=Math.round(imgW(im)*k);c.height=Math.round(imgH(im)*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);await start(c.toDataURL('image/jpeg',.94),true);}finally{URL.revokeObjectURL(u);}};
+ $('#zoneFile').onchange=e=>file(e).catch(err=>toast(err.message));$('#zoneCamera').onchange=e=>file(e).catch(err=>toast(err.message));
+}
+async function rescanZone(anchor,result,context){
+ const prevMode=localStorage.getItem('scanly_mode');localStorage.setItem('scanly_mode',context.mode);let records=[];
+ openModal(`<div class="dhead"><h3>Analyse de la zone</h3></div><div class="mbody"><p id="sMsg" aria-live="polite">Lecture IA…</p><p class="hint">Aucune modification de la bibliothèque avant validation.</p></div>`,'sm');modalLeaveGuard=()=>false;
+ try{const img=await srcToImg(result.src),{list}=await recognize([result.src]);
+  records=list.filter(d=>Array.isArray(d.boite)&&d.boite.length===4&&d.boite.every(Number.isFinite)&&d.boite[2]>d.boite[0]&&d.boite[3]>d.boite[1]).slice(0,150).map(d=>{d.boite=d.boite.map(v=>clamp(v,0,1000));const sp=spineFromDetection(img,d.boite,d.coins),q=sp.quad||[[d.boite[1]/1000,d.boite[0]/1000],[d.boite[3]/1000,d.boite[0]/1000],[d.boite[3]/1000,d.boite[2]/1000],[d.boite[1]/1000,d.boite[2]/1000]],quad=q.map(p=>[result.rect.x+p[0]*result.rect.w,result.rect.y+p[1]*result.rect.h]);
+   const candidates=books.filter(b=>b.caseId===anchor.caseId);let match=null,score=0;for(const b of candidates){let sc=0;if(!context.newPhoto&&b.quad&&(b.srcRef?.imp||b.importId)===context.imp?.id&&(b.srcRef?.pi??0)===context.pi){const a=quadBox(quad),c=quadBox(b.quad),inter=Math.max(0,Math.min(a.x1,c.x1)-Math.max(a.x0,c.x0))*Math.max(0,Math.min(a.y1,c.y1)-Math.max(a.y0,c.y0)),area=(a.x1-a.x0)*(a.y1-a.y0);sc=area?inter/area:0;}if(d.titre&&norm(d.titre)===norm(b.title)&&(parseInt(d.tome)||null)===(b.volume||null))sc=Math.max(sc,.8);if(sc>score){score=sc;match=b;}}
+   return {d,sp,quad,title:d.titre||'',author:d.auteur||'',series:d.serie||'',volume:parseInt(d.tome)||null,row:clamp((context.baseRow||anchor.row||1)+(parseInt(d.rangee)||1)-1,1,15),match:score>.45?match:null,action:score>.45?'ignore':'add',target:score>.45?match.id:'',replaceInfo:false};});
+ }catch(e){modalLeaveGuard=null;openModal(`<div class="dhead"><h3>Analyse interrompue</h3><button class="x" data-close>×</button></div><div class="mbody"><p>${esc(e.message)}</p><p>Aucun livre modifié.</p><button type="button" class="btn s" id="zoneRetry">Reprendre la zone</button></div>`,'sm');$('#zoneRetry').onclick=()=>openZoneTool(anchor);return;
+ }finally{if(prevMode==null)localStorage.removeItem('scanly_mode');else localStorage.setItem('scanly_mode',prevMode);}
+ showZoneReview(anchor,result,context,records);
+}
+function showZoneReview(anchor,result,context,records){
+ openModal(`<div class="dhead"><h3>Vérifier la nouvelle analyse</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Les doublons possibles sont ignorés par défaut. Ajouter crée un livre ; Remplacer corrige un livre choisi sans changer ses notes, sa couverture ni son rangement. Aucun livre existant n’est supprimé.</p><div id="zoneReview">${records.map((r,i)=>`<div data-zr="${i}" style="display:flex;gap:10px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line)"><img src="${r.sp.crop}" style="height:110px;max-width:90px;object-fit:contain"><div style="flex:1;min-width:180px"><label class="l">Titre</label><input class="fld" data-zk="title" value="${esc(r.title)}"><label class="l">Auteur</label><input class="fld" data-zk="author" value="${esc(r.author)}"><div class="g2"><div><label class="l">Série</label><input class="fld" data-zk="series" value="${esc(r.series)}"></div><div><label class="l">Tome</label><input class="fld" type="number" min="1" data-zk="volume" value="${r.volume||''}"></div></div><label class="l">Étagère</label><input class="fld" type="number" min="1" max="15" data-zk="row" value="${r.row}"><p class="hint" data-no-i18n>${r.match?'Doublon possible : '+esc(dispTitle(r.match)):'Nouveau candidat'} · confiance ${Math.round((+r.d.confiance||0)*100)} %</p><select class="fld" data-zk="action"><option value="ignore" ${r.action==='ignore'?'selected':''}>Ignorer</option><option value="add" ${r.action==='add'?'selected':''}>Ajouter</option><option value="replace" ${r.action==='replace'?'selected':''}>Remplacer la tranche d’un livre</option></select><label class="l">Livre à corriger (si remplacement)</label><select class="fld" data-zk="target" data-no-i18n><option value="">Choisir…</option>${books.filter(b=>b.caseId===anchor.caseId).map(b=>`<option value="${b.id}" ${r.target===b.id?'selected':''}>${esc(dispTitle(b))} · ${b.row||1}</option>`).join('')}</select><label class="hint"><input type="checkbox" data-zk="replaceInfo" ${r.replaceInfo?'checked':''}> Remplacer aussi titre, auteur, série et tome par les champs ci-dessus</label><button type="button" class="btn s sm" data-zone-crop="${i}">Ajuster le détourage</button><button type="button" class="btn s sm" data-zone-split="${i}">Séparer ce candidat</button></div></div>`).join('')||'<p>Aucun livre détecté. Essaie une photo plus rapprochée ou un cadre manuel.</p>'}</div><div class="btns"><button type="button" class="btn s" id="zoneBack">Reprendre la zone</button><button type="button" class="btn p" id="zoneApply" ${records.length?'':'disabled'}>Appliquer les choix</button></div><p id="zoneApplyMsg" class="hint" aria-live="polite"></p></div>`);
+ let applied=false,busy=false;modalLeaveGuard=()=>!busy&&(applied||confirm('Abandonner ces résultats non appliqués ? La bibliothèque reste inchangée.'));
+ $('#zoneReview').onchange=e=>{const row=e.target.closest('[data-zr]'),key=e.target.dataset.zk;if(!row||!key)return;const r=records[+row.dataset.zr];r[key]=key==='replaceInfo'?e.target.checked:key==='volume'?(parseInt(e.target.value)||null):key==='row'?clamp(parseInt(e.target.value)||1,1,15):e.target.value;};
+ $('#zoneReview').onclick=e=>{const crop=e.target.closest('[data-zone-crop]');if(crop){if(busy)return;modalLeaveGuard=null;openCandidateCrop(anchor,result,context,records,+crop.dataset.zoneCrop);return;}const btn=e.target.closest('[data-zone-split]');if(!btn)return;const i=+btn.dataset.zoneSplit,r=records[i];if(busy)return;modalLeaveGuard=null;openCandidateSplit(anchor,result,context,records,i);};
+ $('#zoneBack').onclick=()=>{if(!modalLeaveGuard())return;modalLeaveGuard=null;openZoneTool(anchor);};
+ $('#zoneApply').onclick=async()=>{
+  const chosen=records.filter(r=>r.action!=='ignore');if(!chosen.length){$('#zoneApplyMsg').textContent='Aucun ajout ni remplacement sélectionné.';return;}
+  const targets=new Set();for(const r of chosen)if(r.action==='replace'){if(!books.some(b=>b.id===r.target)||targets.has(r.target)){$('#zoneApplyMsg').textContent='Choisis un livre différent pour chaque remplacement.';return;}targets.add(r.target);}
+  if(!confirm(`Appliquer ${chosen.filter(r=>r.action==='add').length} ajout(s) et ${targets.size} remplacement(s) ?`))return;
+  busy=true;$('#zoneApply').disabled=true;
+  const beforeBooks=JSON.parse(JSON.stringify(books)),beforeImports=JSON.parse(JSON.stringify(imports)),beforeCases=JSON.parse(JSON.stringify(cases));SY.mute++;
+  try{
+   let imp=context.imp,pi=context.pi;
+   if(!imp){imp={id:'imp_'+uid(),date:new Date().toISOString(),caseId:anchor.caseId,count:0,photos:[],hd:[]};imports.push(imp);}
+   if(context.newPhoto||!context.imp){pi=Math.max(imp.hd?.length||0,imp.photos?.length||0);imp.hd=imp.hd||[];imp.photos=imp.photos||[];imp.hd[pi]=result.fullSrc;const im=await srcToImg(result.fullSrc);imp.photos[pi]=resize(im,900,.65);}
+   const made=[],changed=[];
+   for(const r of chosen){const b=r.action==='replace'?books.find(b=>b.id===r.target):newBook({caseId:anchor.caseId,row:r.row,position:nextPos(anchor.caseId,r.row),title:r.title,author:r.author,series:r.series,volume:r.volume,type:TYPES.includes(r.d.type)?r.d.type:anchor.type,unknown:!r.title,importId:imp.id});
+    b.spineImg=r.sp.crop;b.quad=r.quad;b.srcRef={imp:imp.id,pi};b.color=r.sp.color;b.spineOrig=null;
+    const h=b.hU||anchor.hU||170;b.hU=h;b.wU=clamp(Math.round(h*r.sp.wpx/Math.max(1,r.sp.hpx)),6,95);
+    if(r.action==='replace'&&r.replaceInfo){Object.assign(b,{title:r.title,author:r.author,series:r.series,volume:r.volume,unknown:!r.title});}
+    if(r.action==='add'){b.orig={caseId:b.caseId,row:b.row,position:b.position};books.push(b);made.push(b);}changed.push(b);
+   }
+   imp.count=(imp.count||0)+made.length;const c=cases.find(c=>c.id===anchor.caseId);if(c)c.rows=Math.max(c.rows||3,...made.map(b=>b.row));await new Promise((resolve,reject)=>{const tx=DB.db.transaction(['books','imports','cases'],'readwrite');changed.forEach(b=>tx.objectStore('books').put(b));tx.objectStore('imports').put(imp);if(c)tx.objectStore('cases').put(c);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Enregistrement annulé'));});SY.mute--;SY.dirty=true;if(syncOn()&&SY.auto){clearTimeout(SY.timer);SY.timer=setTimeout(()=>syncPush(),20000);}
+   applied=true;busy=false;modalLeaveGuard=null;closeModal();renderAll();openBook(anchor.id,false,true);
+   showUndo(`${made.length} livre(s) ajouté(s), ${targets.size} corrigé(s)`,async()=>{const ids=new Set(beforeBooks.map(b=>b.id));await DB.delMany('books',books.filter(b=>!ids.has(b.id)).map(b=>b.id));await DB.putMany('books',beforeBooks);const impIds=new Set(beforeImports.map(i=>i.id));await DB.delMany('imports',imports.filter(i=>!impIds.has(i.id)).map(i=>i.id));await DB.putMany('imports',beforeImports);await DB.putMany('cases',beforeCases);await load();renderAll();toast('Nouvelle analyse annulée');});
+  }catch(e){SY.mute=Math.max(0,SY.mute-1);const oldIds=new Set(beforeBooks.map(b=>b.id));await DB.delMany('books',books.filter(b=>!oldIds.has(b.id)).map(b=>b.id));await DB.putMany('books',beforeBooks);const oldImpIds=new Set(beforeImports.map(i=>i.id));await DB.delMany('imports',imports.filter(i=>!oldImpIds.has(i.id)).map(i=>i.id));await DB.putMany('imports',beforeImports);await DB.putMany('cases',beforeCases);await load();busy=false;$('#zoneApplyMsg')&&($('#zoneApplyMsg').textContent=e.message);$('#zoneApply')&&($('#zoneApply').disabled=false);}
+ };
+}
+
+async function openCandidateCrop(anchor,result,context,records,i){
+ const r=records[i];await openQuadEditor({src:result.fullSrc,quad:r.quad,title:`Détourage du candidat ${i+1} / ${records.length}`,onSave:async(qn,sp)=>{r.quad=qn;r.sp=sp;showZoneReview(anchor,result,context,records);}});
+ const head=$('#mbox .dhead'),n=document.createElement('div');n.className='tool-nav';n.innerHTML=`<button type="button" class="btn s sm" id="candPrev" ${i?'':'disabled'}>‹</button><span>${i+1} / ${records.length}</span><button type="button" class="btn s sm" id="candNext" ${i<records.length-1?'':'disabled'}>›</button>`;head.insertBefore(n,head.querySelector('[data-close]'));
+ const go=delta=>{if(modalLeaveGuard&&!modalLeaveGuard())return;modalLeaveGuard=null;openCandidateCrop(anchor,result,context,records,i+delta);};$('#candPrev').onclick=()=>go(-1);$('#candNext').onclick=()=>go(1);
+}
+
+function openCandidateSplit(anchor,result,context,records,i){
+ const r=records[i];openModal(`<div class="dhead"><h3>Séparer ce candidat</h3><button class="x" data-close>×</button></div><div class="mbody"><p>Clique sur chaque séparation entre livres. Clique sur une ligne pour la retirer.</p><div id="candidateSp" style="position:relative;display:inline-block;touch-action:none"><img src="${r.sp.crop}" style="height:48vh;min-width:220px;max-width:85vw;object-fit:fill"></div><div class="btns"><button type="button" class="btn s" id="candidateCancel">Retour</button><button type="button" class="btn p" id="candidateApply" disabled>Séparer</button><label class="hint"><input type="checkbox" id="candidateRead" ${cfg.key?'checked':'disabled'}> Relire les morceaux avec l’IA</label></div></div>`,'sm');let cuts=[],busy=false;
+ const head=$('#mbox .dhead'),n=document.createElement('div');n.className='tool-nav';n.innerHTML=`<button type="button" class="btn s sm" id="splitCandPrev" ${i?'':'disabled'}>‹</button><span>${i+1} / ${records.length}</span><button type="button" class="btn s sm" id="splitCandNext" ${i<records.length-1?'':'disabled'}>›</button>`;head.insertBefore(n,head.querySelector('[data-close]'));const move=delta=>{if(modalLeaveGuard&&!modalLeaveGuard())return;modalLeaveGuard=null;openCandidateSplit(anchor,result,context,records,i+delta);};$('#splitCandPrev').onclick=()=>move(-1);$('#splitCandNext').onclick=()=>move(1);
+ const W=$('#candidateSp'),draw=()=>{W.querySelectorAll('span').forEach(n=>n.remove());cuts.forEach((v,k)=>{const l=document.createElement('span');l.dataset.cut=k;l.style.cssText=`position:absolute;top:0;bottom:0;left:${v*100}%;width:8px;margin-left:-4px;background:#ff00c8`;W.appendChild(l);});$('#candidateApply').disabled=!cuts.length;};
+ W.onclick=e=>{if(e.target.dataset.cut!=null)cuts.splice(+e.target.dataset.cut,1);else{const box=W.getBoundingClientRect(),v=(e.clientX-box.left)/box.width;if(v>.03&&v<.97&&cuts.every(c=>Math.abs(c-v)>.03)){cuts.push(v);cuts.sort((a,b)=>a-b);}}draw();};
+ modalLeaveGuard=()=>!busy&&(!cuts.length||confirm('Abandonner les coupures non appliquées ?'));$('#candidateCancel').onclick=()=>{if(!modalLeaveGuard())return;modalLeaveGuard=null;showZoneReview(anchor,result,context,records);};
+ $('#candidateApply').onclick=async()=>{if(busy)return;busy=true;const im=await srcToImg(r.sp.crop),fr=[0,...cuts,1],lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];const parts=[];for(let j=0;j<fr.length-1;j++){const c=document.createElement('canvas');c.width=Math.max(2,Math.round((fr[j+1]-fr[j])*imgW(im)));c.height=imgH(im);c.getContext('2d').drawImage(im,fr[j]*imgW(im),0,(fr[j+1]-fr[j])*imgW(im),imgH(im),0,0,c.width,c.height);parts.push({...r,title:'',author:'',series:'',volume:null,action:'ignore',target:'',match:null,replaceInfo:false,quad:[lerp(r.quad[0],r.quad[1],fr[j]),lerp(r.quad[0],r.quad[1],fr[j+1]),lerp(r.quad[3],r.quad[2],fr[j+1]),lerp(r.quad[3],r.quad[2],fr[j])],sp:{...r.sp,crop:c.toDataURL('image/jpeg',.92),wpx:r.sp.wpx*(fr[j+1]-fr[j])}});}if($('#candidateRead').checked&&cfg.key){$('#candidateApply').disabled=true;const items=parts.map(p=>({read:p.sp.crop}));try{await readSpinesAI(items);items.forEach((item,k)=>{const d=item.res;if(d)Object.assign(parts[k],{title:d.titre||'',author:d.auteur||'',series:d.serie||'',volume:parseInt(d.tome)||null});});}catch(e){toast('Lecture IA : '+e.message);}}records.splice(i,1,...parts);modalLeaveGuard=null;showZoneReview(anchor,result,context,records);};
+}
+
 function openLoupe(b) {
   const L = (NAV.list || navList()).filter(id => books.some(o => o.id === id && o.spineImg));
   if (!L.includes(b.id)) L.unshift(b.id);
@@ -2057,8 +2174,8 @@ JSON : [{"k":1,"titre":"…","auteur":"…","serie":null,"tome":null,"editeur":"
   (Array.isArray(rr) ? rr : (rr.livres || [])).forEach(o => { const m = list[(+o.k || 0) - 1]; if (m && o.titre) m.res = o; });
 }
 async function openOrigin(b, options = {}) {
-  const integrated = !!options.integrated;
-  const L=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&o.spineImg));
+  const integrated = true;
+  const L=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&o.spineImg&&origImport(o)));
   const idx=L.indexOf(b.id);
   const imp = origImport(b); if (!imp) return toast('Photo d\'origine introuvable pour ce livre');
   let pi = b.srcRef?.pi ?? 0, src = (imp.hd && imp.hd[pi]) || (imp.photos && imp.photos[pi]);
@@ -2066,7 +2183,7 @@ async function openOrigin(b, options = {}) {
   openModal(`<div class="dhead"><h3 style="flex:1;min-width:0">${integrated ? 'Corriger – ' : "Photo d’origine – "}${esc(dispTitle(b))}</h3>${integrated ? `<div style="display:flex;gap:6px;align-items:center"><button type="button" class="btn s sm" id="ogPrev" ${idx>0?'':'disabled'} aria-label="Livre précédent">‹</button><span id="ogCount">${idx+1} / ${L.length}</span><button type="button" class="btn s sm" id="ogNext" ${idx<L.length-1?'':'disabled'} aria-label="Livre suivant">›</button></div>` : ''}<button class="x" data-close>×</button></div><div class="mbody" style="padding:12px 16px">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
       ${integrated ? `<button type="button" class="btn s sm" id="ogBack">Retour à la tranche</button>` : ''}<div class="seg" id="ogMode"><button data-m="draw" class="on" title="Glisser sur la photo pour tracer un cadre autour d'un livre">▭ Tracer un cadre</button><button data-m="pan" title="Glisser pour déplacer la photo">✥ Déplacer</button></div>
-      <button class="btn s sm" id="ogFit">⤢ Toute la photo</button><button class="btn s sm" id="ogBook">◎ Ce livre</button>
+      <button type="button" class="btn s sm" id="ogRescan">Rescanner une zone</button><button class="btn s sm" id="ogFit">⤢ Toute la photo</button><button class="btn s sm" id="ogBook">◎ Ce livre</button>
       ${nPh > 1 ? `<select class="tsel" id="ogPh">${Array.from({length: nPh}, (_, i) => `<option value="${i}" ${i === pi ? 'selected' : ''}>Photo ${i + 1}/${nPh}</option>`).join('')}</select>` : ''}
       <label class="btn s sm" style="cursor:pointer" title="Utiliser un autre fichier photo (si la photo d'origine n'est pas disponible ou trop petite)">📁 Autre photo…<input type="file" id="ogFile" accept="image/*" hidden></label>
       <button type="button" class="btn k sm" id="ogDelete" disabled title="Supprimer uniquement le cadre tracé sélectionné">Supprimer le cadre</button><button type="button" class="btn s sm" id="ogClear" disabled>Effacer les cadres</button><label style="display:flex;align-items:center;gap:6px">Cadre enregistré<select class="tsel" id="ogSelect" aria-label="Sélectionner un cadre enregistré"><option value="">Choisir un cadre…</option></select></label><span class="tsp"></span><span class="hint" id="ogN" aria-live="polite">Aucun cadre</span>
@@ -2147,6 +2264,7 @@ async function openOrigin(b, options = {}) {
   C.addEventListener('wheel', e => { if (!img) return; e.preventDefault(); const [sx, sy] = pos(e), f = Math.exp(-e.deltaY * .0015), nz = clamp(z * f, .05, 40); ox = sx - (sx - ox) * nz / z; oy = sy - (sy - oy) * nz / z; z = nz; draw(); }, {passive: false});
   $('#ogMode').onclick = e => { const m = e.target.closest('[data-m]'); if (!m) return; mode = m.dataset.m; $$('#ogMode button').forEach(x2 => x2.classList.toggle('on', x2 === m)); C.style.cursor = mode === 'pan' ? 'grab' : 'crosshair'; };
   C.style.cursor = 'crosshair';
+  $('#ogRescan').onclick = () => {if(!modalLeaveGuard())return;modalLeaveGuard=null;openZoneTool(b);};
   $('#ogFit').onclick = () => img && fitAll(); $('#ogBook').onclick = () => img && fitBook();
   if ($('#ogPh')) $('#ogPh').onchange = e => { if(!modalLeaveGuard()){e.target.value=pi;return;} pi = +e.target.value; frames = []; sel = -1; load((imp.hd && imp.hd[pi]) || (imp.photos && imp.photos[pi])); };
   $('#ogFile').onchange = async e => { const f = e.target.files[0]; if (!f || !modalLeaveGuard()) return; const u = URL.createObjectURL(f), im = await srcToImg(u); URL.revokeObjectURL(u);
@@ -2191,20 +2309,22 @@ function openSplit(b) {
     <p class="hint" style="margin-top:0">Clique sur la tranche à chaque frontière entre deux livres (clic sur une ligne pour la retirer). Chaque morceau deviendra un livre séparé, à la même place sur l'étagère${cfg.key ? ', puis l\'IA lira son titre' : ''}.</p>
     <div style="display:flex;justify-content:center"><div id="spW" style="position:relative;display:inline-block;cursor:crosshair;line-height:0"><img id="spI" src="${spineURL(b)}" alt="" style="height:62vh;width:min(560px,max(260px,auto));min-width:260px;object-fit:fill;display:block;user-select:none;box-shadow:0 4px 14px rgba(0,0,0,.3)" draggable="false"></div></div>
     <div class="btns"><span class="hint" id="spN" style="align-self:center">1 livre</span><span class="tsp"></span><button class="btn s" data-close>Annuler</button><button class="btn g" id="spOk" disabled>Séparer</button></div></div>`, 'sm');
-  let cuts = []; const W = $('#spW'), I = $('#spI');
+  let cuts = [],splitBusy=false; const W = $('#spW'), I = $('#spI');
+  const guard=()=>!splitBusy&&(!cuts.length||confirm('Les coupures non appliquées seront abandonnées. Continuer ?'));modalLeaveGuard=guard;toolNav(b,'split',guard);
   const draw = () => { $$('#spW .spl').forEach(x => x.remove()); cuts.forEach((f, i) => { const d = document.createElement('div'); d.className = 'spl'; d.dataset.i = i;
       d.style.cssText = `position:absolute;top:0;bottom:0;left:calc(${f * 100}% - 4px);width:8px;cursor:pointer;background:linear-gradient(90deg,transparent 3px,#ff00c8 3px,#ff00c8 5px,transparent 5px)`; W.appendChild(d); });
     $('#spN').textContent = (cuts.length + 1) + ' livre' + (cuts.length ? 's' : ''); $('#spOk').disabled = !cuts.length; };
   W.onclick = e => { const l = e.target.closest('.spl'); if (l) { cuts.splice(+l.dataset.i, 1); return draw(); } const r = I.getBoundingClientRect(), f = (e.clientX - r.left) / r.width; if (f > .03 && f < .97) { cuts.push(f); cuts.sort((a, c) => a - c); draw(); } };
   $('#spOk').onclick = async () => {
-    $('#spOk').innerHTML = '<span class="spin"></span>'; const im = await srcToImg(b.spineImg), w = im.naturalWidth, h = im.naturalHeight, fr = [0, ...cuts, 1], made = [];
+    splitBusy=true;$('#spOk').innerHTML = '<span class="spin"></span>'; const im = await srcToImg(b.spineImg), w = im.naturalWidth, h = im.naturalHeight, originalWidth=b.wU, originalQuad=b.quad?b.quad.map(p=>p.slice()):null,originalRef=b.srcRef?{...b.srcRef}:null, fr = [0, ...cuts, 1], made = [];
     pushUndo(`Séparation de « ${dispTitle(b)} »`);
     const row = books.filter(x => x.caseId === b.caseId && (x.row || 1) === (b.row || 1)).sort((p, q) => (p.position || 0) - (q.position || 0)), at = row.indexOf(b);
     for (let j = 0; j < fr.length - 1; j++) { const x0 = Math.round(fr[j] * w), x1 = Math.max(x0 + 2, Math.round(fr[j + 1] * w)), c = document.createElement('canvas'); c.width = x1 - x0; c.height = h; c.getContext('2d').drawImage(im, x0, 0, x1 - x0, h, 0, 0, x1 - x0, h);
       const crop = c.toDataURL('image/jpeg', .88), o = j === 0 ? b : newBook({caseId: b.caseId, row: b.row, type: b.type, importId: b.importId, orig: b.orig ? {...b.orig} : undefined, hU: b.hU, pxMed: b.pxMed});
-      o.spineImg = crop; o.wU = b.wU ? Math.max(6, Math.round(b.wU * (fr[j + 1] - fr[j]))) : undefined; o.cover = j === 0 ? o.cover : null; o.quad = null;
+      o.spineImg = crop; o.wU = originalWidth ? Math.max(6, Math.round(originalWidth * (fr[j + 1] - fr[j]))) : undefined; o.cover = j === 0 ? o.cover : null; o.quad = null;
+      if(originalQuad){const mix=(a,c,f)=>[a[0]+(c[0]-a[0])*f,a[1]+(c[1]-a[1])*f];o.quad=[mix(originalQuad[0],originalQuad[1],fr[j]),mix(originalQuad[0],originalQuad[1],fr[j+1]),mix(originalQuad[3],originalQuad[2],fr[j+1]),mix(originalQuad[3],originalQuad[2],fr[j])];if(originalRef)o.srcRef={...originalRef};o.spineOrig=null;}
       if (j > 0) { o.title = ''; o.unknown = true; } made.push(o); }
-    made[0].title = ''; made[0].unknown = true; ['author', 'series', 'volume', 'publisher', 'isbn', 'cover', 'description', 'price', 'priceSource', 'year', 'pages', 'genre'].forEach(k => delete made[0][k]);
+    made[0].title = ''; made[0].unknown = true; ['author', 'series', 'volume', 'publisher', 'isbn', 'cover', 'coverManual', 'coverOriginal', 'coverSource', 'description', 'price', 'priceSource', 'year', 'pages', 'genre'].forEach(k => delete made[0][k]);
     row.splice(at, 1, ...made); row.forEach((x, i) => x.position = i + 1);
     made.forEach(m => { if (!books.includes(m)) books.push(m); });
     if (cfg.key) { $('#spOk').innerHTML = '<span class="spin"></span> Lecture IA…';
@@ -2213,7 +2333,7 @@ function openSplit(b) {
         const rr = await gemini(parts, {json: true, think: 'low', timeout: 120000}); (Array.isArray(rr) ? rr : (rr.livres || [])).forEach(o => { const m = made[(+o.k || 0) - 1]; if (!m || !o.titre) return;
           Object.assign(m, {title: o.titre, author: o.auteur || '', series: o.serie || '', volume: parseInt(o.tome) || null, publisher: o.editeur || '', type: TYPES.includes(o.type) ? o.type : m.type, unknown: false}); });
       } catch (e) { toast('Lecture IA : ' + e.message, 4000); } }
-    await DB.putMany('books', row); closeModal(); closeDrawer(); renderAll();
+    await DB.putMany('books', row); cuts=[];splitBusy=false;modalLeaveGuard=null;closeModal();renderAll();openBook(b.id,false,true);openSplit(b);
     showUndo(`« ${made.map(dispTitle).join(' », « ')} » séparés`); if (made.some(m => !m.unknown)) bgComplete(made.filter(m => !m.unknown), true, false);
   };
 }
@@ -3107,12 +3227,13 @@ async function restraightenMany(list, btn) {
 }
 
 /* ----- Éditeur de détourage : 4 coins déplaçables + aperçu redressé ----- */
-async function openQuadEditor({src, quad, title = 'Ajuster le détourage', onSave}) {
+async function openQuadEditor({src, quad, title = 'Ajuster le détourage', onSave, toolBook = null}) {
   const img = await srcToImg(src), IW = imgW(img), IH = imgH(img);
   let Q = quad ? quadPx(quad, img) : [[0, 0], [IW, 0], [IW, IH], [0, IH]];
+  const originalQ=JSON.stringify(Q);
   const bb = quadBox(Q), bw = bb.x1 - bb.x0, bh = bb.y1 - bb.y0;
   const R = {x0: clamp(bb.x0 - Math.max(.8 * bw, .12 * bh), 0, IW), y0: clamp(bb.y0 - .1 * bh, 0, IH), x1: clamp(bb.x1 + Math.max(.8 * bw, .12 * bh), 0, IW), y1: clamp(bb.y1 + .1 * bh, 0, IH)};
-  const s = Math.min(520 / (R.y1 - R.y0), 560 / (R.x1 - R.x0), 4), vw = Math.round((R.x1 - R.x0) * s), vh = Math.round((R.y1 - R.y0) * s);
+  const s = Math.min(Math.min(520,innerHeight*.58) / (R.y1 - R.y0), Math.min(560,innerWidth-48) / (R.x1 - R.x0), 4), vw = Math.round((R.x1 - R.x0) * s), vh = Math.round((R.y1 - R.y0) * s);
   openModal(`<div class="dhead"><h3>${esc(title)}</h3><button class="x" data-close>×</button></div><div class="mbody">
     <p class="hint" style="margin-top:0">Fais glisser les 4 coins dorés sur les bords réels de la tranche (y compris si le livre penche). L'aperçu à droite montre la tranche redressée, telle qu'elle apparaîtra sur l'étagère.</p>
     <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
@@ -3139,7 +3260,10 @@ async function openQuadEditor({src, quad, title = 'Ajuster le détourage', onSav
   const cleanup = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
   $('#qeAuto').onclick = () => { Q = autoQuad(img, quadBox(Q)).quad; draw(); };
   $('#qeStraight').onclick = () => { const b = quadBox(Q); Q = [[b.x0, b.y0], [b.x1, b.y0], [b.x1, b.y1], [b.x0, b.y1]]; draw(); };
-  $('#qeOk').onclick = async () => { cleanup(); const sp = extractQuad(img, Q); closeModal(); await onSave(quadNorm(Q, img), sp); };
+  const guard=()=>JSON.stringify(Q)===originalQ||confirm('Le détourage non enregistré sera abandonné. Continuer ?');modalLeaveGuard=guard;
+  modalExtraCleanup=()=>{cleanup();clearTimeout(pt);};
+  if(toolBook)toolNav(toolBook,'quad',guard);
+  $('#qeOk').onclick = async () => { const sp = extractQuad(img, Q);modalLeaveGuard=null; closeModal(); await onSave(quadNorm(Q, img), sp); };
   $$('#mbox [data-close]').forEach(b => b.addEventListener('click', cleanup));
 }
 
