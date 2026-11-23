@@ -5,9 +5,9 @@ const KEY='scanly_biblio_cache_v1',TTL=30*86400000,NEG=86400000,MAX=150;
 let cache={};try{cache=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){}
 const pending=new Map(),failures=new Map();let olQueue=Promise.resolve(),lastOL=0;
 function store(k,value){cache[k]={at:Date.now(),value};const entries=Object.entries(cache).sort((a,b)=>b[1].at-a[1].at).slice(0,MAX);cache=Object.fromEntries(entries);try{localStorage.setItem(KEY,JSON.stringify(cache));}catch(e){cache=Object.fromEntries(entries.slice(0,30));try{localStorage.setItem(KEY,JSON.stringify(cache));}catch(e){}}}
-async function request(url,kind='json'){
- const key=kind+':'+url,old=cache[key];if(old&&Date.now()-old.at<(old.value==null?NEG:TTL))return old.value;
- if(failures.has(key)&&Date.now()-failures.get(key)<300000)throw new Error('Service temporairement inaccessible ; réessayer dans quelques minutes');
+async function request(url,kind='json',options={}){
+ const key=kind+':'+url,old=cache[key];if(!options.force&&old&&Date.now()-old.at<((old.value==null||old.value?.totalItems===0||Array.isArray(old.value?.docs)&&!old.value.docs.length||typeof old.value==='object'&&!Object.keys(old.value||{}).length)?NEG:TTL))return old.value;
+ if(!options.force&&failures.has(key)&&Date.now()-failures.get(key)<300000)throw new Error('Service temporairement inaccessible ; réessayer dans quelques minutes');
  if(pending.has(key))return pending.get(key);
  const task=(async()=>{const run=async()=>{const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),8000);try{const r=await fetch(url,{signal:ctrl.signal});if(!r.ok)throw new Error('HTTP '+r.status);const value=kind==='json'?await r.json():await r.text();store(key,value);return value;}finally{clearTimeout(timer);}};
  if(url.startsWith('https://openlibrary.org/')){const q=olQueue.then(async()=>{const wait=Math.max(0,1100-(Date.now()-lastOL));if(wait)await new Promise(r=>setTimeout(r,wait));lastOL=Date.now();return run();});olQueue=q.catch(()=>{});return q;}return run();})();
@@ -27,7 +27,7 @@ function parseXML(text){const xml=new DOMParser().parseFromString(text,'applicat
  return {title,subtitle,author:names.join(', '),publisher:get('210','c').concat(get('214','c'))[0]||'',year:year?+year[0]:null,pages:pages?+pages[1]:null,isbn:ids.find(s=>s.length===13)||ids[0]||'',isbns:ids,url,source:'BnF'};}).filter(r=>r.title);
 }
 function queryURL(b){const q=s=>String(s||'').replace(/["\\]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);const isbn=clean(b.isbn);let query;if(validISBN(isbn))query='bib.isbn all "'+isbn+'"';else{query='bib.title all "'+q(b.title)+'"';if(b.author)query+=' and bib.author all "'+q(b.author.split(',')[0])+'"';}return 'https://catalogue.bnf.fr/api/SRU?'+new URLSearchParams({version:'1.2',operation:'searchRetrieve',query,recordSchema:'unimarcXchange',maximumRecords:'5'});}
-async function lookup(b){if(!validISBN(b.isbn)&&!String(b.title||'').trim())return [];return parseXML(await request(queryURL(b),'text'));}
+async function lookup(b,options={}){if(!validISBN(b.isbn)&&!String(b.title||'').trim())return [];return parseXML(await request(queryURL(b),'text',options));}
 function exact(b,r){return validISBN(b.isbn)&&r.isbns.some(i=>isbn13(i)===isbn13(b.isbn));}
 function fill(b,r){const changed=[];for(const k of ['title','author','publisher','year','pages','isbn'])if((b[k]==null||b[k]==='')&&r[k]){b[k]=r[k];changed.push(k);}if(changed.length){b.bnfRef={url:r.url,checkedAt:new Date().toISOString(),isbn:r.isbn,fields:changed};if(b.title)b.unknown=false;}return changed;}
 async function supplement(b){if(localStorage.getItem('scanly_bnf_auto')==='0'||!validISBN(b.isbn)||b.author&&b.publisher&&b.year&&b.pages)return [];

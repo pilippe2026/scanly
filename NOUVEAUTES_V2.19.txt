@@ -1,0 +1,77 @@
+SCANLY V2.19 - BANDEAU COMPACT, ISBN AUTOMATIQUE, RESUME COURT
+Base exclusive : archive SCANLY V2.18 fournie par Philippe.
+
+1. BANDEAU / FILTRES
+Les vues restent accessibles. Un seul bouton Filtres remplace les nombreux choix
+Tout, Roman, BD, statut, auteur, genre et tri dans le bandeau.
+Filtres ouvre un panneau a sections repliables : Type de livre, Lecture et statut,
+Auteur et genre, Ordre d'affichage. Recherche dans la liste des auteurs.
+Les filtres se combinent et sont appliques ensemble. Le compteur du bouton indique
+le nombre de criteres actifs (tri inclus). La croix efface ces criteres sans effacer
+la recherche generale. Reinitialiser dans le panneau remet les choix a zero.
+Sur petit ecran : une liste Vue et le bouton Filtres remplacent la longue barre.
+Sur PC : les onglets restent visibles ; seuls les onglets peuvent defiler si necessaire,
+le bouton Filtres reste accessible. Les valeurs enregistrees ne sont pas traduites.
+Les vues Souhaits / A verifier gardent leurs propres filtres dedies.
+
+2. ISBN
+Ancien probleme : aucune recherche declenchee a la saisie ; le parcours manuel
+attendait aussi une analyse IA, parfois longue ou indisponible, avant d'actualiser.
+Desormais : saisir/coller un ISBN valide (10 ou 13 caracteres, cle de controle valide)
+declenche la recherche apres une courte pause ou a la sortie du champ.
+Entree ou Mettre a jour depuis l'ISBN relance explicitement la recherche.
+Google Books + Open Library en parallele ; BnF exacte si necessaire et autorisee.
+Le bouton manuel permet une nouvelle tentative sans rester bloque par une reponse
+vide ou une erreur mise en cache. L'ISBN 10 est rapproche de son equivalent ISBN 13.
+Aucun appel Gemini requis pour renseigner les informations disponibles des bases.
+Les titres Google dont l'ISBN ne correspond pas sont refuses. BnF : ISBN exact.
+Les champs disponibles sont remplis dans le formulaire. VERIFIER PUIS ENREGISTRER
+pour conserver les changements ; pas d'ecriture automatique de la fiche.
+Les modifications manuelles faites pendant la recherche sont preservees.
+Une reponse tardive ne peut pas remplir la fiche d'un autre livre ni un autre ISBN.
+Emplacement, statut, note, pret, notes et couverture personnelle sont preserves.
+Une fiche complete ouverte puis enregistree n'est pas relue automatiquement.
+La recherche n'invente pas les champs absents. Serie, tome, prix ou couverture peuvent
+rester manquants selon la notice. Le tome n'est jamais deduit des voisins.
+Message sous ISBN : progression, succes, code invalide, aucune notice ou service en
+panne. Les quotas, acces reseau et disponibilite des bases restent des limites externes.
+Le complement BnF automatique respecte son parametre ; la relance manuelle peut
+interroger la BnF explicitement. Infos IA reste un complement volontaire.
+
+3. RESUME
+Bouton Resume en haut de la fiche, au-dessus des etoiles.
+Ouvre/replie un apercu tres court dans la fiche sans quitter le livre.
+Si une description est disponible : Gemini peut la condenser en deux phrases,
+45 mots maximum, avec consigne de ne pas reveler le denouement.
+La generation repose uniquement sur cette description, pas sur une histoire devinee.
+Sans cle ou en cas de panne IA : extrait court de la description, identifie comme tel.
+Sans description : recherche d'une notice correspondante. Si rien n'est disponible,
+message Resume non disponible ; aucune histoire n'est inventee.
+Les resumes generes sont memorises par livre, identite bibliographique et langue.
+La description longue existante reste disponible plus bas. Les descriptions anciennes
+ne sont pas retraduites automatiquement. Les nouvelles commandes sont traduites.
+
+PRESERVATION
+Tous les visuels d'origine sont conserves a l'identique.
+Souhaits, points de restauration, cadres, detourage, navigation, tactile, six univers,
+sauvegarde et synchronisation de V2.18 conserves. Schema principal IndexedDB inchange.
+Les nouvelles informations des livres suivent la sauvegarde et la synchronisation.
+Aucune donnee fictive ni cle/jeton de test dans l'archive.
+
+TESTS
+Syntaxe JavaScript, demarrage Chromium PC et emulation iPhone/iPad : bandeau compact,
+filtres combines, reset, saisie ISBN automatique, sauvegarde explicite, nouveaux livres,
+notes/statut/note/emplacement preserves, reponses tardives et modifications concurrentes,
+Resume au-dessus des etoiles et extrait sans cle.
+Tests avec reponses de bases et IA SIMULEES : refus d'un autre ISBN, complement BnF,
+relance apres reponse vide, erreur HTTP visible, pas de recherche lors d'un enregistrement
+normal, cache du resume, absence de source sans invention, valeurs dans les cinq langues.
+Aucun appel Gemini reel, aucun test sur appareil physique ni synchronisation GitHub reelle.
+La disponibilite des bases depuis l'appareil de Philippe reste a confirmer.
+
+MISE A JOUR
+Archive et dossier : SCANLY V2.19.
+Faire une sauvegarde exportee avant remplacement. Envoyer sur GitHub le CONTENU du
+dossier SCANLY V2.19 (index.html, book_sources.js, i18n.js, sw.js, assets...), pas le
+parent. Garder la meme adresse. Fermer puis rouvrir completement l'application.
+Ne pas effacer les donnees Safari pour actualiser le cache.

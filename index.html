@@ -590,6 +590,12 @@ input,select,textarea{font-size:16px}  /* évite le zoom automatique d'iOS sur l
 
 body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{display:none!important}.toolbar #viewSeg{flex:none!important;max-width:none!important;overflow:visible!important}body.utility-view #viewSeg{max-width:100%!important;overflow-x:auto!important;width:100%;box-sizing:border-box}.enhance-cover{align-self:flex-start}.enhance-cover .phc{height:140px!important;display:flex;box-sizing:border-box;overflow:hidden}.enhance-cover .phv{font-size:34px}.enhance-cover .pht{font-size:11px}.enhance-cover .phs,.enhance-cover .pha{font-size:10px}
 @media(max-width:900px){.enhance-cover .phc{height:110px!important;padding:7px 5px!important}.enhance-cover .phv{font-size:28px;padding:2px 6px}.enhance-cover .phs{display:none}}
+
+/* V2.19 compact navigation and grouped filters */
+#filterLegacy19{display:none!important}.toolbar{overflow:hidden!important;gap:10px!important;height:55px;flex-shrink:0}.toolbar #viewSeg{flex:1 1 auto!important;min-width:0;max-width:none!important;width:auto!important;overflow-x:auto!important;scrollbar-width:none}.toolbar #viewSeg::-webkit-scrollbar{display:none}.filter-actions19{display:flex!important;gap:5px;flex:none;align-items:center}.filter-actions19 button{white-space:nowrap;padding:7px 12px;font-size:13px}.filter-count19{background:var(--gold);color:var(--navy);padding:2px 6px;border-radius:20px}.filter-actions19 .active{border-color:var(--gold)}#viewCompact19{display:none}.filter-panel19 details{border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:12px}.filter-panel19 summary{font-weight:600;cursor:pointer;margin-bottom:8px}.filter-panel19 .fld{max-width:100%;box-sizing:border-box}.brief-summary19{padding:12px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--cream);font-size:14px;line-height:1.5}.brief-summary19[hidden]{display:none!important}#isbnStatus19{min-height:18px;overflow-wrap:anywhere}
+@media(max-width:900px){.toolbar{padding:6px 10px!important;gap:8px!important;height:52px!important}.toolbar #viewSeg{display:none!important}#viewCompact19{display:block!important;flex:1;min-width:0;max-width:100%;height:38px}.filter-actions19 button{min-height:38px;padding:6px 9px;font-size:12px}.brief-summary19{font-size:13px}}
+
+#filterClear19[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -720,7 +726,7 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.18';
+const VERSION = '2.19';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
@@ -960,7 +966,7 @@ async function recognize(urls) {
 }
 
 /* ---------- Enrichissement ---------- */
-async function gBooks(q, max = 5) { try { const d=await SCANLY_SOURCES.request(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&printType=books`);const items=d.items||[];if(/^isbn:/i.test(q)){const id=q.slice(5).replace(/[^0-9X]/gi,'');return items.filter(it=>(it.volumeInfo?.industryIdentifiers||[]).some(x=>SCANLY_SOURCES.validISBN(x.identifier)&&SCANLY_SOURCES.isbn13(x.identifier)===SCANLY_SOURCES.isbn13(id)));}return items;}catch(e){return [];} }
+async function gBooks(q, max = 5, options = {}) { try { const d=await SCANLY_SOURCES.request(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&printType=books`,'json',options);const items=d.items||[];if(/^isbn:/i.test(q)){const id=q.slice(5).replace(/[^0-9X]/gi,'');return items.filter(it=>(it.volumeInfo?.industryIdentifiers||[]).some(x=>SCANLY_SOURCES.validISBN(x.identifier)&&SCANLY_SOURCES.isbn13(x.identifier)===SCANLY_SOURCES.isbn13(id)));}return items;}catch(e){options.onError?.('Google Books : '+e.message);return [];} }
 
 function applyGB(b, it, force) {
   const v = it.volumeInfo || {}, s = it.saleInfo || {};
@@ -1104,6 +1110,7 @@ function renderAll() {
 }
 function opt(arr, all, cur) { return `<option value="">${all}</option>` + arr.map(v => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(v)}</option>`).join(''); }
 function renderToolbar() {
+  renderCompactFilters19();
   const types = TYPES.filter(t => books.some(b => b.type === t));
   $('#chips').innerHTML = `<button class="chip ${F.type ? '' : 'on'}" data-t="">Tout</button>` + types.map(t => `<button class="chip ${F.type === t ? 'on' : ''}" data-t="${t}">${t}<span class="n">${books.filter(b => b.type === t && !b.wish).length}</span></button>`).join('');
   $('#fAuthor').innerHTML = opt([...new Set(books.flatMap(b => (b.author || '').split(',').map(a => a.trim()).filter(Boolean)))].sort((a, b) => a.localeCompare(b, 'fr')), 'Tous auteurs', F.author);
@@ -1704,8 +1711,9 @@ function renderList() {
 $('#grid').onclick = e => { const b = e.target.closest('.bk'); if (b) openBook(b.dataset.id); };
 $('#tlist').onclick = e => { const ck = e.target.closest('[data-chk]'); if (ck) { ck.checked ? SEL.add(ck.dataset.chk) : SEL.delete(ck.dataset.chk); ck.closest('tr').classList.toggle('chk', ck.checked); renderListBar(); return renderSelBar(); } const th = e.target.closest('th[data-s]'); if (th) { F.sort = th.dataset.s; $('#fSort').value = F.sort; return renderAll(); } const tr = e.target.closest('tr[data-id]'); if (tr) openBook(tr.dataset.id); };
 
-function setView(v) {document.body.classList.toggle('utility-view',v==='wish'||v==='review'); $$('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v)); if (v === 'lib') applyView();if(v==='review')renderReviewQueue18();if(v==='wish')renderWishlist18();requestAnimationFrame(()=>$('#viewSeg button.on')?.scrollIntoView({block:'nearest',inline:'nearest'})); }
+function setView(v) {document.body.classList.toggle('utility-view',v==='wish'||v==='review'); $$('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v)); if (v === 'lib') applyView();if(v==='review')renderReviewQueue18();if(v==='wish')renderWishlist18();renderCompactFilters19();requestAnimationFrame(()=>$('#viewSeg button.on')?.scrollIntoView({block:'nearest',inline:'nearest'})); }
 $('#viewSeg').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); };
+setupCompactFilters19();
 $('#chips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; F.type = c.dataset.t; renderAll(); };
 [['#fStatus', 'status'], ['#fAuthor', 'author'], ['#fGenre', 'genre'], ['#fSort', 'sort']].forEach(([s, k]) => $(s).onchange = e => { F[k] = e.target.value; if (k === 'status' && F.status === '__wish' && !CAM.ghost) { CAM.ghost = true; localStorage.setItem('scanly_ghost', '1'); } renderAll(); });
 $('#fReset').onclick = () => { Object.assign(F, {q: '', type: '', status: '', author: '', genre: '', sort: 'shelf'}); aiHits = null; $('#q').value = ''; $('#fStatus').value = ''; $('#fSort').value = 'shelf'; renderAll(); };
@@ -1874,7 +1882,7 @@ async function goNav(d) {
   openBook(L[j], false, true);
 }
 function openDrawer(title, html, foot = '') { $('#dTitle').textContent = title; $('#dBody').innerHTML = html; $('#dFoot').innerHTML = foot; $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); $('#dBody').scrollTop = 0; }
-function closeDrawer() { $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
+function closeDrawer() {if(drawerCleanup19){drawerCleanup19();drawerCleanup19=null;} $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
 $('#dClose').onclick = closeDrawer; $('#scrim').onclick = closeDrawer;
 function viewer3D(b) {
   const W = b.type === 'Manga' ? 116 : 130, H = Math.round(W * 1.5), D = Math.round(clamp(b.faceOut ? 26 : bookDims(b).w * .9, 14, 44)), col = colOf(b), tc = txtCol(col);
@@ -1903,6 +1911,7 @@ function initViewer() {
 }
 const origDiff = b => b.orig && (b.orig.caseId !== (b.caseId || null) || b.orig.row !== (b.row || 1) || b.orig.position !== b.position);
 function openBook(idOrBook, isNew = false, nav = false) {
+  if(drawerCleanup19){drawerCleanup19();drawerCleanup19=null;}
   const b = isNew ? idOrBook : books.find(x => x.id === idOrBook); if (!b) return;
   if (!nav && !$('#drawer').classList.contains('on')) NAV.list = isNew ? null : navList();
   NAV.cur = isNew ? null : b.id; bookDirty = false;
@@ -1914,6 +1923,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
       ${b.price != null && b.price !== '' ? `<div style="margin-top:8px"><span class="price">${eur(b.price, b.priceSource)}</span> <span class="hint">${esc(b.priceSource || '')}</span></div>` : ''}
       ${loc ? `<div class="hint" style="margin-top:6px">${esc(loc.name)} · étagère ${b.row || 1} · position ${b.position || '?'}</div>` : ''}
       ${origDiff(b) ? `<div class="hint">Origine (photo) : ${esc(oc ? oc.name : 'non rangé')} · étagère ${b.orig.row} · position ${b.orig.position}</div>` : ''}
+      <button type="button" class="btn s sm" id="bBriefSummary19" aria-expanded="false" aria-controls="briefSummaryBox19" style="margin-top:10px">Résumé</button><div id="briefSummaryBox19" class="brief-summary19" hidden aria-live="polite"></div>
       <div class="stars" id="bStars">${[1, 2, 3, 4, 5].map(i => `<b data-r="${i}" class="${(b.rating || 0) >= i ? 'on' : ''}">★</b>`).join('')}</div>
     </div></div>
     ${b.spineImg ? `<div class="spinebox"><img src="${spineURL(b)}" alt="Tranche photographiée"><div><b style="font:700 13px var(--fT)">Tranche photographiée</b><p class="hint" style="margin:4px 0 8px">${b.unknown ? 'L\'IA n\'a pas pu lire cette tranche lors du scan. Lis-la ici et complète le titre, ou demande une nouvelle lecture zoomée.' : 'Extrait de ta photo : sert de texture sur l\'étagère (bouton « Tranches photo »).'}</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ${b.unknown ? 'g' : 's'} sm" id="bIdent">Identifier avec l'IA</button><button class="btn s sm" id="bQuad" title="Déplacer les 4 coins sur les bords réels du livre">Ajuster le détourage</button><button class="btn s sm" id="bStraight" title="Redressement et détourage automatiques">Redresser auto</button><button class="btn s sm" id="bLoupe" title="Voir la tranche en grand (molette = zoom)">⌕ Agrandir</button><button class="btn s sm" id="bSplit" title="Cette tranche contient plusieurs livres : place les coupures">✂ Séparer en plusieurs livres</button><button class="btn s sm" id="bZoomRoom" title="Zoomer sur ce livre dans la pièce">Zoom dans la pièce</button>${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">📷 Reprendre sur la photo d'origine</button>` : ''}</div></div></div>` : ''}
@@ -1926,10 +1936,10 @@ function openBook(idOrBook, isNew = false, nav = false) {
     <div class="g2"><div><label class="l">Série</label><input class="fld" id="eSeries" value="${esc(b.series)}"></div><div><label class="l">Tome</label><input class="fld" id="eVol" type="number" value="${esc(b.volume)}"></div></div>
     <div class="g2"><div><label class="l">Type</label><select class="fld" id="eType">${TYPES.map(t => `<option ${b.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div><div><label class="l">Genre</label><input class="fld" id="eGenre" value="${esc(b.genre)}"></div></div>
     <div class="g3"><div><label class="l">Éditeur</label><input class="fld" id="ePub" value="${esc(b.publisher)}"></div><div><label class="l">Année</label><input class="fld" id="eYear" type="number" value="${esc(b.year)}"></div><div><label class="l">Pages</label><input class="fld" id="ePages" type="number" value="${esc(b.pages)}"></div></div>
-    <div class="isbnbox"><div style="flex:1;min-width:180px"><label class="l" style="margin-top:0">ISBN / code-barres</label><input class="fld" id="eIsbn" value="${esc(b.isbn)}" placeholder="978…"></div>
+    <p id="isbnStatus19" class="hint" aria-live="polite"></p><div class="isbnbox"><div style="flex:1;min-width:180px"><label class="l" style="margin-top:0">ISBN / code-barres</label><input class="fld" id="eIsbn" value="${esc(b.isbn)}" placeholder="978…"></div>
       <button class="btn g" id="bScanIsbn" title="Lire le code-barres à la webcam (ou sur une photo) puis mettre la fiche à jour">${I('isbn')} Scanner le code-barres</button>
       <button class="btn s" id="bIsbnUpd" title="Lancer la recherche avec l'ISBN saisi">Mettre à jour depuis l'ISBN</button>
-      <p class="hint" style="margin:4px 0 0;width:100%">Recherche Google Books + Open Library + IA : titre, auteur, série, éditeur, année, pages, genre, prix, couverture et résumé sont remplis automatiquement. Emplacement, statut, note, prêt et notes sont conservés.</p></div>
+      <p class="hint" style="margin:4px 0 0;width:100%">Un ISBN valide lance automatiquement la recherche dans Google Books, Open Library et, si nécessaire, la BnF. Les informations disponibles sont renseignées sans appel IA. Vérifie puis Enregistrer. Emplacement, statut, note, prêt et notes sont conservés.</p></div>
     <div class="g2"><div style="display:none"></div><div><label class="l">Prix (€)</label><input class="fld" id="ePrice" type="number" step="0.01" value="${esc(b.price)}"></div><div><label class="l">Statut</label><select class="fld" id="eStatus">${STATUS.map(s => `<option ${(b.status || 'À lire') === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div></div>
     <div class="g3"><div><label class="l">Meuble</label><select class="fld" id="eCase"><option value="">Non rangé</option>${cases.map(c => `<option value="${c.id}" ${b.caseId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="__new">＋ Nouveau meuble…</option></select></div>
       <div><label class="l">Étagère (1 = haut)</label><input class="fld" id="eRow" type="number" min="1" max="15" value="${esc(b.row || 1)}"></div><div><label class="l">Position (vide = à la fin)</label><input class="fld" id="ePos" type="number" min="1" value="${esc(isNew ? '' : b.position)}"></div></div>
@@ -1956,6 +1966,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
       status: $('#eStatus').value, caseId: cid, row: clamp(n($('#eRow').value) || 1, 1, 15), position: n($('#ePos').value), color: $('#eColor').value,
       readDate: $('#eRead').value, loanTo: $('#eLoan').value.trim(), loanDate: $('#eLoanD').value, loanDue: $('#eLoanR').value, notes: $('#eNotes').value, rating});
     const fmt = $('#eFmt').value; if (fmt !== 'photo') { if (b.hU && fmt) { delete b.hU; delete b.wU; } b.height = fmt || null; }
+    const isbnResult19=$('#eIsbn')._isbnResult19;if(isbnResult19&&cleanIsbn(b.isbn)===isbnResult19.isbn){if(!b.coverManual&&isbnResult19.cover)b.cover=isbnResult19.cover;if(isbnResult19.description)b.description=isbnResult19.description;if(isbnResult19.bnfRef)b.bnfRef=isbnResult19.bnfRef;b.isbnSources19=isbnResult19.sources;b.isbnVerified19=isbnResult19.isbn;if(isbnResult19.priceApplied&&Number(b.price)===Number(isbnResult19.price))b.priceSource=isbnResult19.priceSource;if(b.briefSummaryIdentity19!==summaryIdentity19(b)){delete b.briefSummary19;delete b.briefSummaryIdentity19;delete b.briefSummaryLang19;}}
     if (b.title) b.unknown = false;
     if (b.loanTo) { if (!b.loanDate) b.loanDate = today(); if (!b.loanDue) b.loanDue = addDays(b.loanDate, 30); if (b.status !== 'Prêté') { b.prevStatus = b.status; b.status = 'Prêté'; } }
     else if (hadLoan) returnLoan(b);
@@ -1979,18 +1990,8 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if(!isNew){const list=NAV.list||navList(),next=list[list.indexOf(b.id)+1],btn=document.createElement('button');btn.type='button';btn.className='btn p';btn.id='bookSaveNext';btn.textContent='Enregistrer et suivant';btn.disabled=!next;$('#bSave').after(btn);btn.onclick=async()=>{NAV.after=next;await $('#bSave').onclick();};}
   if($('#bSpinePrevious'))$('#bSpinePrevious').onclick=async()=>{if(!confirm('Revenir à la tranche précédente ?'))return;if(!await safetyPoint18('Avant restauration de tranche'))return;const old=b.previousSpine18;for(const k of spineFields18)if(k in old)b[k]=old[k];else delete b[k];delete b.previousSpine18;await saveBook(b);renderAll();openBook(b.id,false,true);};
   if ($('#bDel')) $('#bDel').onclick = async () => { if (await deleteBooks([b.id], `« ${dispTitle(b)} »`)) closeDrawer(); };
-  const updFromIsbn = async (isbn, btn) => {
-    await read(); const prev = {...b}, lbl = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Recherche…';
-    const r = await isbnLookup(isbn, s => { btn.innerHTML = `<span class="spin"></span> ${s}`; });
-    btn.disabled = false; btn.innerHTML = lbl;
-    if (!r.found) { b.isbn = isbn; $('#eIsbn').value = isbn; return toast(`ISBN ${isbn} introuvable dans les bases et non reconnu par l'IA : vérifie le code ou complète à la main`, 6000); }
-    const ch = applyIsbn(b, r); b.isbn = isbn;
-    if (!isNew) await saveBook(b); reopen();
-    toast(ch.length ? `Fiche mise à jour (${r.sources.join(' + ')}) : ${ch.join(', ')}${r.aiConf && r.aiConf < .6 && r.sources.length === 1 ? ' – confiance IA faible, à vérifier' : ''}` : 'Fiche déjà à jour pour cet ISBN', 7000);
-    if (!isNew && ch.length) showUndo('Fiche mise à jour depuis l\'ISBN', async () => { Object.keys(b).forEach(k => { if (!(k in prev)) delete b[k]; }); Object.assign(b, prev); await saveBook(b); renderAll(); if ($('#drawer').classList.contains('on')) openBook(b.id); toast('Mise à jour annulée'); });
-  };
-  $('#bScanIsbn').onclick = () => openBarcode(code => { $('#eIsbn').value = code; updFromIsbn(code, $('#bScanIsbn')); }, 'Scanner le code-barres de « ' + (dispTitle(b) || 'ce livre') + ' »');
-  $('#bIsbnUpd').onclick = () => { const v = cleanIsbn($('#eIsbn').value); if (v.length !== 10 && v.length !== 13) return toast('Saisis un ISBN à 10 ou 13 chiffres (ou scanne le code-barres)'); updFromIsbn(v, $('#bIsbnUpd')); };
+  bindISBNForm19(b,isNew);
+  $('#bBriefSummary19').onclick=()=>showBriefSummary19(b,isNew);
   if ($('#bLoc')) $('#bLoc').onclick = () => showInRoom(b.id);
   if ($('#bOrig')) $('#bOrig').onclick = async () => { closeDrawer(); setView('lib'); curCase = b.orig.caseId || curCase; await reorderByOrig([b], `Remise en place de « ${dispTitle(b)} »`); showUndo(`« ${dispTitle(b)} » remis à sa place d'origine`); setTimeout(() => showInRoom(b.id), 50); };
   if ($('#bRet')) $('#bRet').onclick = async () => { await read(); returnLoan(b); await saveBook(b); reopen(); toast('Retour enregistré'); };
@@ -2073,7 +2074,7 @@ function nextCompare18(b,kind){const src=b.spineImg;if(!src)return;const image=$
 async function photoQuality18(src){const im=await srcToImg(src),w=imgW(im),h=imgH(im),c=document.createElement('canvas'),k=Math.min(1,800/Math.max(w,h));c.width=Math.round(w*k);c.height=Math.round(h*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);const data=x.getImageData(0,0,c.width,c.height).data,gray=i=>(data[i]*.299+data[i+1]*.587+data[i+2]*.114);let n=0,sum=0,sum2=0,glare=0;for(let y=1;y<c.height-1;y+=2)for(let a=1;a<c.width-1;a+=2){const i=(y*c.width+a)*4,g=gray(i),lap=gray(i-4)+gray(i+4)+gray(i-c.width*4)+gray(i+c.width*4)-4*g;n++;sum+=lap;sum2+=lap*lap;if(g>248)glare++;}const variance=n?sum2/n-(sum/n)**2:0;return {w,h,blur:variance<35,glare:n?glare/n:0,low:w<1000||h<400,wide:w/Math.max(1,h)>4,variance};}
 async function checkPhotos18(urls){const warnings=[];for(let i=0;i<urls.length;i++){try{const q=await photoQuality18(urls[i]),r=[];if(q.low)r.push('résolution limitée');if(q.blur)r.push('netteté possiblement insuffisante');if(q.wide)r.push('photo très large : plusieurs clichés rapprochés peuvent aider');if(q.glare>.2)r.push('zones très claires : vérifier les reflets');if(r.length)warnings.push(`Photo ${i+1} (${q.w} × ${q.h}) : ${r.join(', ')}`);}catch(e){warnings.push(`Photo ${i+1} : contrôle impossible`);}}return !warnings.length||confirm(warnings.join('\n')+'\n\nContrôle indicatif, sans garantie. Continuer le scan ?');}
 function enhanceModal18(){const body=$('#mbox .mbody');if(!body)return;body.classList.add('enhanced-tools');body.querySelectorAll('p.hint').forEach(p=>{if(p.textContent.length<140||p.closest('details'))return;const d=document.createElement('details');d.className='enhance-help';const summary=document.createElement('summary');summary.textContent='Aide';p.before(d);d.append(summary,p);});
- const actions=['#qeOk','#straightRun','#straightSave','#spOk','#cropApply','#ogRep','#ogAdd','#zoneApply','#rrApply','#purchaseSave','#toolSaveNext'].map(sel=>$(sel)).filter(Boolean);
+ const actions=['#qeOk','#straightRun','#straightSave','#spOk','#cropApply','#ogRep','#ogAdd','#zoneApply','#rrApply','#purchaseSave','#toolSaveNext','#filterApply19','#filterReset19'].map(sel=>$(sel)).filter(Boolean);
  const old=$('#mbox .tool-action-dock');if(old)old.remove();if(!actions.length)return;
  const dock=document.createElement('div');dock.className='tool-action-dock';const observer=new MutationObserver(()=>{actions.forEach((source,i)=>{const btn=dock.children[i];if(btn){btn.disabled=source.disabled;btn.innerHTML=source.innerHTML;}});});
  actions.forEach(source=>{const clone=document.createElement('button');clone.type='button';clone.className=source.className;clone.innerHTML=source.innerHTML;clone.disabled=source.disabled;clone.onclick=()=>source.click();dock.appendChild(clone);observer.observe(source,{attributes:true,childList:true,characterData:true,subtree:true,attributeFilter:['disabled']});});const cancel=document.createElement('button');cancel.type='button';cancel.className='btn s';cancel.textContent='Annuler';cancel.onclick=()=>closeModal();dock.appendChild(cancel);$('#mbox').appendChild(dock);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();observer.disconnect();};}
@@ -2081,6 +2082,46 @@ function enhanceModal18(){const body=$('#mbox .mbody');if(!body)return;body.clas
 function attachToolEnhance18(b,kind){const selector={quad:'#qeOk',straight:'#straightSave',split:'#spOk',cover:'#cropApply',origin:'#ogRep'}[kind];if(selector)toolSaveNext18(b,kind,selector);if(kind==='quad')nextCompare18(b,kind);enhanceModal18();}
 function holdDelay18(){return {short:450,normal:600,long:900}[localStorage.getItem('scanly_hold_delay')]||600;}
 async function editionPicker18(b){const original=JSON.parse(JSON.stringify(b));openModal(`<div class="dhead"><h3>Choisir une édition</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Vérifie titre, tome, éditeur, année et ISBN. Une couverture personnelle reste protégée. Aucune édition n’est appliquée automatiquement.</p><div class="g2"><div><label class="l">Série à conserver ou corriger</label><input class="fld" id="editionSeries" value="${esc(b.series||'')}"></div><div><label class="l">Tome lu sur l’édition (ne pas déduire)</label><input class="fld" type="number" min="1" id="editionVolume" value="${b.volume||''}"></div></div><div id="editionRows" aria-live="polite">Recherche…</div></div>`);try{let items=await gBooks(b.isbn?'isbn:'+b.isbn:'intitle:'+b.title+(b.author?' inauthor:'+b.author:''),8);const rows=items.map(it=>{const v=it.volumeInfo||{},ids=v.industryIdentifiers||[];return {it,title:v.title,subtitle:v.subtitle,author:(v.authors||[]).join(', '),publisher:v.publisher,year:v.publishedDate,isbn:(ids.find(x=>x.type==='ISBN_13')||ids[0])?.identifier,cover:v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail,source:'Google Books'};});if(b.isbn){const ol=await olByIsbn(b.isbn);if(ol)rows.push({title:ol.title,subtitle:ol.subtitle,author:(ol.author_name||[]).join(', '),publisher:(ol.publisher||[])[0],year:ol.publish_year?.[0],isbn:b.isbn,cover:ol.coverUrl,source:'Open Library',ol});}const root=$('#editionRows');if(!root)return;root.innerHTML=rows.map((r,i)=>`<article class="enhance-card"><img src="${esc((r.cover||'').replace('http:','https:'))}" style="max-width:90px;max-height:130px;object-fit:contain" alt=""><div data-no-i18n><h3>${esc(r.title)}</h3><p>${esc(r.subtitle||'')}<br>${esc(r.author)}<br>${esc(r.publisher||'')} · ${esc(r.year||'')}<br>ISBN ${esc(r.isbn||'')} · ${r.source}</p></div><button type="button" class="btn s" data-edition="${i}">Choisir cette édition</button></article>`).join('')||'<p>Aucune édition trouvée. Vérifie l’ISBN ou utilise la BnF.</p>';root.onclick=async e=>{const btn=e.target.closest('[data-edition]');if(!btn)return;const r=rows[+btn.dataset.edition];if(!confirm('Remplacer les informations bibliographiques par cette édition ? Notes, statut et emplacement sont conservés.'))return;if(!await safetyPoint18('Avant choix d’édition'))return;if(r.it){applyGB(b,r.it,true);b.title=r.title||b.title;}else{for(const k of ['title','author','publisher','isbn'])if(r[k])b[k]=r[k];if(r.year)b.year=parseInt(r.year)||b.year;if(r.ol.number_of_pages_median)b.pages=r.ol.number_of_pages_median;if(!b.coverManual&&r.cover)b.cover=r.cover;}b.series=$('#editionSeries').value.trim();b.volume=parseInt($('#editionVolume').value)||null;b.editionSource=r.source;b.unknown=false;await saveBook(b);closeModal();renderAll();openBook(b.id,false,true);};}catch(e){if($('#editionRows'))$('#editionRows').textContent=e.message;}}
+
+/* V2.19: compact filters, ISBN form autofill and short grounded story preview. */
+function filterCount19(){return ['type','status','author','genre'].filter(k=>F[k]).length+(F.sort!=='shelf'?1:0);}
+function renderCompactFilters19(){const btn=$('#filtersOpen19');if(!btn)return;const n=filterCount19();btn.innerHTML=`<span>Filtres</span>${n?` <b class="filter-count19">${n}</b>`:''} <span aria-hidden="true">▾</span>`;btn.title=n?['type','status','author','genre'].filter(k=>F[k]).map(k=>F[k]).join(' · '):'Type, statut, auteur, genre et tri';btn.classList.toggle('active',n>0);$('#filterClear19').hidden=!n;const select=$('#viewCompact19');if(select){const active=$('#viewSeg button.on');if(active)select.value=active.dataset.v;}}
+function openFilters19(){const count=filterCount19(),types=TYPES.filter(t=>books.some(b=>b.type===t)),authors=[...new Set(books.flatMap(b=>(b.author||'').split(',').map(s=>s.trim()).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'fr')),genres=[...new Set(books.map(b=>b.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+ openModal(`<div class="dhead"><h3>Filtres</h3><button class="x" data-close>×</button></div><div class="mbody filter-panel19"><p class="hint">Les filtres se combinent. Appliquer met à jour la vue sans modifier les livres.</p><details open><summary>Type de livre</summary><select class="fld" id="filterType19"><option value="">Tous les types</option>${types.map(t=>`<option value="${esc(t)}" ${F.type===t?'selected':''}>${esc(t)} (${books.filter(b=>b.type===t&&!b.wish).length})</option>`).join('')}</select></details><details ${F.status?'open':''}><summary>Lecture et statut</summary><select class="fld" id="filterStatus19">${$('#fStatus').innerHTML}</select></details><details ${F.author||F.genre?'open':''}><summary>Auteur et genre</summary><label class="l">Rechercher un auteur</label><input class="fld" id="filterAuthorSearch19" placeholder="Nom de l’auteur"><label class="l">Auteur</label><select class="fld" id="filterAuthor19">${opt(authors,'Tous auteurs',F.author)}</select><label class="l">Genre</label><select class="fld" id="filterGenre19">${opt(genres,'Tous genres',F.genre)}</select></details><details ${F.sort!=='shelf'?'open':''}><summary>Ordre d’affichage</summary><select class="fld" id="filterSort19">${$('#fSort').innerHTML}</select></details><div class="btns"><button type="button" class="btn s" id="filterReset19">Réinitialiser</button><button type="button" class="btn p" id="filterApply19">Appliquer les filtres</button></div></div>`,'sm');$('#filterStatus19').value=F.status;$('#filterSort19').value=F.sort;$$('#filterAuthor19 option,#filterGenre19 option').filter(o=>o.value).forEach(o=>o.setAttribute('data-no-i18n',''));
+ $('#filterAuthorSearch19').oninput=e=>{const q=textNorm18(e.target.value),cur=$('#filterAuthor19').value;$('#filterAuthor19').innerHTML=opt(authors.filter(a=>textNorm18(a).includes(q)||a===cur),'Tous auteurs',cur);$$('#filterAuthor19 option').filter(o=>o.value).forEach(o=>o.setAttribute('data-no-i18n',''));};
+ $('#filterReset19').onclick=()=>{$('#filterType19').value='';$('#filterStatus19').value='';$('#filterAuthorSearch19').value='';$('#filterAuthor19').innerHTML=opt(authors,'Tous auteurs','');$('#filterGenre19').value='';$('#filterSort19').value='shelf';};
+ $('#filterApply19').onclick=()=>{Object.assign(F,{type:$('#filterType19').value,status:$('#filterStatus19').value,author:$('#filterAuthor19').value,genre:$('#filterGenre19').value,sort:$('#filterSort19').value});$('#fStatus').value=F.status;$('#fSort').value=F.sort;if(F.status==='__wish'&&!CAM.ghost){CAM.ghost=true;localStorage.setItem('scanly_ghost','1');}closeModal();renderAll();};
+}
+function setupCompactFilters19(){const toolbar=$('.toolbar'),view=$('#viewSeg');const stash=document.createElement('div');stash.id='filterLegacy19';stash.hidden=true;[...toolbar.children].filter(e=>e!==view).forEach(e=>stash.appendChild(e));toolbar.appendChild(stash);const mobile=document.createElement('select');mobile.id='viewCompact19';mobile.className='tsel';mobile.setAttribute('aria-label','Vue');mobile.innerHTML=[...view.querySelectorAll('button')].map(b=>`<option value="${b.dataset.v}">${b.textContent}</option>`).join('');view.after(mobile);mobile.onchange=e=>setView(e.target.value);const actions=document.createElement('div');actions.className='filter-actions19';actions.innerHTML='<button type="button" class="btn s" id="filtersOpen19" aria-label="Ouvrir les filtres">Filtres ▾</button><button type="button" class="btn s" id="filterClear19" aria-label="Effacer les filtres" hidden>×</button>';toolbar.appendChild(actions);$('#filtersOpen19').onclick=openFilters19;$('#filterClear19').onclick=()=>{Object.assign(F,{type:'',status:'',author:'',genre:'',sort:'shelf'});$('#fStatus').value='';$('#fSort').value='shelf';renderAll();};renderCompactFilters19();}
+const isbnFieldMap19={title:'#eTitle',author:'#eAuthor',series:'#eSeries',volume:'#eVol',publisher:'#ePub',year:'#eYear',pages:'#ePages',genre:'#eGenre',type:'#eType',price:'#ePrice'};
+function bindISBNForm19(b,isNew){const input=$('#eIsbn'),status=$('#isbnStatus19'),button=$('#bIsbnUpd');if(!input)return;let timer=null,seq=0,last='',pending=null,disposed=false;
+ const valid=()=>SCANLY_SOURCES.validISBN(cleanIsbn(input.value)),active=()=>!disposed&&input.isConnected&&$('#drawer').classList.contains('on')&&(isNew||NAV.cur===b.id);
+ const msg=s=>{if(active())status.textContent=s;};
+ const lookup=async(raw,force=false)=>{const code=cleanIsbn(raw);if(!SCANLY_SOURCES.validISBN(code)){msg(code?'ISBN invalide : vérifie les 10 ou 13 caractères et la clé de contrôle.':'');return false;}if(!force&&last===code)return true;last=code;const token=++seq,snapshot=Object.fromEntries(Object.entries(isbnFieldMap19).map(([k,s])=>[k,$(s)?.value])),oldISBN=b.isbn,oldIdentity=summaryIdentity19(b);msg('Recherche automatique par ISBN…');button.disabled=true;
+ const task=(async()=>{try{const r=await isbnLookup(code,s=>{if(token===seq)msg(s);},{useAI:false,force});if(!active()||token!==seq||cleanIsbn(input.value)!==code)return false;if(!r.found){last='';msg(r.errors?.length?'Recherche incomplète : '+r.errors.join(' · ')+'. Réessaie avec le bouton ISBN.':'Aucune notice exacte trouvée. Vérifie l’ISBN ou réessaie. Aucun titre n’a été inventé.');return false;}const changed=[];
+ for(const [k,sel] of Object.entries(isbnFieldMap19)){const el=$(sel),v=r[k];if(!el||v==null||v===''||el.value!==snapshot[k])continue;if(k==='type'&&![...el.options].some(o=>o.value===v))continue;el.value=String(v);changed.push(k);}
+ input._isbnResult19={...r,priceApplied:changed.includes('price')};bookDirty=true;
+ msg(changed.length?'Informations renseignées : '+r.sources.join(' + ')+'. Vérifie puis Enregistrer.':'Notice trouvée. Tes modifications saisies pendant la recherche ont été conservées.');return true;
+ }catch(e){if(token===seq){last='';msg('Recherche indisponible : '+e.message+'. Réessaie avec le bouton ISBN.');}return false;}finally{if(active()&&token===seq)button.disabled=false;}})();pending=task;await task;if(pending===task)pending=null;return true;};
+ const schedule=()=>{clearTimeout(timer);seq++;last='';button.disabled=false;if($('#briefSummaryBox19'))$('#briefSummaryBox19').hidden=true;$('#bBriefSummary19')?.setAttribute('aria-expanded','false');if(!valid()){msg(input.value?'ISBN incomplet ou invalide.':'');return;}timer=setTimeout(()=>lookup(input.value),650);};
+ input.addEventListener('input',schedule);input.addEventListener('change',()=>{clearTimeout(timer);if(valid())lookup(input.value);else msg('ISBN invalide.');});input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);lookup(input.value,true);}});
+ button.onclick=()=>{clearTimeout(timer);return lookup(input.value,true);};$('#bScanIsbn').onclick=()=>openBarcode(code=>{input.value=code;lookup(code,true);},'Scanner le code-barres');
+ const save=$('#bSave'),originalSave=save.onclick;let saving=false;save.onclick=async(...args)=>{if(saving)return;saving=true;try{clearTimeout(timer);if(valid()&&last!==cleanIsbn(input.value))await lookup(input.value);if(pending)await pending;if(!active()){NAV.after=null;return;}if(!isNew&&input._isbnResult19?.isbn===cleanIsbn(input.value)&&bookDirty&&!await safetyPoint18('Avant enregistrement depuis ISBN'))return;return await originalSave(...args);}finally{saving=false;}};
+ const prev=drawerCleanup19;drawerCleanup19=()=>{prev?.();disposed=true;clearTimeout(timer);seq++;};
+ if(valid()&&b.title&&b.author)last=cleanIsbn(input.value);
+ if(valid()&&(!b.title||!b.author)){timer=setTimeout(()=>lookup(input.value),650);}
+}
+let drawerCleanup19=null;
+function summaryIdentity19(b){return [cleanIsbn(b.isbn||''),textNorm18(b.title),textNorm18(b.author),b.volume||''].join('|');}
+function plainDescription19(s){const doc=new DOMParser().parseFromString(String(s||''),'text/html');return (doc.body.textContent||'').replace(/\s+/g,' ').trim();}
+function briefExcerpt19(s){const words=plainDescription19(s).split(/\s+/).filter(Boolean);return words.slice(0,45).join(' ')+(words.length>45?'…':'');}
+async function showBriefSummary19(b,isNew){const box=$('#briefSummaryBox19'),button=$('#bBriefSummary19');if(!box)return;if(!box.hidden){box.hidden=true;button.setAttribute('aria-expanded','false');return;}box.hidden=false;button.setAttribute('aria-expanded','true');const title=$('#eTitle')?.value.trim()||b.title,author=$('#eAuthor')?.value.trim()||b.author,isbn=cleanIsbn($('#eIsbn')?.value||b.isbn),volume=parseInt($('#eVol')?.value)||null,identity=summaryIdentity19({title,author,isbn,volume}),lang=window.SCANLY_I18N?.get()||'fr';
+ if(b.briefSummary19&&b.briefSummaryIdentity19===identity&&b.briefSummaryLang19===lang){box.textContent=b.briefSummary19;return;}button.disabled=true;box.textContent='Recherche d’un aperçu court, sans révéler la fin…';const current=()=>box.isConnected&&$('#drawer').classList.contains('on')&&summaryIdentity19({title:$('#eTitle')?.value,author:$('#eAuthor')?.value,isbn:$('#eIsbn')?.value,volume:parseInt($('#eVol')?.value)||null})===identity;
+ try{let description=$('#eIsbn')?._isbnResult19?.isbn===isbn?$('#eIsbn')._isbnResult19.description||'':summaryIdentity19(b)===identity?b.description||'':'';if(!description){if(SCANLY_SOURCES.validISBN(isbn)){const r=await isbnLookup(isbn,null,{useAI:false});description=r.description||'';}else if(title){const rows=await gBooks('intitle:'+title+(author?' inauthor:'+author:''),5);const it=rows.find(it=>textNorm18(it.volumeInfo?.title)===textNorm18(title)&&(!author||sim(author,(it.volumeInfo?.authors||[]).join(' '))>.6)&&volMatch((it.volumeInfo?.title||'')+' '+(it.volumeInfo?.subtitle||''),volume));description=it?.volumeInfo?.description||'';}}
+ if(!current())return;const text=plainDescription19(description);if(!text){box.textContent='Résumé non disponible pour cette édition. Aucune histoire n’a été inventée.';return;}let summary='';if(cfg.key){try{const response=await gemini([{text:`À partir uniquement de la description ci-dessous, rédige un aperçu de l’histoire en 2 phrases et 45 mots maximum, dans la langue ${lang}. Ne révèle ni dénouement ni retournement majeur. Ne complète pas avec tes connaissances. Si ce n’est pas une fiction, présente brièvement le sujet. JSON {"resume":"..."}. Description : ${text.slice(0,6000)}`}],{json:true,think:'low',timeout:45000});summary=String(response?.resume||'').trim();if(summary.split(/\s+/).length>45)summary=briefExcerpt19(summary);}catch(e){summary='';}}
+ if(!current())return;if(!summary){box.textContent='Aperçu de la description : '+briefExcerpt19(text);return;}box.textContent=summary;b.briefSummary19=summary;b.briefSummaryIdentity19=identity;b.briefSummaryLang19=lang;if(!isNew&&!bookDirty&&summaryIdentity19(b)===identity)await saveBook(b);else bookDirty=true;
+ }catch(e){if(current())box.textContent='Résumé indisponible : '+e.message;}finally{if(button.isConnected)button.disabled=false;}
+}
 
 async function prepareToolBook(){if(!bookDirty)return true;if(!confirm('Enregistrer les modifications de la fiche avant d’ouvrir cet outil ? Annuler reste sur la fiche.'))return false;const save=$('#bSave');if(save?.onclick)await save.onclick();return !bookDirty;}
 function toolList(b, kind){const list=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&(['cover','bnf','zone'].includes(kind)||o.spineImg)));if(!list.includes(b.id))list.unshift(b.id);return list;}
@@ -3027,18 +3068,18 @@ function isbnValid(s) {
   if (/^\d{9}[\dX]$/.test(d)) return [...d].reduce((t, c, i) => t + (c === 'X' ? 10 : +c) * (10 - i), 0) % 11 === 0;
   return false;
 }
-async function olByIsbn(isbn) {
-  try { const key='ISBN:'+isbn,d=await SCANLY_SOURCES.request('https://openlibrary.org/api/books?'+new URLSearchParams({bibkeys:key,format:'json',jscmd:'data'})),e=d[key];if(!e)return null;
+async function olByIsbn(isbn, options = {}) {
+  try { const key='ISBN:'+isbn,key13='ISBN:'+SCANLY_SOURCES.isbn13(isbn),d=await SCANLY_SOURCES.request('https://openlibrary.org/api/books?'+new URLSearchParams({bibkeys:key===key13?key:key+','+key13,format:'json',jscmd:'data'}),'json',options),e=d[key]||d[key13];if(!e)return null;
     const year=String(e.publish_date||'').match(/\b(1[5-9]\d{2}|20\d{2})\b/);
-    return {title:e.title,subtitle:e.subtitle,author_name:(e.authors||[]).map(a=>a.name),publisher:(e.publishers||[]).map(a=>a.name),publish_year:year?[+year[0]]:[],number_of_pages_median:e.number_of_pages,coverUrl:e.cover?.medium||e.cover?.large||e.cover?.small};
-  } catch(e){return null;}
+    return {title:e.title,subtitle:e.subtitle,author_name:(e.authors||[]).map(a=>a.name),publisher:(e.publishers||[]).map(a=>a.name),publish_year:year?[+year[0]]:[],number_of_pages_median:e.number_of_pages,description:(e.excerpts||[]).map(x=>x.text||'').filter(Boolean).join(' '),coverUrl:e.cover?.medium||e.cover?.large||e.cover?.small};
+  } catch(e){options.onError?.('Open Library : '+e.message);return null;}
 }
 
 /* Recherche complète à partir d'un ISBN : Google Books + Open Library + IA */
-async function isbnLookup(isbn, onStep) {
-  isbn = cleanIsbn(isbn);
+async function isbnLookup(isbn, onStep, options = {}) {
+  isbn = cleanIsbn(isbn);const errors=[];options={...options,onError:e=>errors.push(e)};
   onStep && onStep('Google Books…');
-  const [gb, ol] = await Promise.all([gBooks('isbn:' + isbn, 3), olByIsbn(isbn)]);
+  const [gb, ol] = await Promise.all([gBooks('isbn:' + isbn, 5,options), olByIsbn(isbn,options)]);
   const it = gb[0], v = it?.volumeInfo || {}, s = it?.saleInfo || {};
   const r = {isbn, sources: []};
   if (it) { r.sources.push('Google Books');
@@ -3048,11 +3089,11 @@ async function isbnLookup(isbn, onStep) {
     const p = s.listPrice || s.retailPrice; if (p && p.currencyCode === 'EUR') { r.price = p.amount; r.priceSource = 'Google Books'; } }
   if (ol) { r.sources.push('Open Library');
     r.title = r.title || ol.title; r.author = r.author || (ol.author_name || []).join(', '); r.publisher = r.publisher || (ol.publisher || [])[0];
-    r.year = r.year || ol.first_publish_year || (ol.publish_year || [])[0]; r.pages = r.pages || ol.number_of_pages_median;
+    r.year = r.year || ol.first_publish_year || (ol.publish_year || [])[0]; r.pages = r.pages || ol.number_of_pages_median;r.description=r.description||ol.description;
     if (!r.cover && ol.coverUrl) r.cover = ol.coverUrl; }
   onStep && onStep('BnF…');
-  if ((await SCANLY_SOURCES.supplement(r)).length) r.sources.push('BnF');
-  if (cfg.key) {
+  if((localStorage.getItem('scanly_bnf_auto')!=='0'||options.force)&&(!r.title||!r.author||!r.publisher||!r.year)){try{const notices=await SCANLY_SOURCES.lookup({isbn:SCANLY_SOURCES.isbn13(isbn)},options),notice=notices.find(n=>SCANLY_SOURCES.exact({isbn},n));if(notice){if(SCANLY_SOURCES.fill(r,notice).length)r.sources.push('BnF');}}catch(e){r.bnfError=e.message;errors.push('BnF : '+e.message);}}
+  if (cfg.key && options.useAI===true) {
     onStep && onStep('Analyse IA…');
     const hint = r.title ? `Données trouvées : ${JSON.stringify({titre: r.title, sous_titre: r.subtitle, auteur: r.author, editeur: r.publisher, annee: r.year, pages: r.pages})}` : 'Aucune donnée trouvée dans les bases en ligne.';
     try {
@@ -3073,7 +3114,7 @@ JSON : {"titre":"…","auteur":"Prénom Nom","serie":"… ou null","tome":nombre
       if (!r.description && o.resume) r.description = o.resume;
     } catch (e) { toast('IA : ' + e.message, 4000); }
   }
-  r.found = !!r.title;
+  r.errors=errors;r.found = !!r.title;
   return r;
 }
 const META_FIELDS = {title: 'titre', author: 'auteur', series: 'série', volume: 'tome', publisher: 'éditeur', year: 'année', pages: 'pages', isbn: 'ISBN', type: 'type', genre: 'genre', price: 'prix', cover: 'couverture', description: 'résumé'};
