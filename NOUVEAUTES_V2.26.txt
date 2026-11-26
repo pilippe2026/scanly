@@ -1,0 +1,43 @@
+SCANLY V2.26 - BIBLIOTHEQUE PLUS LEGERE ET PLUS SURE, CODE REORGANISE
+Base exclusive : SCANLY V2.25.
+
+- IMAGES STOCKEES A PART
+  Tranches, couvertures, dos et photos d'origine ne sont plus ranges DANS les fiches :
+  chaque image est enregistree une seule fois (format compact) et partagee.
+  Les 3 points de restauration ne recopient plus toutes les images.
+  Test (40 livres, 60 images, 3 points) : 7,5 Mo -> 4,9 Mo.
+  Conversion automatique au premier lancement (message « Optimisation du stockage
+  des images »), une seule fois. Rien a faire. Les images inutilisees sont effacees
+  15 s apres le demarrage, jamais celles d'un point de restauration.
+- RECUPERATION GITHUB « TOUT OU RIEN »
+  La bibliotheque recuperee depuis un autre appareil est ecrite en une seule operation :
+  en cas de coupure, l'ancienne bibliotheque reste intacte.
+- SECURITE
+  Parametres > Synchronisation : un jeton GitHub « classique » (ghp_…, acces a TOUS
+  les depots) est signale ; conseil pour creer un jeton « Fine-grained » limite au depot.
+- IA
+  Si le modele Gemini choisi ne repond plus, SCANLY le dit (message) au lieu de
+  changer le reglage en silence.
+- CODE
+  index.html est decoupe : style dans scanly.css, programme dans le dossier js/
+  (8 fichiers par theme : base, piece, fiche, scan, parametres, demarrage, synchro,
+  tactile et V2). Aucun changement de fonctionnement.
+- TESTS AUTOMATIQUES (dossier SCANLY_TESTS, a part, non publie)
+
+TESTS : 3 series automatiques dans Chromium, toutes OK : calculs (ISBN, BnF, couvertures,
+taille apres recadrage), interface PC et iPhone (7 vues, 9 fenetres, enregistrement d'une fiche,
+memes textes qu'avant le decoupage), stockage (conversion d'une bibliotheque V2.24,
+restauration d'un point V2.24 et V2.26, menage, envoi et recuperation GitHub simules).
+Non teste : Safari / appareil physique, ta bibliotheque reelle, GitHub reel.
+
+MISE A JOUR (IMPORTANT) :
+1. Exporter une sauvegarde (Parametres > Enregistrer une sauvegarde).
+2. Envoyer sur GitHub le CONTENU du dossier SCANLY V2.26, y compris le NOUVEAU dossier js/
+   et le fichier scanly.css (sans eux l'application ne s'ouvre pas).
+   Ne pas toucher au dossier scanly-data/ (tes donnees synchronisees).
+3. Fermer et rouvrir l'application ; attendre la fin de « Optimisation du stockage ».
+   Faire de meme sur chaque appareil.
+RETOUR EN ARRIERE : une version plus ancienne ne sait pas lire le nouveau stockage.
+   Pour revenir en arriere, il faudrait effacer les donnees du site puis ouvrir la sauvegarde
+   exportee a l'etape 1. Garde donc bien cette sauvegarde.
+
