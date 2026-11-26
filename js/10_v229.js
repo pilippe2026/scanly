@@ -165,3 +165,14 @@ const OK29 = /^(✔|☁)|ajouté|rangé|enregistré|importé|restauré|synchroni
 function boot29() { const hs = $('#hSet'); if (hs) hs.onclick = () => openSettings(); /* V2.29 : le bouton ⚙ appelait l'ancienne version (sans les sections V2.27) */
   initTabs29(); initSearch29(); initZoom29(); updateLoanDot29(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(boot29, 0)); else setTimeout(boot29, 0);
+
+/* V2.31 : iPhone en mode app (écran d'accueil) avec barre d'état transparente :
+   iOS donne à la page une hauteur réduite de la hauteur de la barre d'état, ce qui laissait
+   une bande vide sous la barre d'onglets. On mesure l'écart et on le rattrape. */
+function fitScreen31() {
+  const portrait = innerHeight > innerWidth, standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  const full = Math.max(screen.height, screen.width), gap = Math.round(full - innerHeight);
+  const ok = standalone && portrait && gap > 0 && gap < 140;
+  document.documentElement.style.setProperty('--gap31', ok ? gap + 'px' : '0px');
+}
+fitScreen31(); addEventListener('resize', fitScreen31); addEventListener('orientationchange', () => setTimeout(fitScreen31, 300));

@@ -735,3 +735,10 @@ html[data-mode29=dark] ::-webkit-scrollbar-thumb{background:#33497a}
 body.search29 .hsearch input::-webkit-search-cancel-button{display:none;-webkit-appearance:none}
 @media (max-width:900px) and (min-height:501px){body.tabs29 .toast{max-width:calc(100vw - 32px);width:max-content}}
 html[data-mode29=dark] :is(.lbar,#listBar,#listBar>div){background:#13244b;color:#ECE7DC;border-color:#2a3d68}
+/* V2.31 : rattrapage de la hauteur sur iPhone (mode app) */
+@media (max-width:900px) and (min-height:501px){
+  body.tabs29 #tabs29{bottom:calc(-1 * var(--gap31, 0px))}
+  body.tabs29 main{height:calc(100dvh + var(--gap31, 0px) - 121px - env(safe-area-inset-top) - 62px - env(safe-area-inset-bottom))}
+  body.tabs29 #toast{bottom:calc(78px + env(safe-area-inset-bottom) - var(--gap31, 0px))}
+  html,body{min-height:calc(100% + var(--gap31, 0px))}
+}
