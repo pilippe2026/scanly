@@ -1,0 +1,53 @@
+SCANLY V2.27 - 8 NOUVELLES FONCTIONS
+Base exclusive : SCANLY V2.26.
+
+1. SCANNER PLUSIEURS LIVRES A LA SUITE
+   Ajouter un livre > « Scanner plusieurs livres ». Chaque code-barres lu fait un bip et
+   s'ajoute a la liste (titres recherches en arriere-plan, doublons signales).
+   A la fin : choisir le meuble, l'etagere, le statut (ou la liste de souhaits) > Ranger.
+   iPhone / iPad : Safari ne detecte pas seul les codes-barres : toucher « Lire le code »
+   pour chaque livre (IA), ou taper l'ISBN.
+2. RAPPELS DE PRET
+   Tableau de bord : carte « Prets a relancer » (echeance dans 2 jours ou depassee).
+   Bouton « Relancer » (aussi dans la fiche, section Pret) : message pret a envoyer par
+   SMS, e-mail, Partager ou Copier ; la date de relance est notee.
+   Parametres > Rappels : notification a l'echeance (quand SCANLY est ouvert ; sur iPhone,
+   SCANLY doit etre sur l'ecran d'accueil).
+3. IMPORT GOODREADS / BABELIO / CSV
+   Parametres > « Importer Goodreads / Babelio / CSV… ». Colonnes reconnues
+   automatiquement, apercu avant import, doublons ignores, livres « a lire » de Goodreads
+   en liste de souhaits (au choix), couvertures recherchees ensuite.
+4. SUIVI DE LECTURE
+   Fiche > « Suivi de lecture et etiquettes » : page en cours, commence le, progression.
+   Saisir une page passe le livre « En cours » ; la derniere page propose « Lu ».
+   Tableau de bord : livres en cours, objectif annuel (« fixer un objectif »), bilan de
+   l'annee (livres, pages, auteur le plus lu, genre favori, coup de coeur), choix de l'annee.
+5. ETIQUETTES ET LISTES
+   Fiche : etiquettes libres (« A offrir », « Dedicace »…). Tableau de bord > « Mes listes » :
+   toucher une liste affiche ses livres. Filtres > « Etiquettes et lecteurs ».
+6. LISTE DE SOUHAITS PARTAGEABLE
+   Liste de souhaits > « Partager ma liste » : texte (Partager / Copier) ou page web a
+   envoyer. Ni notes ni emplacement des livres.
+7. ALERTES DE PARUTION
+   Une fois par semaine (cle Gemini requise), l'IA verifie les nouveaux tomes de tes series
+   en cours. Tableau de bord : « Nouveautes dans tes series » > « → souhaits ».
+   Series > « Verifier les nouvelles parutions ». Estimation IA : a verifier.
+   Desactivable dans Parametres.
+8. BIBLIOTHEQUE FAMILIALE
+   Parametres > « Lecteurs de la famille » (ex. Philippe, Marie, Leo). Le premier est le
+   lecteur principal. Fiche : statut, date et page pour chaque autre lecteur.
+   Objectif et bilan par lecteur ; filtre « Lu par ». Lecteurs et objectifs synchronises.
+
+TESTS : 4 series automatiques dans Chromium, toutes OK, sur ecran PC et ecran d'iPhone
+(Google Books et l'IA simules) : rafale (ISBN faux ecarte, doublon signale, rangement),
+relance et notification de pret, import Goodreads et CSV francais, page / statut /
+etiquettes, objectif et bilan, filtres, liste de souhaits (texte et page), parutions
+(tomes 4 et 5 -> souhaits), lecteurs (lecture de Marie, filtre, synchro) ; plus les tests V2.26.
+Non teste : Safari / iPhone reel (camera, notifications, SMS), vrais fichiers Goodreads/Babelio,
+vraie reponse de l'IA pour les parutions.
+Les textes ajoutes ne sont pas encore traduits (anglais, espagnol, coreen, allemand).
+
+MISE A JOUR : envoyer sur GitHub, dans le depot « scanly » (celui de l'application, PAS
+« scanly-data »), le CONTENU du dossier SCANLY V2.27, dont js/09_v227.js.
+Fermer et rouvrir l'application sur chaque appareil.
+

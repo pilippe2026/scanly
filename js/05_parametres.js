@@ -7,7 +7,7 @@
 async function backupNow() {
   if (!books.length && !cases.length) return toast('Rien à sauvegarder pour l\'instant');
   const data = {app: 'SCANLY', version: VERSION, date: new Date().toISOString(), cases, imports, books: books.map(b => ({...b, shelfId: b.caseId})),
-    shelves: cases.map(c => ({id: c.id, name: c.name, photos: [], createdAt: c.createdAt})), seriesMeta: SMETA, types: [...TYPES]};
+    shelves: cases.map(c => ({id: c.id, name: c.name, photos: [], createdAt: c.createdAt})), seriesMeta: SMETA, types: [...TYPES], readers27: localStorage.getItem('scanly_readers27'), goal27: localStorage.getItem('scanly_goal27')};
   const n = await saveFile(`scanly_sauvegarde_${today()}.json`, JSON.stringify(data), 'application/json', '.json', 'Sauvegarde SCANLY');
   if (n) { localStorage.setItem('scanly_lastsave', new Date().toISOString()); toast('Sauvegarde enregistrée : ' + n); renderDash(); }
 }
@@ -27,6 +27,7 @@ async function importFile(f) {
     await DB.putMany('cases', cs.map(c => ({rows: 3, createdAt: Date.now(), ...c}))); await DB.putMany('books', bk);
     if (Array.isArray(d.imports)) await DB.putMany('imports', d.imports);
     if (d.seriesMeta) { SMETA = {...SMETA, ...d.seriesMeta}; localStorage.setItem('scanly_series', JSON.stringify(SMETA)); }
+    for (const k of ['readers27', 'goal27']) if (typeof d[k] === 'string' && !localStorage.getItem('scanly_' + k)) localStorage.setItem('scanly_' + k, d[k]);
     if (Array.isArray(d.types)) applyTypesSetting20([...new Set([...TYPES.filter(t => t !== 'Autre'), ...d.types])]);
     await load(); renderAll(); closeModal(); toast('Import terminé');
   } catch (er) { toast('Import impossible : ' + er.message); }
