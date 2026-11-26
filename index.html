@@ -758,7 +758,7 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.23';
+const VERSION = '2.24';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
 const STATUS = ['À lire','En cours','Lu','Prêté'];
@@ -1994,7 +1994,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if (!nav && !$('#drawer').classList.contains('on')) NAV.list = isNew ? null : navList();
   NAV.cur = isNew ? null : b.id; bookDirty = false;
   const loc = cases.find(c => c.id === b.caseId), oc = b.orig && cases.find(c => c.id === b.orig.caseId);
-  const spineTools20 = b.spineImg ? `<div class="spinebox"><img src="${spineURL(b)}" alt="Tranche photographiée"><div><b style="font:700 13px var(--fT)">Tranche photographiée</b><p class="hint" style="margin:4px 0 8px">${b.unknown ? 'L\'IA n\'a pas pu lire cette tranche lors du scan. Lis-la ici et complète le titre, ou demande une nouvelle lecture zoomée.' : 'Extrait de ta photo : sert de texture sur l\'étagère (bouton « Tranches photo »).'}</p><div class="fiche-tools20"><button class="btn ${b.unknown ? 'g' : 's'} sm" id="bIdent">Identifier avec l'IA</button><button class="btn s sm" id="bLoupe" title="Voir la tranche en grand (molette = zoom)">⌕ Agrandir</button><button class="btn s sm" id="bQuad" title="Déplacer les 4 coins sur les bords réels du livre">Ajuster le détourage</button><button class="btn s sm" id="bStraight" title="Redressement et détourage automatiques">Redresser auto</button><button class="btn s sm" id="bSplit" title="Cette tranche contient plusieurs livres : place les coupures">✂ Séparer en plusieurs livres</button>${b.previousSpine18 ? '<button type="button" class="btn s sm" id="bSpinePrevious">Revenir à la tranche précédente</button>' : ''}</div></div></div>` : '';
+  const spineTools20 = b.spineImg ? `<div class="spinebox"><img src="${spineURL(b)}" alt="Tranche photographiée"><div><b style="font:700 13px var(--fT)">Tranche photographiée</b><p class="hint" style="margin:4px 0 8px">${b.unknown ? 'L\'IA n\'a pas pu lire cette tranche lors du scan. Lis-la ici et complète le titre, ou demande une nouvelle lecture zoomée.' : 'Extrait de ta photo : sert de texture sur l\'étagère (bouton « Tranches photo »).'}</p><div class="fiche-tools20"><button class="btn ${b.unknown ? 'g' : 's'} sm" id="bIdent">Identifier avec l'IA</button><button class="btn s sm" id="bLoupe" title="Voir la tranche en grand (molette = zoom)">⌕ Agrandir</button><button class="btn s sm" id="bQuad" title="Déplacer les 4 coins sur les bords réels du livre">Ajuster le détourage</button><button class="btn s sm" id="bStraight" title="Redressement et détourage automatiques">Redresser auto</button><button class="btn s sm" id="bSplit" title="Cette tranche contient plusieurs livres : place les coupures">✂ Séparer en plusieurs livres</button>${b.previousSpine18 ? '<button type="button" class="btn s sm" id="bSpinePrevious">Revenir à la tranche précédente</button>' : ''}${b.series && seriesPeers24(b).length ? '<button type="button" class="btn s sm" id="bSeriesSize24" title="Même hauteur et même épaisseur que les autres tomes de la série">Même taille que la série</button>' : ''}</div></div></div>` : '';
   const sec20 = (key, title, body, def = true) => `<details class="fsec20" data-sec="${key}" ${ficheSecOpen20(key, def) ? 'open' : ''}><summary>${title}</summary><div class="fsec20-body">${body}</div></details>`;
   openDrawer(isNew ? 'Nouvel ouvrage' : b.unknown ? 'Livre à identifier' : b.wish ? 'Liste de souhaits' : 'Fiche ouvrage', `
     <div class="det-top">${viewer3D(b)}<div style="flex:1;min-width:0">
@@ -2042,7 +2042,9 @@ function openBook(idOrBook, isNew = false, nav = false) {
       genre: $('#eGenre').value.trim(), publisher: $('#ePub').value.trim(), year: n($('#eYear').value), pages: n($('#ePages').value), isbn: $('#eIsbn').value.trim(), price,
       status: $('#eStatus').value, caseId: cid, row: clamp(n($('#eRow').value) || 1, 1, 15), position: n($('#ePos').value), color: $('#eColor').value,
       readDate: $('#eRead').value, loanTo: $('#eLoan').value.trim(), loanDate: $('#eLoanD').value, loanDue: $('#eLoanR').value, notes: $('#eNotes').value, rating});
-    const fmt = $('#eFmt').value; if (fmt !== 'photo') { if (b.hU && fmt) { delete b.hU; delete b.wU; } b.height = fmt || null; }
+    const fmt = $('#eFmt').value; if (fmt !== 'photo') { const oldW = b.hU ? bookDims(b).w : null; if (b.hU && fmt) { delete b.hU; delete b.wU; } b.height = fmt || null;
+      /* V2.24 : changer de format garde une épaisseur cohérente (série, sinon l'ancienne épaisseur limitée) */
+      if (fmt) { const h = bookDims(b).h, ser = seriesSize24(b), w = ser ? ser.w : oldW; if (w) b.wU = Math.round(clamp(w, 6, Math.max(8, maxThick24(h, b)))); } }
     const isbnResult19=$('#eIsbn')._isbnResult19;if(isbnResult19&&cleanIsbn(b.isbn)===isbnResult19.isbn){if(!b.coverManual&&isbnResult19.cover)b.cover=isbnResult19.cover;if(isbnResult19.description)b.description=isbnResult19.description;if(isbnResult19.bnfRef)b.bnfRef=isbnResult19.bnfRef;b.isbnSources19=isbnResult19.sources;b.isbnVerified19=isbnResult19.isbn;if(isbnResult19.priceApplied&&Number(b.price)===Number(isbnResult19.price))b.priceSource=isbnResult19.priceSource;if(b.briefSummaryIdentity19!==summaryIdentity19(b)){delete b.briefSummary19;delete b.briefSummaryIdentity19;delete b.briefSummaryLang19;}}
     if (b.title) b.unknown = false;
     if (b.loanTo) { if (!b.loanDate) b.loanDate = today(); if (!b.loanDue) b.loanDue = addDays(b.loanDate, 30); if (b.status !== 'Prêté') { b.prevStatus = b.status; b.status = 'Prêté'; } }
@@ -2069,6 +2071,10 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if ($('#bDel')) $('#bDel').onclick = async () => { if (await deleteBooks([b.id], `« ${dispTitle(b)} »`)) closeDrawer(); };
   bindISBNForm19(b,isNew);
   bindFiche20(b,isNew);
+  if ($('#bSeriesSize24')) $('#bSeriesSize24').onclick = async () => { if (!await prepareToolBook()) return; const ser = seriesSize24(b); if (!ser) return;
+    const old = {hU: b.hU, wU: b.wU, height: b.height}; b.hU = Math.round(ser.h); b.wU = Math.round(clamp(ser.w, 6, Math.max(8, maxThick24(b.hU, b))));
+    await saveBook(b); renderAll(); openBook(b.id, false, true);
+    showUndo(`Taille alignée sur ${ser.n} autre(s) tome(s) de la série`, async () => { for (const k in old) if (old[k] == null) delete b[k]; else b[k] = old[k]; await saveBook(b); renderAll(); openBook(b.id, false, true); }); };
   if ($('#bCoverCheck21')) $('#bCoverCheck21').onclick = async e => { if (!await prepareToolBook()) return; const btn = e.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Recherche…';
     const avoid = new Set(books.filter(x => x !== b && x.cover && x.series && norm(x.series) === norm(b.series || '') && x.volume !== b.volume).map(x => ckey(x.cover)));
     const old = b.cover, oldIsbn = b.isbn; avoid.add(ckey(old)); const r = await recheckCover21(b, avoid, true), info = b._cv21 || {}; delete b._cv21;
@@ -3454,11 +3460,22 @@ async function restraighten(b) {
   const q = autoQuad(img, B), sp = extractQuad(img, q.quad);
   applySpine(b, sp, quadNorm(q.quad, img)); return true;
 }
+/* V2.24 : taille après un recadrage.
+   Avant : hauteur et largeur recalculées en comparant la nouvelle découpe à l'échelle de la photo
+   du scan (pxMed). Or un recadrage se fait souvent sur la tranche déjà découpée ou sur la photo HD,
+   dont l'échelle est différente : le tome devenait plus petit (ou énorme).
+   Désormais : la HAUTEUR est conservée (ou prise sur les autres tomes de la série) et seule
+   l'ÉPAISSEUR est déduite des proportions de la nouvelle découpe, avec des limites réalistes. */
+function seriesPeers24(b) { const k = norm(b.series || ''); return k ? books.filter(o => o !== b && o.id !== b.id && !o.wish && norm(o.series || '') === k) : []; }
+const median24 = a => { const v = a.filter(x => Number.isFinite(x)).sort((x, y) => x - y); return v.length ? v[Math.floor(v.length / 2)] : null; };
+function seriesSize24(b) { const P = seriesPeers24(b), d = P.map(o => bookDims(o)); if (!P.length) return null; return {h: median24(d.map(x => x.h)), w: median24(d.map(x => x.w)), n: P.length}; }
+function maxThick24(h, b) { return Math.round(h * (['BD', 'Comics', 'Beau livre'].includes(b.type) || b.height === 'grande' ? .22 : .34)); }
 function applySpine(b, sp, qn) {
   if(!b.previousSpine18||b.previousSpine18.spineImg!==b.spineImg)preserveSpine18(b);
+  const before = bookDims(b), ser = seriesSize24(b);
   b.quad = qn; b.spineImg = sp.crop; b.color = sp.color;
-  if (b.pxMed) { b.hU = Math.round(clamp(170 * sp.hpx / b.pxMed, 90, 300)); b.wU = Math.round(clamp(170 * sp.wpx / b.pxMed, 6, 95)); }
-  else if (b.hU) b.wU = Math.round(clamp(b.hU * sp.wpx / Math.max(1, sp.hpx), 6, 95));
+  const h = Math.round(clamp(ser ? ser.h : before.h, 90, 300)), ratio = sp.wpx / Math.max(1, sp.hpx);
+  b.hU = h; b.wU = Math.round(clamp(h * ratio, 6, Math.max(8, maxThick24(h, b))));
 }
 async function restraightenMany(list, btn) {
   if(!await safetyPoint18('Avant redressement groupé'))return;

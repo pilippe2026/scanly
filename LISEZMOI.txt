@@ -1,3 +1,30 @@
+SCANLY V2.24 - TAILLE DES LIVRES APRES RECADRAGE
+Base exclusive : archive SCANLY V2.23 fournie par Philippe.
+
+- CAUSE
+  Apres « Ajuster le detourage » ou « Redresser auto », la hauteur et l'epaisseur
+  etaient recalculees en comparant la nouvelle decoupe a l'echelle de la photo du scan.
+  Le recadrage se fait souvent sur la tranche deja decoupee ou sur la photo HD, a une
+  autre echelle : le tome devenait plus petit que les autres. Changer ensuite le
+  Format effacait aussi l'epaisseur mesuree : le livre pouvait devenir enorme.
+- CORRECTION
+  Recadrage : la hauteur est conservee (ou prise sur les autres tomes de la serie) ;
+  seule l'epaisseur est deduite des proportions de la nouvelle decoupe, avec une
+  limite realiste (BD / beau livre : 22 % de la hauteur maximum, autres : 34 %).
+  Changement de Format : l'epaisseur de la serie (sinon l'ancienne, limitee) est gardee.
+- NOUVEAU BOUTON
+  Fiche > Tranche et couverture > « Meme taille que la serie » (si le livre a une serie
+  et d'autres tomes) : hauteur et epaisseur medianes des autres tomes. Annuler 10 s.
+  Pour un tome deja deforme : ouvrir sa fiche et toucher ce bouton.
+
+TESTS : syntaxe JS ; emulation iPhone, serie fictive de 5 BD : recadrage a une autre
+echelle (hauteur conservee 200, epaisseur 15), decoupe aberrante (epaisseur limitee),
+bouton serie (200 x 14, Annuler), changement de format (epaisseur conservee).
+Non teste : appareil physique, ta bibliotheque reelle, GitHub.
+
+MISE A JOUR : sauvegarde exportee ; envoyer sur GitHub le CONTENU du dossier SCANLY V2.24 ;
+fermer et rouvrir l'application.
+
 SCANLY V2.23 - DOS DU LIVRE (4E DE COUVERTURE)
 Base exclusive : archive SCANLY V2.22 fournie par Philippe.
 
