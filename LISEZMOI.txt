@@ -1,3 +1,28 @@
+SCANLY V2.28 - TRADUCTIONS COMPLETES
+Base exclusive : SCANLY V2.27.
+
+1. MENU DES MEUBLES TRADUIT
+   « Vue d'ensemble » et « Non rangés » s'affichent maintenant dans la langue choisie
+   (Overview, Vista general, 전체 보기, Gesamtansicht…). Les noms que tu donnes à tes
+   meubles (Salon, Chambre…) restent tels quels, dans toutes les langues.
+
+2. ENVIRON 800 TEXTES AJOUTES EN ANGLAIS, ESPAGNOL, COREEN ET ALLEMAND
+   Messages, confirmations, bulles d'aide, tableau de bord, séries, impressions,
+   synchronisation, scan, et toutes les nouveautés de la V2.27 (scan en rafale, prêts,
+   import CSV, suivi de lecture, étiquettes, liste de souhaits partagée, parutions).
+
+3. TEXTES AVEC DES NOMBRES OU DES NOMS
+   Les phrases comme « 3 livre(s) déplacé(s) vers Salon » sont désormais traduites
+   elles aussi : le traducteur reconnaît le modèle et garde le nombre et le nom.
+
+Technique
+- Nouveau fichier i18n_extra.js (les traductions ajoutées), chargé avant i18n.js.
+- i18n.js : modèles avec {0}, {1}… et mémoire des traductions pour rester rapide.
+- Rubans « PRÊTÉ » / « SOUHAIT » sur les tranches 3D traduits.
+- Aucune modification des données ni de la base : retour à la V2.27 possible.
+- Les consignes envoyées à l'IA Gemini restent en français (volontaire).
+
+
 SCANLY V2.27 - 8 NOUVELLES FONCTIONS
 Base exclusive : SCANLY V2.26.
 

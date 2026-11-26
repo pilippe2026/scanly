@@ -57,7 +57,7 @@ async function renderStore25() {
   const el = $('#pStore25'); if (!el) return; const st = navigator.storage;
   if (!st?.persist) { el.innerHTML = 'Stockage : ce navigateur ne permet pas de le protéger. Enregistre des sauvegardes régulièrement.'; return; }
   if (STORE25.persisted == null) await askPersist25();
-  let used = ''; try { const e = await st.estimate(); if (e?.usage != null) used = ` · Espace utilisé : ${mo25(e.usage)}${e.quota ? ' sur ' + mo25(e.quota) + ' disponibles' : ''}`; } catch (e) {}
+  let used = ''; try { const e = await st.estimate(); if (e?.usage != null) used = `<span> · Espace utilisé : ${mo25(e.usage)}${e.quota ? ' sur ' + mo25(e.quota) + ' disponibles' : ''}</span>`; } catch (e) {}
   const ios = typeof IS_IOS !== 'undefined' && IS_IOS && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
   el.innerHTML = STORE25.persisted
     ? `<b style="color:var(--ok, #2c7a4b)">✔ Stockage protégé</b> : le navigateur ne videra pas la bibliothèque pour libérer de la place.${used}`
