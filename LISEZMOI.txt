@@ -1,3 +1,32 @@
+SCANLY V2.22 - « COUVERTURE INCORRECTE ? » FONCTIONNE MEME SI GOOGLE BOOKS EST LIMITE
+Base exclusive : archive SCANLY V2.21 fournie par Philippe.
+
+- CAUSE
+  La V2.21 affichait « Recherche impossible (reseau) » des qu'UNE requete echouait.
+  Google Books, utilise sans cle, refuse souvent les requetes (quota partage,
+  HTTP 429) alors que la connexion fonctionne. Gemini (Identifier avec l'IA, Infos IA)
+  passe par un autre service : c'est pourquoi il repondait normalement.
+  De plus, un echec etait memorise 5 minutes : les clics suivants echouaient aussi.
+- CORRECTION
+  Une erreur Google seule ne bloque plus : Open Library puis l'IA (ISBN de l'edition)
+  sont utilises. « Couverture conservee » uniquement si AUCUNE base n'a repondu,
+  avec le detail de l'erreur (ex. Google Books : HTTP 429 · Open Library : HTTP 503).
+  Le bouton de la fiche ignore la memoire d'echec et relance vraiment la recherche.
+- ISBN D'UN AUTRE LIVRE
+  Si l'ISBN de la fiche designe un autre livre (ex. « Coureur de l'extreme » avec
+  l'ISBN de « SAM »), la couverture est retiree (ou remplacee par la bonne) et le
+  message l'indique. Si l'IA retrouve un ISBN correspondant au titre, il remplace le
+  mauvais ; sinon verifie l'ISBN dans Informations. Annuler (10 s) restaure couverture et ISBN.
+- Revérification de toute la bibliotheque (Parametres) : meme logique.
+
+TESTS : syntaxe JS ; emulation iPhone, reponses SIMULEES : Google HTTP 429 + Open Library
+en panne (message detaille, couverture conservee) ; Google 429 + Open Library OK avec ISBN
+de « Sam » (couverture retiree, ISBN signale) ; Google 429 + bonne notice Open Library
+(nouvelle couverture). Non teste : bases reelles depuis ton iPhone, GitHub.
+
+MISE A JOUR : sauvegarde exportee ; envoyer sur GitHub le CONTENU du dossier SCANLY V2.22 ;
+fermer et rouvrir l'application.
+
 SCANLY V2.21 - COUVERTURES FIABLES, SUPPRESSION D'ETAGERE VISIBLE
 Base exclusive : archive SCANLY V2.20 fournie par Philippe.
 

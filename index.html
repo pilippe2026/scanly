@@ -758,7 +758,7 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.21';
+const VERSION = '2.22';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
 const STATUS = ['À lire','En cours','Lu','Prêté'];
@@ -999,7 +999,7 @@ async function recognize(urls) {
 }
 
 /* ---------- Enrichissement ---------- */
-async function gBooks(q, max = 5, options = {}) { try { const d=await SCANLY_SOURCES.request(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&printType=books`,'json',options);const items=d.items||[];if(/^isbn:/i.test(q)){const id=q.slice(5).replace(/[^0-9X]/gi,'');return items.filter(it=>(it.volumeInfo?.industryIdentifiers||[]).some(x=>SCANLY_SOURCES.validISBN(x.identifier)&&SCANLY_SOURCES.isbn13(x.identifier)===SCANLY_SOURCES.isbn13(id)));}return items;}catch(e){window.NETERR21=(window.NETERR21||0)+1;options.onError?.('Google Books : '+e.message);return [];} }
+async function gBooks(q, max = 5, options = {}) { const C=window.CV21;if(C&&C.force)options={...options,force:true}; try { const d=await SCANLY_SOURCES.request(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&printType=books`,'json',options);if(C)C.ok++;const items=d.items||[];if(/^isbn:/i.test(q)){const id=q.slice(5).replace(/[^0-9X]/gi,'');return items.filter(it=>(it.volumeInfo?.industryIdentifiers||[]).some(x=>SCANLY_SOURCES.validISBN(x.identifier)&&SCANLY_SOURCES.isbn13(x.identifier)===SCANLY_SOURCES.isbn13(id)));}return items;}catch(e){if(C){C.err++;C.msgs.add('Google Books : '+e.message);}options.onError?.('Google Books : '+e.message);return [];} }
 
 function applyGB(b, it, force) {
   const v = it.volumeInfo || {}, s = it.saleInfo || {};
@@ -1049,14 +1049,14 @@ function titleMatch21(b, title, subtitle, authors) {
 }
 const gbMatch21 = (b, it) => { const v = it?.volumeInfo || {}; return titleMatch21(b, v.title, v.subtitle, (v.authors || []).join(' ')); };
 async function olIsbnRecord21(isbn) { const c = String(isbn).replace(/[^0-9X]/gi, ''); if (c.length < 10) return null;
-  try { const rr = await SCANLY_SOURCES.request(`https://openlibrary.org/api/books?bibkeys=ISBN:${c}&format=json&jscmd=data`); return rr['ISBN:' + c] || null; } catch (e) { return null; } }
+  const C = window.CV21; try { const rr = await SCANLY_SOURCES.request(`https://openlibrary.org/api/books?bibkeys=ISBN:${c}&format=json&jscmd=data`, 'json', C && C.force ? {force: true} : {}); if (C) C.ok++; return rr['ISBN:' + c] || null; } catch (e) { if (C) { C.err++; C.msgs.add('Open Library : ' + e.message); } return null; } }
 async function coverFor(b, avoid) { b._coverSrc21 = null; const u = await coverFor21(b, avoid); return u; }
 async function coverFor21(b, avoid) {
   const v = b.volume, ser = b.series || '', au = b.author ? b.author.split(',')[0].trim().split(' ').pop() : '';
   const used = u => !u || (avoid && avoid.has(ckey(u)));
   const tryIsbn = async (isbn, verify = true) => { const c = String(isbn || '').replace(/[^0-9X]/gi, ''); if (c.length < 10) return null;
-    const it = (await gBooks('isbn:' + c, 3))[0], u = gbCover(it); if (u && !used(u) && (!verify || gbMatch21(b, it))) return u;
-    const rec = await olIsbnRecord21(c), o = rec?.cover && (rec.cover.medium || rec.cover.large || rec.cover.small);
+    const it = (await gBooks('isbn:' + c, 3))[0], u = gbCover(it); if (it && verify && !gbMatch21(b, it) && window.CV21 && c === String(b.isbn || '').replace(/[^0-9X]/gi, '')) window.CV21.wrongIsbn = it.volumeInfo?.title || '?'; if (u && !used(u) && (!verify || gbMatch21(b, it))) return u;
+    const rec = await olIsbnRecord21(c), o = rec?.cover && (rec.cover.medium || rec.cover.large || rec.cover.small); if (rec?.title && verify && window.CV21 && c === String(b.isbn || '').replace(/[^0-9X]/gi, '') && !titleMatch21(b, rec.title, rec.subtitle, (rec.authors || []).map(a => a.name).join(' '))) window.CV21.wrongIsbn = rec.title;
     return o && !used(o) && (!verify || titleMatch21(b, rec.title, rec.subtitle, (rec.authors || []).map(a => a.name).join(' '))) ? o : null; };
   // 1. ISBN connu
   if (b.isbn) { const u = await tryIsbn(b.isbn); if (u) return u; }
@@ -1071,20 +1071,25 @@ async function coverFor21(b, avoid) {
     if (okVol) return u; }
   // 3. Open Library (recherche)
   try { const p = new URLSearchParams({q: (ser && v ? ser + ' ' + v : b.title) + (au ? ' ' + au : ''), limit: '10', fields: 'title,subtitle,author_name,cover_i'});
-    const rr = await SCANLY_SOURCES.request('https://openlibrary.org/search.json?' + p);
+    const C = window.CV21, rr = await SCANLY_SOURCES.request('https://openlibrary.org/search.json?' + p, 'json', C && C.force ? {force: true} : {}); if (C) C.ok++;
     for (const d of (rr.docs || [])) { const u = d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : null; if (!used(u) && titleMatch21(b, d.title, d.subtitle, (d.author_name || []).join(' ')) && (!v || volMatch(d.title + ' ' + (d.subtitle || ''), v))) return u; }
-  } catch (e) {}
+  } catch (e) { const C = window.CV21; if (C) { C.err++; C.msgs.add('Open Library : ' + e.message); } }
   // 4. l'IA retrouve l'ISBN de l'édition française de ce tome
   if (cfg.key && (ser || b.title)) { try {
     const o = await gemini([{text: `Donne l'ISBN-13 de l'édition française de : « ${b.title} »${ser ? `, série « ${ser} »` : ''}${v ? `, tome ${v}` : ''}${b.author ? `, ${b.author}` : ''}${b.publisher ? `, éditeur ${b.publisher}` : ''}. Si tu n'es pas sûr, null. JSON : {"isbn":"…"}`}], {json: true, timeout: 60000});
-    const u = await tryIsbn(o.isbn); if (u) { if (!b.isbn) b.isbn = String(o.isbn).replace(/[^0-9X]/gi, ''); return u; } } catch (e) {} }
+    const u = await tryIsbn(o.isbn); if (u) { if (!b.isbn || window.CV21?.wrongIsbn) b.isbn = String(o.isbn).replace(/[^0-9X]/gi, ''); return u; } } catch (e) {} }
   return null;
 }
 /* V2.21 : revérification stricte des couvertures automatiques */
-async function recheckCover21(b, avoid) {
-  const before = window.NETERR21 || 0, u = await coverFor21(b, avoid);
-  if ((window.NETERR21 || 0) > before && !u) return 'unchecked';
+/* V2.22 : « réseau » seulement si AUCUNE base n'a répondu (Google Books est souvent limité en quota
+   sans clé : une erreur Google seule ne bloque plus la vérification). Un ISBN qui désigne un autre
+   livre suffit à prouver que la couverture issue de cet ISBN est fausse. */
+async function recheckCover21(b, avoid, force = false) {
+  const C = window.CV21 = {ok: 0, err: 0, msgs: new Set(), force, wrongIsbn: null}; let u = null;
+  try { u = await coverFor21(b, avoid); } finally { window.CV21 = null; }
+  b._cv21 = {wrongIsbn: C.wrongIsbn, msgs: [...C.msgs]};
   if (u) { if (ckey(u) === ckey(b.cover)) return 'kept'; b.cover = u; return 'changed'; }
+  if (!C.ok && C.err && !C.wrongIsbn) return 'unchecked';
   b.cover = null; return 'removed';
 }
 async function auditCovers21(btn) {
@@ -1094,7 +1099,7 @@ async function auditCovers21(btn) {
   if (!await safetyPoint18('Avant revérification des couvertures')) return;
   const lbl = btn ? btn.innerHTML : '', R = {kept: 0, changed: 0, removed: 0, unchecked: 0}; let k = 0;
   await pool(todo, 3, async b => { const avoid = new Set(books.filter(x => x !== b && x.cover && x.series && norm(x.series) === norm(b.series || '') && x.volume !== b.volume).map(x => ckey(x.cover)));
-    const r = await recheckCover21(b, avoid); R[r]++; if (r === 'changed' || r === 'removed') await DB.put('books', b);
+    const r = await recheckCover21(b, avoid); delete b._cv21; R[r]++; if (r === 'changed' || r === 'removed') await DB.put('books', b);
     k++; if (btn) btn.innerHTML = `<span class="spin"></span> ${k}/${todo.length}`; });
   if (btn) btn.innerHTML = lbl; renderAll();
   toast(`Couvertures : ${R.kept} confirmée(s), ${R.changed} remplacée(s), ${R.removed} retirée(s)${R.unchecked ? `, ${R.unchecked} non vérifiée(s) (réseau)` : ''}.`, 9000);
@@ -2065,10 +2070,11 @@ function openBook(idOrBook, isNew = false, nav = false) {
   bindFiche20(b,isNew);
   if ($('#bCoverCheck21')) $('#bCoverCheck21').onclick = async e => { if (!await prepareToolBook()) return; const btn = e.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Recherche…';
     const avoid = new Set(books.filter(x => x !== b && x.cover && x.series && norm(x.series) === norm(b.series || '') && x.volume !== b.volume).map(x => ckey(x.cover)));
-    const old = b.cover; avoid.add(ckey(old)); const r = await recheckCover21(b, avoid);
-    if (r === 'unchecked') { btn.disabled = false; btn.textContent = 'Couverture incorrecte ?'; return toast('Recherche impossible (réseau) : couverture conservée'); }
+    const old = b.cover, oldIsbn = b.isbn; avoid.add(ckey(old)); const r = await recheckCover21(b, avoid, true), info = b._cv21 || {}; delete b._cv21;
+    if (r === 'unchecked') { btn.disabled = false; btn.textContent = 'Couverture incorrecte ?'; return toast('Aucune base de livres n’a répondu : couverture conservée. Détail : ' + (info.msgs || []).join(' · ') + '. Tu peux aussi utiliser « Ajouter une couverture ».', 9000); }
     await saveBook(b); renderAll(); openBook(b.id, false, true);
-    showUndo(r === 'removed' ? 'Couverture retirée (aucune couverture correspondant au titre)' : 'Nouvelle couverture trouvée', async () => { b.cover = old; await saveBook(b); renderAll(); openBook(b.id, false, true); }); };
+    const isbnTxt = info.wrongIsbn ? ` L’ISBN ${oldIsbn} correspond à « ${info.wrongIsbn} »${b.isbn !== oldIsbn ? ` : remplacé par ${b.isbn}` : ' : vérifie-le dans Informations'}.` : '';
+    showUndo((r === 'removed' ? 'Couverture retirée : aucune couverture correspondant au titre.' : 'Nouvelle couverture trouvée.') + isbnTxt, async () => { b.cover = old; b.isbn = oldIsbn; await saveBook(b); renderAll(); openBook(b.id, false, true); }); };
   if ($('#bLoc')) $('#bLoc').onclick = () => showInRoom(b.id);
   if ($('#bOrig')) $('#bOrig').onclick = async () => { closeDrawer(); setView('lib'); curCase = b.orig.caseId || curCase; await reorderByOrig([b], `Remise en place de « ${dispTitle(b)} »`); showUndo(`« ${dispTitle(b)} » remis à sa place d'origine`); setTimeout(() => showInRoom(b.id), 50); };
   if ($('#bRet')) $('#bRet').onclick = async () => { await read(); returnLoan(b); await saveBook(b); reopen(); toast('Retour enregistré'); };
