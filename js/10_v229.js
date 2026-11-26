@@ -77,7 +77,7 @@ function openLoans29() {
 function openProfile29() {
   const n = books.filter(b => !b.wish).length, read = books.filter(b => !b.wish && b.status === 'Lu').length, last = localStorage.getItem('scanly_lastsave');
   openModal(`<div class="dhead"><h3>Profil</h3><button class="x" data-close>×</button></div><div class="mbody sheet29">
-    <div class="me29"><b>${n}</b><span>ouvrages</span><b>${read}</b><span>lus</span><b>${books.filter(b => b.wish).length}</b><span>souhaits</span></div>
+    <div class="me29"><b>${n}</b><span>ouvrages</span><b>${read}</b><span>lus</span><b>${books.filter(b => b.wish).length}</b><span>souhaits</span></div><p class="hint" style="text-align:center;margin:0 0 4px">SCANLY V${VERSION}</p>
     ${sheetBtn29('me29Dash', '▤', 'Tableau de bord', 'Statistiques, lectures, séries')}
     ${sheetBtn29('me29Rev', '⚑', 'À vérifier', 'Doublons possibles et tranches incertaines')}
     ${sheetBtn29('me29AI', '✦', 'Assistant IA', 'Recommandations et questions sur ta bibliothèque')}

@@ -7,7 +7,7 @@
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.29';
+const VERSION = '2.30';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 function loadTypes20() { try { const saved = JSON.parse(localStorage.getItem('scanly_types') || 'null'); if (Array.isArray(saved) && saved.length) TYPES.splice(0, TYPES.length, ...[...new Set(saved.filter(s => typeof s === 'string' && s.trim()).map(s => s.trim()))]); } catch (e) {} if (!TYPES.includes('Autre')) TYPES.push('Autre'); }
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
@@ -489,3 +489,18 @@ function matchQ(b, q) { if (!q) return true; return norm([b.title, b.author, b.s
 function passF(b) { return (!F.type || b.type === F.type) && (!F.status || (F.status === '__wish' ? b.wish : F.status === '__unk' ? b.unknown : !b.wish && (b.status || 'À lire') === F.status)) && (!F.author || (b.author || '').split(',').map(a => a.trim()).includes(F.author)) && (!F.genre || b.genre === F.genre); }
 const caseOf = b => b && b.caseId && cases.some(c => c.id === b.caseId) ? b.caseId : NONE;
 
+
+/* V2.30 : mise à jour fiable sur iPhone. Le service worker est revérifié à chaque retour dans l'app,
+   sans passer par le cache HTTP, et la page se recharge d'elle-même quand une nouvelle version prend la main. */
+function registerSW30() {
+  const sw = navigator.serviceWorker; const hadCtrl = !!sw.controller; let reloaded = false;
+  sw.register('sw.js', {updateViaCache: 'none'}).then(reg => {
+    const check = () => reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+    setInterval(check, 30 * 60 * 1000);
+  }).catch(() => {});
+  sw.addEventListener('controllerchange', () => { if (!hadCtrl || reloaded) return; reloaded = true;
+    const busy = document.querySelector('#modal.on, #drawer.on') || document.activeElement?.matches?.('input,textarea,select');
+    if (busy) { toast('Nouvelle version de SCANLY prête : ferme et rouvre l\'app pour l\'utiliser', 8000); return; }
+    location.reload(); });
+}
