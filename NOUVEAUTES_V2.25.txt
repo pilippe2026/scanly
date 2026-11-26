@@ -1,0 +1,21 @@
+SCANLY V2.25 - STOCKAGE PROTEGE (LA BIBLIOTHEQUE NE DOIT PAS ETRE EFFACEE)
+Base exclusive : archive SCANLY V2.24.
+
+- CAUSE
+  Le navigateur (surtout Safari sur iPhone / iPad) peut vider les donnees d'un site
+  quand l'espace manque. SCANLY demandait deja la protection au demarrage, mais sans
+  regarder la reponse : si le navigateur refusait, personne ne le savait.
+- CORRECTION
+  Au demarrage, SCANLY verifie si le stockage est protege, le redemande sinon, puis
+  redemande au premier toucher / clic (certains navigateurs n'acceptent qu'apres un geste).
+  Parametres > Sauvegarde et exports : « ✔ Stockage protege » ou « ⚠ Stockage non protege »,
+  espace utilise, bouton « Proteger le stockage ». Sur iPhone / iPad hors ecran d'accueil :
+  conseil d'ajouter SCANLY a l'ecran d'accueil.
+- RAPPEL DE SAUVEGARDE
+  Stockage non protege : rappel d'enregistrer une sauvegarde apres 7 jours (14 sinon).
+
+TESTS : syntaxe JS (index.html, i18n.js, sw.js). Non teste : navigateur, appareil physique, GitHub.
+
+MISE A JOUR : sauvegarde exportee ; envoyer sur GitHub le CONTENU du dossier SCANLY V2.25 ;
+fermer et rouvrir l'application ; ouvrir Parametres pour voir l'etat du stockage.
+
