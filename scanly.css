@@ -735,10 +735,18 @@ html[data-mode29=dark] ::-webkit-scrollbar-thumb{background:#33497a}
 body.search29 .hsearch input::-webkit-search-cancel-button{display:none;-webkit-appearance:none}
 @media (max-width:900px) and (min-height:501px){body.tabs29 .toast{max-width:calc(100vw - 32px);width:max-content}}
 html[data-mode29=dark] :is(.lbar,#listBar,#listBar>div){background:#13244b;color:#ECE7DC;border-color:#2a3d68}
-/* V2.31 : rattrapage de la hauteur sur iPhone (mode app) */
+/* V2.32 : mise en page « coque d'application » sur téléphone et tablette en portrait.
+   La page occupe exactement l'écran (position fixe sur les 4 bords) et se range en colonne :
+   en-tête, barre d'outils, pièce (prend toute la place restante), barre d'onglets.
+   Plus aucune hauteur calculée à la main : chaque bloc s'adapte, quel que soit l'appareil. */
 @media (max-width:900px) and (min-height:501px){
-  body.tabs29 #tabs29{bottom:calc(-1 * var(--gap31, 0px))}
-  body.tabs29 main{height:calc(100dvh + var(--gap31, 0px) - 121px - env(safe-area-inset-top) - 62px - env(safe-area-inset-bottom))}
-  body.tabs29 #toast{bottom:calc(78px + env(safe-area-inset-bottom) - var(--gap31, 0px))}
-  html,body{min-height:calc(100% + var(--gap31, 0px))}
+  body.tabs29{position:fixed;top:0;right:0;bottom:0;left:0;height:auto;display:flex;flex-direction:column}
+  body.tabs29>header,body.tabs29>.toolbar{flex:0 0 auto}
+  body.tabs29 main{flex:1 1 auto;min-height:0;height:auto}
+  body.tabs29 #tabs29{position:relative;left:auto;right:auto;bottom:auto;flex:0 0 auto}
 }
+/* V2.32 : iPhone en mode app (écran d'accueil) avec barre d'état transparente :
+   iOS peut réserver une zone haute de la hauteur de la barre d'état et raccourcir la page d'autant,
+   d'où une bande vide en bas. Une page un peu plus haute que l'écran l'oblige à utiliser tout l'écran ;
+   la coque fixe ci-dessus garde ensuite tout à sa place (rien ne défile). */
+html.app32{min-height:calc(100% + env(safe-area-inset-top))}
