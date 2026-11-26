@@ -47,7 +47,7 @@ async function snapshot() {
   const imgs = new Map(), trash = await DB.all('trash').catch(() => []);
   const core = {app: 'SCANLY', version: VERSION, date: new Date().toISOString(), device: SY.device,
     books: await extern(books, imgs), cases: await extern(cases, imgs), imports: await extern(imports, imgs), trash: await extern(trash, imgs),
-    seriesMeta: SMETA, settings: {theme: localStorage.getItem('scanly_theme') || '', ghost: localStorage.getItem('scanly_ghost'), photo: localStorage.getItem('scanly_photo'), types: [...TYPES]}};
+    seriesMeta: SMETA, settings: {theme: localStorage.getItem('scanly_theme') || '', ghost: localStorage.getItem('scanly_ghost'), photo: localStorage.getItem('scanly_photo'), types: [...TYPES], readers27: localStorage.getItem('scanly_readers27'), goal27: localStorage.getItem('scanly_goal27')}};
   return {core, imgs};
 }
 async function headInfo() { // dernier envoi présent sur GitHub
@@ -100,6 +100,7 @@ async function syncPull(h) {
     if (d.seriesMeta) { SMETA = d.seriesMeta; localStorage.setItem('scanly_series', JSON.stringify(SMETA)); }
     if (d.settings?.theme && THEMES[d.settings.theme]) { theme = d.settings.theme; localStorage.setItem('scanly_theme', theme); }
     if (Array.isArray(d.settings?.types)) applyTypesSetting20(d.settings.types);
+    for (const k of ['readers27', 'goal27']) if (typeof d.settings?.[k] === 'string') localStorage.setItem('scanly_' + k, d.settings[k]); // V2.27 : lecteurs et objectifs
     UNDO.stack = []; UNDO.redo = []; persistUndo(); SEL.clear();
     await load(); rt = activeTheme(); applyTheme(); renderAll(); renderRoom(true);
     SY.last = {sha: h.sha, date: h.date, device: h.device}; SY.dirty = false;
