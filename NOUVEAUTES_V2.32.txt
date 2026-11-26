@@ -1,0 +1,12 @@
+SCANLY V2.32 - BARRE D'ONGLETS ENTIERE SUR TOUS LES ECRANS
+Base exclusive : SCANLY V2.31.
+
+La V2.31 descendait trop la barre d'onglets sur iPhone (icônes coupées, libellés cachés).
+Le rattrapage mesuré est supprimé. La page occupe désormais exactement l'écran et se range
+en colonne : en-tête, barre d'outils, pièce, barre d'onglets. La pièce prend toute la place
+restante et la barre d'onglets reste entière, collée au bas de l'écran, au-dessus de la barre
+d'accueil de l'iPhone.
+Vérifié sur 11 formats : iPhone SE, 15, 16 Pro, Pro Max, iPhone en paysage, iPad portrait
+et paysage, iPad Pro, Mac et PC, avec et sans le mode app (écran d'accueil).
+Aucune modification des données.
+
