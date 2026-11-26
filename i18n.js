@@ -11,14 +11,29 @@ Object.assign(D,{"Filtres": ["Filters", "Filtros", "필터", "Filter"], "Ouvrir 
 /* V2.23 */ Object.assign(D,{"Ajouter le dos du livre": ["Add back cover", "Añadir contraportada", "뒤표지 추가", "Rückseite hinzufügen"], "Modifier le dos du livre": ["Change back cover", "Cambiar contraportada", "뒤표지 변경", "Rückseite ändern"], "↻ Voir le dos": ["↻ Show back", "↻ Ver contraportada", "↻ 뒤표지 보기", "↻ Rückseite zeigen"], "↻ Voir la couverture": ["↻ Show cover", "↻ Ver portada", "↻ 표지 보기", "↻ Cover zeigen"], "Enregistrer le dos": ["Save back cover", "Guardar contraportada", "뒤표지 저장", "Rückseite speichern"], "Rogner le dos actuel": ["Crop current back cover", "Recortar contraportada actual", "현재 뒤표지 자르기", "Aktuelle Rückseite zuschneiden"], "Retirer le dos": ["Remove back cover", "Quitar contraportada", "뒤표지 제거", "Rückseite entfernen"], "📷 Prendre une photo": ["📷 Take a photo", "📷 Tomar una foto", "📷 사진 촬영", "📷 Foto aufnehmen"]});
 /* V2.25 */ Object.assign(D,{"Protéger le stockage": ["Protect storage", "Proteger el almacenamiento", "저장소 보호", "Speicher schützen"], "✔ Stockage protégé": ["✔ Storage protected", "✔ Almacenamiento protegido", "✔ 저장소 보호됨", "✔ Speicher geschützt"]});
 /* V2.24 */ Object.assign(D,{"Même taille que la série": ["Same size as the series", "Mismo tamaño que la serie", "시리즈와 같은 크기", "Gleiche Größe wie die Reihe"]});
+if(window.SCANLY_I18N_EXTRA)for(const [k,v] of Object.entries(window.SCANLY_I18N_EXTRA))if(!D[k])D[k]=v;
 for(const [k,v] of Object.entries(D)){const n=k.replace(/’/g,"'");if(!D[n])D[n]=v;}
+/* V2.28: patterns with placeholders, e.g. "{0} livre(s) déplacé(s) vers {1}". */
+const reEsc=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const P=Object.keys(D).filter(k=>/\{\d+\}/.test(k)).map(k=>{const parts=k.split(/(\{\d+\})/),order=[];let re='';for(const x of parts){const m=x.match(/^\{(\d+)\}$/);if(m){order.push(+m[1]);re+='([\\s\\S]*?)';}else re+=reEsc(x).replace(/ /g,'\\s+');}const lit=parts.filter(x=>!/^\{\d+\}$/.test(x)).join('');return {k,re:new RegExp('^'+re+'$'),order,lit:lit.length,probe:parts.filter(x=>!/^\{\d+\}$/.test(x)).sort((a,b)=>b.length-a.length)[0].trim().split(/\s+/)[0]};}).sort((a,b)=>b.lit-a.lit);
+const memo=new Map();
 const langs={fr:'Français',en:'English',es:'Español',ko:'한국어',de:'Deutsch'};
 let lang=localStorage.getItem('scanly_language')||'fr';if(!langs[lang])lang='fr';
 const idx={en:0,es:1,ko:2,de:3};
 const originals=new WeakMap(),attrs=new WeakMap();
-const protectedSelector='script,style,textarea,input,[data-no-i18n],#pLanguage option,#ogSelect option,#grid .t,#grid .a,#grid .phc,.enhance-cover .phc,.b3v,#eCase option[value]:not([value=""]):not([value="__new"]),#sCase option[value]:not([value=""]):not([value="__new"]),#rCase option[value]:not([value=""]):not([value="__new"]),#tlist td:nth-child(2),#tlist td:nth-child(3),#tlist td:nth-child(4),#tlist td:nth-child(7),#unit .book,#unit .plaque,#caseBar .ddt,#caseBar [data-case]:not([data-case="__all"]):not([data-case="__add"]):not([data-case="__clearai"]),.det-top h2,.det-top h2+div,.price,#chat .msg,#ogTitle,#lpTitle,#lpName,#eDescription,#eNotes,#pCases input,.shelf-name';
+const protectedSelector='script,style,textarea,input,[data-no-i18n],#pLanguage option,#ogSelect option,#grid .t,#grid .a,#grid .phc,.enhance-cover .phc,.b3v,#eCase option[value]:not([value=""]):not([value="__new"]):not([value="__none__"]),#sCase option[value]:not([value=""]):not([value="__new"]):not([value="__none__"]),#rCase option[value]:not([value=""]):not([value="__new"]):not([value="__none__"]),#tlist td:nth-child(2),#tlist td:nth-child(3),#tlist td:nth-child(4),#tlist td:nth-child(7),#unit .book,.det-top h2,.det-top h2+div,.price,#chat .msg,#ogTitle,#lpTitle,#lpName,#eDescription,#eNotes,#pCases input,.shelf-name';
 function protectedNode(el){return !!el.closest(protectedSelector);}
 function translate(s){
+ if(lang==='fr'||!s)return s;
+ const ck=lang+'\u0001'+s;if(memo.has(ck))return memo.get(ck);
+ const r=translate0(s,0);if(memo.size>8000)memo.clear();memo.set(ck,r);return r;
+}
+function patternT(core,depth){
+ if(depth>2)return null;
+ for(const p of P){if(p.probe&&!core.includes(p.probe))continue;const m=core.match(p.re);if(!m)continue;const tpl=D[p.k][idx[lang]];if(!tpl)continue;return tpl.replace(/\{(\d+)\}/g,(a,n)=>{const v=m[p.order.indexOf(+n)+1];return v==null?'':translate0(v,depth+1);});}
+ return null;
+}
+function translate0(s,depth){
  if(lang==='fr'||!s)return s;
  const a=s.match(/^(\s*)(.*?)(\s*)$/s), core=a[2].replace(/’/g,"'");
  let out=D[core]?.[idx[lang]];
@@ -27,6 +42,8 @@ function translate(s){
    if(!out){const m=core.match(/^(\d+)\s+(cadres?|livres?|étagères?|ouvrages|auteurs|séries|lus|résultats|souhaits)$/i);if(m){const words={en:{cadre:'frame',livre:'book','étagère':'shelf',ouvrages:'books',auteurs:'authors','séries':'series',lus:'read','résultats':'results',souhaits:'wishlist'},es:{cadre:'marco',livre:'libro','étagère':'estante',ouvrages:'libros',auteurs:'autores','séries':'series',lus:'leídos','résultats':'resultados',souhaits:'deseos'},ko:{cadre:'영역',livre:'도서','étagère':'선반',ouvrages:'도서',auteurs:'저자','séries':'시리즈',lus:'읽음','résultats':'결과',souhaits:'희망 도서'},de:{cadre:'Rahmen',livre:'Buch','étagère':'Regalbrett',ouvrages:'Bücher',auteurs:'Autoren','séries':'Reihen',lus:'gelesen','résultats':'Ergebnisse',souhaits:'Wünsche'}};let key=m[2].toLowerCase();if(/^(cadres|livres|étagères)$/.test(key))key=key.slice(0,-1);let word=words[lang][key];if(m[1]!=='1'&&['cadre','livre','étagère'].includes(key)){word=({en:{cadre:'frames',livre:'books','étagère':'shelves'},es:{cadre:'marcos',livre:'libros','étagère':'estantes'},ko:{cadre:'영역',livre:'도서','étagère':'선반'},de:{cadre:'Rahmen',livre:'Bücher','étagère':'Regalbretter'}})[lang][key];}out=m[1]+' '+word;}}
  if(!out){const m=core.match(/^(Photo d['’]origine|Corriger) – (.*)$/s);if(m)out=(D[m[1]]?.[idx[lang]]||m[1])+' – '+m[2];}
  if(!out&&/ · étagère \d+ · position /.test(core)){const shelf={en:'shelf',es:'estante',ko:'선반',de:'Regalbrett'}[lang],pos={en:'position',es:'posición',ko:'위치',de:'Position'}[lang];out=core.replace(/ · étagère (\d+) · position /,' · '+shelf+' $1 · '+pos+' ');}
+ if(!out)out=patternT(core,depth||0);
+ if(!out){const m=core.match(/^([^\p{L}\p{N}{]*)([\s\S]+?)([^\p{L}\p{N})»]*)$/u);if(m&&(m[1]||m[3])){const r=D[m[2]]?.[idx[lang]]||patternT(m[2],depth||0);if(r)out=m[1]+r+m[3];}}
  return out?a[1]+out+a[3]:s;
 }
 function textNode(n){const p=n.parentElement;if(!p||protectedNode(p)||!n.data.trim())return;

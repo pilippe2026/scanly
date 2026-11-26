@@ -148,14 +148,16 @@ function caseGroups() {
   const loose = books.filter(b => vis(b) && caseOf(b) === NONE); if (loose.length) g.push({id: NONE, name: 'Non rangés', bs: loose, photos: []});
   return g;
 }
+/* V2.28: user-chosen unit names are never translated; system labels (Non rangés…) are. */
+const nm28 = g => (g.id === NONE || g.id === 'demo') ? esc(g.name) : `<span data-no-i18n>${esc(g.name)}</span>`;
 const rowsCount = g => Math.max(g.rows || 3, 1, ...g.bs.map(b => b.row || 1));
 function renderCaseBar(groups) {
   const q = F.q.trim(), hitsOf = g => q ? g.bs.filter(b => matchQ(b, q) && passF(b)).length : 0, ownN = g => g.bs.filter(b => !b.wish).length;
   const allHits = groups.reduce((s, g) => s + hitsOf(g), 0), kc = cases.find(c => c.id === curCase);
   const curName = curCase === ALL ? 'Vue d\'ensemble' : (groups.find(g => g.id === curCase)?.name || 'Meubles'), curN = curCase === ALL ? books.filter(b => !b.wish).length : (groups.find(g => g.id === curCase) ? ownN(groups.find(g => g.id === curCase)) : 0);
-  $('#caseBar').innerHTML = `<div class="ddw down left"><button class="ddt" data-dd title="Choisir un meuble, la vue d'ensemble, ajouter un meuble ou une étagère">${I('shelfI')} ${esc(curName)} <span class="n">${curN}</span>${allHits ? `<span class="hitn">${allHits}</span>` : ''}<span class="car">▾</span></button><div class="dd">` + (aiHits ? `<button data-case="__clearai" class="ai" title="Revenir à l'affichage normal">Sélection IA (${aiHits.size}) ✕</button><span class="sep"></span>` : '') +
+  $('#caseBar').innerHTML = `<div class="ddw down left"><button class="ddt" data-dd title="Choisir un meuble, la vue d'ensemble, ajouter un meuble ou une étagère">${I('shelfI')} ${curCase === ALL || !groups.find(g => g.id === curCase) ? esc(curName) : nm28(groups.find(g => g.id === curCase))} <span class="n">${curN}</span>${allHits ? `<span class="hitn">${allHits}</span>` : ''}<span class="car">▾</span></button><div class="dd">` + (aiHits ? `<button data-case="__clearai" class="ai" title="Revenir à l'affichage normal">Sélection IA (${aiHits.size}) ✕</button><span class="sep"></span>` : '') +
     (groups.length > 1 ? `<button data-case="${ALL}" class="${curCase === ALL ? 'on' : ''}" title="Tous les meubles réunis en un seul, par zones">Vue d'ensemble<span class="n">${books.filter(b => !b.wish).length}</span>${allHits ? `<span class="hitn">${allHits}</span>` : ''}</button><span class="sep"></span>` : '') +
-    groups.map(g => { const h = hitsOf(g); return `<button data-case="${g.id}" class="${g.id === curCase ? 'on' : ''}" title="Glisse un livre ici pour le déplacer dans ce meuble">${esc(g.name)}<span class="n">${ownN(g)}</span>${h ? `<span class="hitn">${h}</span>` : ''}</button>`; }).join('') +
+    groups.map(g => { const h = hitsOf(g); return `<button data-case="${g.id}" class="${g.id === curCase ? 'on' : ''}" title="Glisse un livre ici pour le déplacer dans ce meuble">${nm28(g)}<span class="n">${ownN(g)}</span>${h ? `<span class="hitn">${h}</span>` : ''}</button>`; }).join('') +
     `<button data-case="__add" title="Nouveau meuble">＋ Meuble</button>` +
     (kc ? `<span class="sep"></span><div class="rowb"><button data-rows="-1" title="Retirer la dernière étagère (si elle est vide)">−</button><span class="rn">${rowsCount({...kc, bs: books.filter(b => b.caseId === kc.id)})} étagères</span><button data-rows="1" title="Ajouter une étagère à ce meuble">＋ Étagère</button></div><button data-shelves21="1" title="Choisir une étagère : sélectionner, vider ou supprimer">Gérer / supprimer une étagère…</button><button data-sel21="1" title="Toucher des livres pour les déplacer ou les supprimer">☑ Sélectionner des livres</button>` : '') + '</div></div>';
 }
@@ -201,7 +203,7 @@ function book3D(b, x, yBottom, s, dimmed) {
       <span class="st" style="max-height:${h - 60 * s}px;font-size:${Math.max(8, 12 * s)}px">${esc(label)}</span>
       <span class="sa" style="font-size:${Math.max(7, 9.5 * s)}px">${esc(lastName(b))}</span></i>`;
   return `<div class="${cls}" data-id="${b.id}" data-case="${caseOf(b)}" data-row="${b.row || 1}" style="left:${x.toFixed(1)}px;top:${(yBottom - h).toFixed(1)}px;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;--bookZ:${backZ.toFixed(2)}px">${front}<i class="contact" style="top:${h}px;width:${w}px;height:${d}px;transform:rotateX(90deg)"></i>
-    ${loan ? `<i class="rib" style="transform:translateZ(${d + 1}px)">PRÊTÉ</i>` : ''}${b.wish ? `<i class="rib wishr" style="transform:translateZ(${d + 1}px)">SOUHAIT</i>` : ''}${b.unknown && w > 14 ? `<i class="rib unkr" style="transform:translateZ(${d + 1}px)">?</i>` : ''}
+    ${loan ? `<i class="rib" style="transform:translateZ(${d + 1}px)">${T28('PRÊTÉ')}</i>` : ''}${b.wish ? `<i class="rib wishr" style="transform:translateZ(${d + 1}px)">${T28('SOUHAIT')}</i>` : ''}${b.unknown && w > 14 ? `<i class="rib unkr" style="transform:translateZ(${d + 1}px)">?</i>` : ''}
     <i class="tp" style="width:${w}px;height:${d}px;transform:rotateX(90deg);background:linear-gradient(90deg,${shade(col, .55)} 0 9%,transparent 9% 91%,${shade(col, .55)} 91%),linear-gradient(0deg,rgba(0,0,0,.35),rgba(0,0,0,0) 70%),repeating-linear-gradient(90deg,#e6dcc6 0 1px,#cdbfa3 1px 2px)"></i>
     <i class="sl" style="left:0;width:${d}px;height:${h}px;background:linear-gradient(90deg,${shade(col, .45)},${side});transform:rotateY(-90deg)"></i>
     <i class="sr" style="left:${w}px;width:${d}px;height:${h}px;background:linear-gradient(90deg,${shade(col, .55)},${shade(col, .4)});transform:translateZ(${d}px) rotateY(90deg)"></i>
@@ -299,8 +301,8 @@ function renderRoom(resetView) {
   zones.forEach((g, zi) => {
     const zw = isAll ? need[zi] + extra * need[zi] / sumNeed : W;
     if (isAll) { html += `<div class="zonebg" style="left:${zx + 4}px;top:4px;width:${zw - 8}px;height:${H - 8}px"></div>`;
-      html += `<div class="plaque zl" data-goto="${g.id}" title="Ouvrir ce meuble" style="left:${zx + zw / 2}px;top:10px">${esc(g.name)}<small>${g.bs.filter(b => !b.wish).length}</small></div>`; }
-    else if (books.length) html += `<div class="plaque" data-ren="${g.id}" title="Renommer" style="left:${Math.min(W * .72, W - 160)}px;top:4px">${esc(g.name)}<small>${g.bs.filter(b => !b.wish).length} ouvrage${g.bs.filter(b => !b.wish).length > 1 ? 's' : ''}</small></div>`;
+      html += `<div class="plaque zl" data-goto="${g.id}" title="Ouvrir ce meuble" style="left:${zx + zw / 2}px;top:10px">${nm28(g)}<small>${g.bs.filter(b => !b.wish).length}</small></div>`; }
+    else if (books.length) html += `<div class="plaque" data-ren="${g.id}" title="Renommer" style="left:${Math.min(W * .72, W - 160)}px;top:4px">${nm28(g)}<small>${g.bs.filter(b => !b.wish).length} ouvrage${g.bs.filter(b => !b.wish).length > 1 ? 's' : ''}</small></div>`;
     rowsOf(g, rowsN).forEach((r, i) => {
       const y = Math.round(TOP + (i + 1) * rowH - U.T); let x = zx + 20;
       if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Cliquer : menu de l'étagère (sélectionner, supprimer). Maintenir puis glisser : déplacer l'étagère">⇕</div>` : ''}`;

@@ -7,12 +7,14 @@
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.27';
+const VERSION = '2.28';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 function loadTypes20() { try { const saved = JSON.parse(localStorage.getItem('scanly_types') || 'null'); if (Array.isArray(saved) && saved.length) TYPES.splice(0, TYPES.length, ...[...new Set(saved.filter(s => typeof s === 'string' && s.trim()).map(s => s.trim()))]); } catch (e) {} if (!TYPES.includes('Autre')) TYPES.push('Autre'); }
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
+/* V2.28: translate a label at render time where the page translator cannot reach (3D spines). */
+const T28 = s => (window.SCANLY_I18N ? SCANLY_I18N.t(s) : s);
 const MODELS = ['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite'];
 
 /* ---------- Icônes au trait (charte : bleu nuit / or / crème) ---------- */
