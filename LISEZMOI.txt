@@ -1,3 +1,90 @@
+SCANLY V2.20 - FICHE OUVRAGE REORGANISEE, DETOURAGE PLUS PRECIS, REGLAGE FIN
+Base exclusive : archive SCANLY V2.19 fournie par Philippe.
+
+- RESUME
+  Le bouton Resume (aperçu court IA) est supprime : doublon avec la description.
+  La description deja presente (sous « Complement BnF » en V2.19) est affichee a la
+  place du bouton, en haut de la fiche au-dessus des etoiles, a l'identique
+  (meme cadre, meme texte, 900 caracteres maximum).
+
+- FICHE OUVRAGE (PC, Mac, iPad, iPhone)
+  Deroulement : en-tete (couverture 3D, titre, auteur, badges, emplacement,
+  description, note) > actions rapides > sections repliables :
+  1. Informations : titre, auteur, serie/tome, type, genre, editeur, annee, pages,
+     ISBN (scanner / mettre a jour), prix, statut + bloc « Completer ou verifier
+     la notice » (bases de livres, choisir une edition, BnF, Infos IA).
+  2. Rangement et lecture : meuble, etagere, position, couleur, format, lu le.
+  3. Pret (ouvert automatiquement si le livre est prete).
+  4. Tranche et couverture : tous les outils de la tranche, couverture,
+     photo d'origine et rescan de zone regroupes au meme endroit.
+  5. Notes personnelles.
+  L'etat ouvert/ferme des sections est memorise sur chaque appareil.
+  PC : Ctrl+Entree enregistre ; Mac : Cmd+Entree. Fleches ← → : livre precedent / suivant.
+  Supprimer est decale a droite dans la barre du bas (moins de risque d'appui par erreur).
+  Doublons retires : « Zoom dans la piece » (fusionne avec « Voir dans la piece »),
+  « Reprendre sur la photo d'origine » present a deux endroits (un seul desormais).
+
+- VOIR DANS LA PIECE
+  Ouvre la piece, cadre le livre avec ses voisins, contour dore pulse et fleche
+  au-dessus du livre pendant environ 6 secondes. Echap / « Tout voir » pour revenir.
+
+- TYPE DE LIVRE MODIFIABLE
+  Fiche > Type > « Gerer les types » : renommer (ex. Beau livre -> Belles oeuvres),
+  ajouter, supprimer (les livres passent en « Autre »). Renommer change l'intitule
+  de TOUS les livres de ce type, souhaits compris. Un nom deja existant fusionne
+  les deux types. Point de restauration cree avant. Le choix « ＋ Nouveau type… »
+  est aussi dans la liste. La liste des types suit la sauvegarde et la synchronisation.
+
+- SUPPRIMER DES LIVRES / UNE ETAGERE DANS LA PIECE 3D
+  Clic (ou toucher) sur le rond ⇕ d'une etagere : menu Selectionner ces livres,
+  Supprimer les livres de l'etagere, Supprimer l'etagere (livres en corbeille,
+  etageres du dessous remontees, bouton Annuler pendant 10 s).
+  Maintenir ⇕ puis glisser deplace toujours l'etagere.
+  Outils > Selection : la barre de selection s'affiche des l'activation (aide,
+  Tout le meuble, Terminer), puis Deplacer / Supprimer pour la selection.
+
+- MENUS EN DOUBLE
+  Les boutons d'action des fenetres (Appliquer, Enregistrer et suivant, Annuler,
+  Filtres...) sont deplaces dans la barre fixe du bas au lieu d'etre copies :
+  une seule commande par action dans toutes les fenetres d'outils et dans Filtres.
+
+- DETOURAGE AUTOMATIQUE PLUS PRECIS
+  Nouveau calcul : un vrai bord de livre doit etre present sur presque toute la
+  hauteur (le texte du titre n'est plus pris pour un bord), couleurs et sillon
+  sombre entre deux livres pris en compte, chaque bord ajuste separement par une
+  droite (perspective), haut et bas recherches par changement net de couleur.
+  Utilise par : Detection automatique, Redresser auto, Redresser toutes les
+  tranches et le scan (nouvelle etape « affinage du detourage » a la fin, sans
+  appel IA supplementaire). En cas de resultat incoherent, la decoupe precedente
+  est conservee.
+
+- REGLAGE FIN (DETOURAGE, COUVERTURE, ZONE)
+  Meme outil partout : zoom (＋/−, molette, pincer, double-clic), deplacement de
+  la photo, coins dores, carres au milieu des cotes pour deplacer un bord,
+  glisser a l'interieur pour deplacer le cadre, loupe pendant le deplacement,
+  « Coin suivant » + fleches ← ↑ ↓ → (maintenir pour repeter ; clavier : cliquer
+  sur la photo puis fleches, Maj = x10, Tab = coin suivant).
+  Ajouter une couverture : 4 coins libres comme le detourage ; la couverture
+  est redressee meme si la photo est prise de biais (apercu en direct),
+  Detection automatique, Rectangle droit, Toute la photo, rotation 90°.
+
+TESTS REALISES
+  Syntaxe JavaScript ; Chromium PC 1400x900, emulation iPad portrait et iPhone
+  390x844 avec donnees fictives en memoire (non incluses dans l'archive) :
+  fiche, sections, Ctrl+Entree, Voir dans la piece, editeur de detourage
+  (detection, zoom, fleches, annulation), couverture (detection, enregistrement),
+  zone, redresser, separer, photo d'origine, filtres (une seule barre),
+  renommage Beau livre -> Belles oeuvres (5 livres), suppression d'etagere
+  puis Annuler, mode selection. Aucune erreur console.
+  Detourage compare a la V2.19 sur une photo d'etagere de test (livres gris
+  identiques, livres penches) : bords et bas des tranches plus justes.
+  Non teste : appareils physiques, Gemini reel, synchronisation GitHub reelle.
+
+MISE A JOUR
+  Faire une sauvegarde exportee avant remplacement. Envoyer sur GitHub le CONTENU
+  du dossier SCANLY V2.20 (index.html, i18n.js, book_sources.js, sw.js, assets...),
+  pas le dossier parent. Fermer puis rouvrir completement l'application.
+
 SCANLY V2.19 - BANDEAU COMPACT, ISBN AUTOMATIQUE, RESUME COURT
 Base exclusive : archive SCANLY V2.18 fournie par Philippe.
 

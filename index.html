@@ -596,6 +596,38 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
 @media(max-width:900px){.toolbar{padding:6px 10px!important;gap:8px!important;height:52px!important}.toolbar #viewSeg{display:none!important}#viewCompact19{display:block!important;flex:1;min-width:0;max-width:100%;height:38px}.filter-actions19 button{min-height:38px;padding:6px 9px;font-size:12px}.brief-summary19{font-size:13px}}
 
 #filterClear19[hidden]{display:none!important}
+/* V2.20 – fiche ouvrage en sections, réglage fin, localisation, étagères */
+.fiche-quick20{margin-top:12px}
+.fsec20{border:1px solid var(--line);border-radius:12px;margin-top:12px;background:var(--white)}
+.fsec20>summary{cursor:pointer;list-style:none;padding:11px 14px;font:700 14px var(--fT);color:var(--navy);display:flex;align-items:center;gap:8px;min-height:44px;box-sizing:border-box}
+.fsec20>summary::-webkit-details-marker{display:none}
+.fsec20>summary::before{content:'▸';color:var(--gold);transition:transform .15s}.fsec20[open]>summary::before{transform:rotate(90deg)}
+.fsec20-body{padding:0 14px 14px}.fsec20-body>.l:first-child,.fsec20-body>.g2:first-child .l,.fsec20-body>.g3:first-child .l{margin-top:0}
+.fsub20{margin-top:14px;padding:10px 12px;background:var(--cream);border-radius:10px}.fsub20>b{font:700 13px var(--fT);color:var(--navy)}.fsub20 .btns{margin-top:8px}
+.fiche-tools20{display:flex;gap:6px;flex-wrap:wrap}
+.spinebox{margin-top:0}
+.linkbtn20{background:none;border:0;padding:0 0 0 6px;color:var(--gold);font:600 12px var(--fB);cursor:pointer;text-decoration:underline}
+.det-top .desc{margin-top:10px}
+#eNotes{min-height:80px}
+.fe20-wrap{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+.fe20-area{position:relative;flex:1 1 320px;min-width:200px;height:min(62vh,640px);min-height:220px;background:#0d1626;border-radius:10px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.fe20-canvas{display:block;width:100%;height:100%;touch-action:none;outline:none}
+.fe20-canvas:focus-visible{box-shadow:inset 0 0 0 3px #2ab8ee}
+.fe20-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fe20-side img{height:min(62vh,640px);max-width:130px;object-fit:contain;background:#222;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.fe20-side.cover20 img{max-width:240px}
+.fe20-tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.fe20-tools .btn{min-width:40px;min-height:38px;touch-action:manipulation}
+.fe20-pad{display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap}
+.fe20-info{margin:0 0 0 4px}
+@media(max-width:700px){.fe20-wrap{flex-wrap:nowrap;gap:8px}.fe20-area{flex:1 1 auto;min-width:0;height:46vh}.fe20-side .hint{display:none}.fe20-side img{height:46vh;max-width:54px}.fe20-side.cover20 img{max-width:96px}.fe20-tools .btn{min-width:44px;min-height:44px}}
+#unit .book.locate20 .fr{animation:locate20 1.1s ease-in-out 5;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--gold),0 0 34px 12px rgba(212,175,124,.95)}
+@keyframes locate20{50%{box-shadow:0 0 0 3px #fff,0 0 0 9px var(--gold),0 0 50px 22px rgba(255,220,160,1)}}
+.locpin20{position:absolute;z-index:4;transform:translateX(-50%) translateZ(140px);color:var(--gold);font:900 34px/1 var(--fB);text-shadow:0 0 6px #000,0 2px 10px rgba(0,0,0,.8);pointer-events:none;animation:locpin20 .9s ease-in-out infinite}
+@keyframes locpin20{50%{margin-top:-12px}}
+.shelfmenu20{display:flex;flex-direction:column;gap:8px;margin:8px 0}.shelfmenu20 .btn{justify-content:center;min-height:44px}
+.fiche-foot20 #bDel,#dFoot #bDel{margin-left:auto}
+.types20 td{padding:4px 6px;vertical-align:middle}.types20 .fld{margin:0;min-width:120px}
 </style>
 </head>
 <body>
@@ -726,8 +758,9 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.19';
+const VERSION = '2.20';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
+loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
 const STATUS = ['À lire','En cours','Lu','Prêté'];
 const NONE = '__none__', ALL = '__all__';
 const MODELS = ['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite'];
@@ -1103,7 +1136,7 @@ const caseOf = b => b && b.caseId && cases.some(c => c.id === b.caseId) ? b.case
    RENDU GÉNÉRAL
    ===================================================================== */
 function renderAll() {
-  reviewCache18=new Map();
+  reviewCache18=new Map(); ensureTypes20();
   const own = books.filter(b => !b.wish).length, w = books.length - own, u = books.filter(b => b.unknown).length;
   $('#hcount').textContent = own + ' ouvrage' + (own > 1 ? 's' : '') + (u ? ` · ${u} à identifier` : '') + (w ? ` · ${w} souhait${w > 1 ? 's' : ''}` : '');
   renderToolbar(); renderRoom(); renderCat(); renderList(); renderSeries(); renderDash();renderReviewQueue18();renderWishlist18(); updUndoBtns();
@@ -1399,7 +1432,7 @@ function renderRoom(resetView) {
     else if (books.length) html += `<div class="plaque" data-ren="${g.id}" title="Renommer" style="left:${Math.min(W * .72, W - 160)}px;top:4px">${esc(g.name)}<small>${g.bs.filter(b => !b.wish).length} ouvrage${g.bs.filter(b => !b.wish).length > 1 ? 's' : ''}</small></div>`;
     rowsOf(g, rowsN).forEach((r, i) => {
       const y = Math.round(TOP + (i + 1) * rowH - U.T); let x = zx + 20;
-      if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Glisser vers le haut ou le bas pour déplacer cette étagère (ou sur l'onglet d'un autre meuble)">⇕</div>` : ''}`;
+      if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Cliquer : menu de l'étagère (sélectionner, supprimer). Maintenir puis glisser : déplacer l'étagère">⇕</div>` : ''}`;
       html += dz(g.id, i + 1, zx, TOP + i * rowH, zw, rowH);
       if (CAM.sel) { const ids = r.filter(b => !b.wish).map(b => b.id), all = ids.length && ids.every(id => SEL.has(id));
         html += `<button class="rowsel${all ? ' on' : ''}" data-rs="${g.id}|${i + 1}" style="left:${zx + 6}px;top:${TOP + i * rowH + 6}px">${all ? '☑' : '☐'} Étagère ${i + 1}${ids.length ? ` (${ids.length})` : ''}</button>`; }
@@ -1424,6 +1457,7 @@ function focusBook(id) { // centre la vue sur un livre
 }
 $('#unit').addEventListener('click', async e => {
   if (justDragged) return;
+  const gp = e.target.closest('.shgrip'); if (gp) return openShelfMenu20(gp.dataset.grip);
   const bk = e.target.closest('.book');
   const rs = e.target.closest('[data-rs]'); if (rs) return selectRow(rs.dataset.rs);
   if (bk) { if (CAM.sel || e.ctrlKey || e.metaKey || e.shiftKey) { SEL.has(bk.dataset.id) ? SEL.delete(bk.dataset.id) : SEL.add(bk.dataset.id); bk.classList.toggle('sel'); return renderSelBar(); } const id = bk.dataset.id; clearTimeout(window._bkClick); window._bkClick = setTimeout(() => openBook(id), 260); return; }
@@ -1447,15 +1481,18 @@ window.addEventListener('resize', () => applyView());
 const caseOptions = (cur, withNone = false) => cases.map(c => `<option value="${c.id}" ${c.id === cur ? 'selected' : ''}>${esc(c.name)}</option>`).join('') + (withNone ? `<option value="${NONE}">Non rangés</option>` : '') + `<option value="__new">＋ Nouveau meuble…</option>`;
 function renderSelBar() {
   [...SEL].forEach(id => { if (!books.some(b => b.id === id)) SEL.delete(id); });
-  const bar = $('#selBar'); if (!SEL.size) { bar.classList.remove('on'); return; }
+  const bar = $('#selBar'); if (!SEL.size && !CAM.sel) { bar.classList.remove('on'); return; }
   bar.classList.add('on');
-  bar.innerHTML = `<b>${SEL.size} livre${SEL.size > 1 ? 's' : ''} sélectionné${SEL.size > 1 ? 's' : ''}</b><span class="hint" style="color:#c9d3e6">Déplacer vers</span>
+  const done = CAM.sel ? '<button class="btn s sm" id="selDone">Terminer la sélection</button>' : '';
+  if (!SEL.size) { bar.innerHTML = `<b>Mode sélection</b><span class="hint" style="color:#c9d3e6">Touche des livres, ou « ☐ Étagère n » pour toute une étagère.</span><button class="btn s sm" id="selCase2" title="Sélectionner tous les livres du meuble affiché">Tout le meuble</button>${done}`; }
+  else bar.innerHTML = `<b>${SEL.size} livre${SEL.size > 1 ? 's' : ''} sélectionné${SEL.size > 1 ? 's' : ''}</b><span class="hint" style="color:#c9d3e6">Déplacer vers</span>
     <select id="selCase">${caseOptions(cases.some(c => c.id === curCase) ? curCase : '')}</select><span class="hint" style="color:#c9d3e6">étagère</span><input id="selRow" type="number" min="1" max="15" value="1" style="width:56px">
-    <button class="btn g sm" id="selGo">Déplacer</button><button class="btn k sm" id="selDel">Supprimer (${SEL.size})</button><button class="btn s sm" id="selCase2" title="Sélectionner tous les livres du meuble affiché">Tout le meuble</button><button class="btn s sm" id="selClear">Tout désélectionner</button>`;
-  $('#selDel').onclick = () => deleteBooks([...SEL], 'Suppression de la sélection');
+    <button class="btn g sm" id="selGo">Déplacer</button><button class="btn k sm" id="selDel">Supprimer (${SEL.size})</button><button class="btn s sm" id="selCase2" title="Sélectionner tous les livres du meuble affiché">Tout le meuble</button><button class="btn s sm" id="selClear">Tout désélectionner</button>${done}`;
+  if ($('#selDel')) $('#selDel').onclick = () => deleteBooks([...SEL], 'Suppression de la sélection');
   $('#selCase2').onclick = () => { books.filter(b => !b.wish && (curCase === ALL || caseOf(b) === curCase)).forEach(b => SEL.add(b.id)); renderRoom(); };
-  $('#selGo').onclick = async () => { const ok = await moveBooks([...SEL], $('#selCase').value, Math.max(1, parseInt($('#selRow').value) || 1), `Déplacement de ${SEL.size} livre(s)`); if (ok) { SEL.clear(); renderAll(); } };
-  $('#selClear').onclick = () => { SEL.clear(); renderRoom(); renderList(); };
+  if ($('#selGo')) $('#selGo').onclick = async () => { const ok = await moveBooks([...SEL], $('#selCase').value, Math.max(1, parseInt($('#selRow').value) || 1), `Déplacement de ${SEL.size} livre(s)`); if (ok) { SEL.clear(); renderAll(); } };
+  if ($('#selClear')) $('#selClear').onclick = () => { SEL.clear(); renderRoom(); renderList(); };
+  if ($('#selDone')) $('#selDone').onclick = () => { CAM.sel = false; SEL.clear(); renderRoom(); renderList(); };
 }
 function selectRow(key) {
   const i = key.lastIndexOf('|'), cid = key.slice(0, i), row = +key.slice(i + 1);
@@ -1916,6 +1953,8 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if (!nav && !$('#drawer').classList.contains('on')) NAV.list = isNew ? null : navList();
   NAV.cur = isNew ? null : b.id; bookDirty = false;
   const loc = cases.find(c => c.id === b.caseId), oc = b.orig && cases.find(c => c.id === b.orig.caseId);
+  const spineTools20 = b.spineImg ? `<div class="spinebox"><img src="${spineURL(b)}" alt="Tranche photographiée"><div><b style="font:700 13px var(--fT)">Tranche photographiée</b><p class="hint" style="margin:4px 0 8px">${b.unknown ? 'L\'IA n\'a pas pu lire cette tranche lors du scan. Lis-la ici et complète le titre, ou demande une nouvelle lecture zoomée.' : 'Extrait de ta photo : sert de texture sur l\'étagère (bouton « Tranches photo »).'}</p><div class="fiche-tools20"><button class="btn ${b.unknown ? 'g' : 's'} sm" id="bIdent">Identifier avec l'IA</button><button class="btn s sm" id="bLoupe" title="Voir la tranche en grand (molette = zoom)">⌕ Agrandir</button><button class="btn s sm" id="bQuad" title="Déplacer les 4 coins sur les bords réels du livre">Ajuster le détourage</button><button class="btn s sm" id="bStraight" title="Redressement et détourage automatiques">Redresser auto</button><button class="btn s sm" id="bSplit" title="Cette tranche contient plusieurs livres : place les coupures">✂ Séparer en plusieurs livres</button>${b.previousSpine18 ? '<button type="button" class="btn s sm" id="bSpinePrevious">Revenir à la tranche précédente</button>' : ''}</div></div></div>` : '';
+  const sec20 = (key, title, body, def = true) => `<details class="fsec20" data-sec="${key}" ${ficheSecOpen20(key, def) ? 'open' : ''}><summary>${title}</summary><div class="fsec20-body">${body}</div></details>`;
   openDrawer(isNew ? 'Nouvel ouvrage' : b.unknown ? 'Livre à identifier' : b.wish ? 'Liste de souhaits' : 'Fiche ouvrage', `
     <div class="det-top">${viewer3D(b)}<div style="flex:1;min-width:0">
       <h2>${esc(isNew && !b.title ? 'Nouveau livre' : dispTitle(b))}</h2><div style="color:var(--slate)">${esc(b.author || '')}</div>
@@ -1923,32 +1962,29 @@ function openBook(idOrBook, isNew = false, nav = false) {
       ${b.price != null && b.price !== '' ? `<div style="margin-top:8px"><span class="price">${eur(b.price, b.priceSource)}</span> <span class="hint">${esc(b.priceSource || '')}</span></div>` : ''}
       ${loc ? `<div class="hint" style="margin-top:6px">${esc(loc.name)} · étagère ${b.row || 1} · position ${b.position || '?'}</div>` : ''}
       ${origDiff(b) ? `<div class="hint">Origine (photo) : ${esc(oc ? oc.name : 'non rangé')} · étagère ${b.orig.row} · position ${b.orig.position}</div>` : ''}
-      <button type="button" class="btn s sm" id="bBriefSummary19" aria-expanded="false" aria-controls="briefSummaryBox19" style="margin-top:10px">Résumé</button><div id="briefSummaryBox19" class="brief-summary19" hidden aria-live="polite"></div>
+      ${b.description ? `<div class="desc" data-no-i18n>${esc(b.description).slice(0, 900)}${b.description.length > 900 ? '…' : ''}</div>` : ''}
       <div class="stars" id="bStars">${[1, 2, 3, 4, 5].map(i => `<b data-r="${i}" class="${(b.rating || 0) >= i ? 'on' : ''}">★</b>`).join('')}</div>
     </div></div>
-    ${b.spineImg ? `<div class="spinebox"><img src="${spineURL(b)}" alt="Tranche photographiée"><div><b style="font:700 13px var(--fT)">Tranche photographiée</b><p class="hint" style="margin:4px 0 8px">${b.unknown ? 'L\'IA n\'a pas pu lire cette tranche lors du scan. Lis-la ici et complète le titre, ou demande une nouvelle lecture zoomée.' : 'Extrait de ta photo : sert de texture sur l\'étagère (bouton « Tranches photo »).'}</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ${b.unknown ? 'g' : 's'} sm" id="bIdent">Identifier avec l'IA</button><button class="btn s sm" id="bQuad" title="Déplacer les 4 coins sur les bords réels du livre">Ajuster le détourage</button><button class="btn s sm" id="bStraight" title="Redressement et détourage automatiques">Redresser auto</button><button class="btn s sm" id="bLoupe" title="Voir la tranche en grand (molette = zoom)">⌕ Agrandir</button><button class="btn s sm" id="bSplit" title="Cette tranche contient plusieurs livres : place les coupures">✂ Séparer en plusieurs livres</button><button class="btn s sm" id="bZoomRoom" title="Zoomer sur ce livre dans la pièce">Zoom dans la pièce</button>${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">📷 Reprendre sur la photo d'origine</button>` : ''}</div></div></div>` : ''}
-    ${b.bnfRef ? `<p class="hint">Complément BnF${b.bnfRef.url ? ` · <a href="${esc(b.bnfRef.url)}" target="_blank" rel="noopener">Notice BnF</a>` : ''}</p>` : ''}
-    ${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}
-    ${b.description ? `<div class="desc">${esc(b.description).slice(0, 900)}${b.description.length > 900 ? '…' : ''}</div>` : ''}
-    <div class="btns">${b.wish && !isNew ? `<button class="btn g" id="bGot">Je l'ai acheté</button>` : ''}${!isNew ? `<button class="btn s" id="bLoc">Voir dans la pièce</button>` : ''}${!isNew && !b.spineImg && origImport(b) ? `<button class="btn g" id="bOrigPhoto">📷 Reprendre sur la photo d'origine</button>` : ''}${!isNew && origDiff(b) ? `<button class="btn g" id="bOrig">↩ Remettre à sa place d'origine</button>` : ''}<button class="btn s" id="bFace">${b.faceOut ? 'Remettre sur la tranche' : 'Mettre en vitrine'}</button><button class="btn s" id="bGB">Compléter (bases de livres)</button><button type="button" class="btn s" id="bEdition">Choisir une édition</button><button class="btn s" id="bBnf">Vérifier avec la BnF</button><button type="button" class="btn s" id="bCoverOpen">Ajouter une couverture</button><button type="button" class="btn s" id="bZone">Rescanner une zone</button>${b.previousSpine18?'<button type="button" class="btn s" id="bSpinePrevious">Revenir à la tranche précédente</button>':''}<button class="btn s" id="bAI">Infos IA</button></div>
-    <label class="l">Titre</label><input class="fld" id="eTitle" value="${esc(b.title)}" placeholder="${b.unknown ? 'Titre à compléter' : ''}">
+    <div class="btns fiche-quick20">${b.wish && !isNew ? `<button class="btn g" id="bGot">Je l'ai acheté</button>` : ''}${!isNew ? `<button class="btn s" id="bLoc" title="Ouvre la pièce, zoome et met le livre en évidence">◎ Voir dans la pièce</button>` : ''}${!isNew && origDiff(b) ? `<button class="btn g" id="bOrig">↩ Remettre à sa place d'origine</button>` : ''}<button class="btn s" id="bFace">${b.faceOut ? 'Remettre sur la tranche' : 'Mettre en vitrine'}</button></div>
+    ${sec20('info', 'Informations', `<label class="l">Titre</label><input class="fld" id="eTitle" value="${esc(b.title)}" placeholder="${b.unknown ? 'Titre à compléter' : ''}">
     <label class="l">Auteur(s)</label><input class="fld" id="eAuthor" value="${esc(b.author)}">
     <div class="g2"><div><label class="l">Série</label><input class="fld" id="eSeries" value="${esc(b.series)}"></div><div><label class="l">Tome</label><input class="fld" id="eVol" type="number" value="${esc(b.volume)}"></div></div>
-    <div class="g2"><div><label class="l">Type</label><select class="fld" id="eType">${TYPES.map(t => `<option ${b.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div><div><label class="l">Genre</label><input class="fld" id="eGenre" value="${esc(b.genre)}"></div></div>
+    <div class="g2"><div><label class="l">Type <button type="button" class="linkbtn20" id="bTypes20" title="Renommer ou ajouter un type de livre">✎ Gérer les types</button></label><select class="fld" id="eType">${typeOptions20(b.type)}</select></div><div><label class="l">Genre</label><input class="fld" id="eGenre" value="${esc(b.genre)}"></div></div>
     <div class="g3"><div><label class="l">Éditeur</label><input class="fld" id="ePub" value="${esc(b.publisher)}"></div><div><label class="l">Année</label><input class="fld" id="eYear" type="number" value="${esc(b.year)}"></div><div><label class="l">Pages</label><input class="fld" id="ePages" type="number" value="${esc(b.pages)}"></div></div>
     <p id="isbnStatus19" class="hint" aria-live="polite"></p><div class="isbnbox"><div style="flex:1;min-width:180px"><label class="l" style="margin-top:0">ISBN / code-barres</label><input class="fld" id="eIsbn" value="${esc(b.isbn)}" placeholder="978…"></div>
       <button class="btn g" id="bScanIsbn" title="Lire le code-barres à la webcam (ou sur une photo) puis mettre la fiche à jour">${I('isbn')} Scanner le code-barres</button>
       <button class="btn s" id="bIsbnUpd" title="Lancer la recherche avec l'ISBN saisi">Mettre à jour depuis l'ISBN</button>
       <p class="hint" style="margin:4px 0 0;width:100%">Un ISBN valide lance automatiquement la recherche dans Google Books, Open Library et, si nécessaire, la BnF. Les informations disponibles sont renseignées sans appel IA. Vérifie puis Enregistrer. Emplacement, statut, note, prêt et notes sont conservés.</p></div>
-    <div class="g2"><div style="display:none"></div><div><label class="l">Prix (€)</label><input class="fld" id="ePrice" type="number" step="0.01" value="${esc(b.price)}"></div><div><label class="l">Statut</label><select class="fld" id="eStatus">${STATUS.map(s => `<option ${(b.status || 'À lire') === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div></div>
-    <div class="g3"><div><label class="l">Meuble</label><select class="fld" id="eCase"><option value="">Non rangé</option>${cases.map(c => `<option value="${c.id}" ${b.caseId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="__new">＋ Nouveau meuble…</option></select></div>
+    <div class="g2"><div><label class="l">Prix (€)</label><input class="fld" id="ePrice" type="number" step="0.01" value="${esc(b.price)}"></div><div><label class="l">Statut</label><select class="fld" id="eStatus">${STATUS.map(s => `<option ${(b.status || 'À lire') === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div></div>
+    <div class="fsub20"><b>Compléter ou vérifier la notice</b><div class="btns"><button class="btn s sm" id="bGB">Compléter (bases de livres)</button><button type="button" class="btn s sm" id="bEdition">Choisir une édition</button><button class="btn s sm" id="bBnf">Vérifier avec la BnF</button><button class="btn s sm" id="bAI">Infos IA</button></div>${b.bnfRef ? `<p class="hint">Complément BnF${b.bnfRef.url ? ` · <a href="${esc(b.bnfRef.url)}" target="_blank" rel="noopener">Notice BnF</a>` : ''}</p>` : ''}</div>`)}
+    ${sec20('place', 'Rangement et lecture', `<div class="g3"><div><label class="l">Meuble</label><select class="fld" id="eCase"><option value="">Non rangé</option>${cases.map(c => `<option value="${c.id}" ${b.caseId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="__new">＋ Nouveau meuble…</option></select></div>
       <div><label class="l">Étagère (1 = haut)</label><input class="fld" id="eRow" type="number" min="1" max="15" value="${esc(b.row || 1)}"></div><div><label class="l">Position (vide = à la fin)</label><input class="fld" id="ePos" type="number" min="1" value="${esc(isNew ? '' : b.position)}"></div></div>
-    <div class="g3"><div><label class="l">Couleur de tranche</label><input class="fld" id="eColor" type="color" value="${colOf(b)}" style="height:38px;padding:3px"></div><div><label class="l">Format</label><select class="fld" id="eFmt">${[['', 'Auto (selon le type)'], ['petite', 'Poche / manga'], ['normale', 'Standard'], ['grande', 'Grand format / BD']].map(([v, l]) => `<option value="${v}" ${(b.hU ? '' : (b.height || '')) === v && !b.hU ? 'selected' : ''}>${l}</option>`).join('')}${b.hU ? '<option value="photo" selected>Mesuré sur la photo</option>' : ''}</select></div><div><label class="l">Lu le</label><input class="fld" id="eRead" type="date" value="${esc(b.readDate)}"></div></div>
-    <div class="step" style="margin-top:16px">Prêt</div>
-    <div class="g3"><div><label class="l">Prêté à</label><input class="fld" id="eLoan" value="${esc(b.loanTo)}" placeholder="Nom de la personne"></div><div><label class="l">Date du prêt</label><input class="fld" id="eLoanD" type="date" value="${esc(b.loanDate)}"></div><div><label class="l">Retour prévu</label><input class="fld" id="eLoanR" type="date" value="${esc(b.loanDue)}"></div></div>
-    ${isLoaned(b) ? `<div class="btns" style="margin-top:8px"><button class="btn s sm" id="bRet">Le livre m'a été rendu</button></div>` : '<p class="hint">Sans date de retour, un rappel est prévu 30 jours après le prêt.</p>'}
+    <div class="g3"><div><label class="l">Couleur de tranche</label><input class="fld" id="eColor" type="color" value="${colOf(b)}" style="height:38px;padding:3px"></div><div><label class="l">Format</label><select class="fld" id="eFmt">${[['', 'Auto (selon le type)'], ['petite', 'Poche / manga'], ['normale', 'Standard'], ['grande', 'Grand format / BD']].map(([v, l]) => `<option value="${v}" ${(b.hU ? '' : (b.height || '')) === v && !b.hU ? 'selected' : ''}>${l}</option>`).join('')}${b.hU ? '<option value="photo" selected>Mesuré sur la photo</option>' : ''}</select></div><div><label class="l">Lu le</label><input class="fld" id="eRead" type="date" value="${esc(b.readDate)}"></div></div>`)}
+    ${sec20('loan', 'Prêt', `<div class="g3"><div><label class="l">Prêté à</label><input class="fld" id="eLoan" value="${esc(b.loanTo)}" placeholder="Nom de la personne"></div><div><label class="l">Date du prêt</label><input class="fld" id="eLoanD" type="date" value="${esc(b.loanDate)}"></div><div><label class="l">Retour prévu</label><input class="fld" id="eLoanR" type="date" value="${esc(b.loanDue)}"></div></div>
+    ${isLoaned(b) ? `<div class="btns" style="margin-top:8px"><button class="btn s sm" id="bRet">Le livre m'a été rendu</button></div>` : '<p class="hint">Sans date de retour, un rappel est prévu 30 jours après le prêt.</p>'}`, isLoaned(b))}
     ${b.wish ? wishFields18(b) : ''}
-    <label class="l">Notes personnelles</label><textarea class="fld" id="eNotes">${esc(b.notes)}</textarea>`,
+    ${sec20('images', 'Tranche et couverture', `${spineTools20}<div class="fsub20"><b>Couverture et photo</b><div class="btns"><button type="button" class="btn s sm" id="bCoverOpen">${b.coverManual ? 'Modifier la couverture' : 'Ajouter une couverture'}</button>${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">\uD83D\uDCF7 Reprendre sur la photo d'origine</button>` : ''}<button type="button" class="btn s sm" id="bZone">Rescanner une zone</button></div>${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}</div>`, true)}
+    ${sec20('notes', 'Notes personnelles', `<textarea class="fld" id="eNotes" aria-label="Notes personnelles">${esc(b.notes)}</textarea>`)}`,
     `<div class="btns" style="padding:12px 18px;border-top:1px solid var(--line);margin:0"><button class="btn p" id="bSave">${isNew ? 'Ajouter à ma bibliothèque' : 'Enregistrer'}</button>${isNew ? '' : '<button class="btn k" id="bDel">Supprimer</button>'}</div>`);
   initViewer(); renderNav(isNew ? null : b.id);
   $('#dBody').addEventListener('input', () => { bookDirty = true; }); $('#dBody').addEventListener('change', e => { if (e.target.closest('.fld')) bookDirty = true; });
@@ -1991,7 +2027,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if($('#bSpinePrevious'))$('#bSpinePrevious').onclick=async()=>{if(!confirm('Revenir à la tranche précédente ?'))return;if(!await safetyPoint18('Avant restauration de tranche'))return;const old=b.previousSpine18;for(const k of spineFields18)if(k in old)b[k]=old[k];else delete b[k];delete b.previousSpine18;await saveBook(b);renderAll();openBook(b.id,false,true);};
   if ($('#bDel')) $('#bDel').onclick = async () => { if (await deleteBooks([b.id], `« ${dispTitle(b)} »`)) closeDrawer(); };
   bindISBNForm19(b,isNew);
-  $('#bBriefSummary19').onclick=()=>showBriefSummary19(b,isNew);
+  bindFiche20(b,isNew);
   if ($('#bLoc')) $('#bLoc').onclick = () => showInRoom(b.id);
   if ($('#bOrig')) $('#bOrig').onclick = async () => { closeDrawer(); setView('lib'); curCase = b.orig.caseId || curCase; await reorderByOrig([b], `Remise en place de « ${dispTitle(b)} »`); showUndo(`« ${dispTitle(b)} » remis à sa place d'origine`); setTimeout(() => showInRoom(b.id), 50); };
   if ($('#bRet')) $('#bRet').onclick = async () => { await read(); returnLoan(b); await saveBook(b); reopen(); toast('Retour enregistré'); };
@@ -2074,10 +2110,19 @@ function nextCompare18(b,kind){const src=b.spineImg;if(!src)return;const image=$
 async function photoQuality18(src){const im=await srcToImg(src),w=imgW(im),h=imgH(im),c=document.createElement('canvas'),k=Math.min(1,800/Math.max(w,h));c.width=Math.round(w*k);c.height=Math.round(h*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);const data=x.getImageData(0,0,c.width,c.height).data,gray=i=>(data[i]*.299+data[i+1]*.587+data[i+2]*.114);let n=0,sum=0,sum2=0,glare=0;for(let y=1;y<c.height-1;y+=2)for(let a=1;a<c.width-1;a+=2){const i=(y*c.width+a)*4,g=gray(i),lap=gray(i-4)+gray(i+4)+gray(i-c.width*4)+gray(i+c.width*4)-4*g;n++;sum+=lap;sum2+=lap*lap;if(g>248)glare++;}const variance=n?sum2/n-(sum/n)**2:0;return {w,h,blur:variance<35,glare:n?glare/n:0,low:w<1000||h<400,wide:w/Math.max(1,h)>4,variance};}
 async function checkPhotos18(urls){const warnings=[];for(let i=0;i<urls.length;i++){try{const q=await photoQuality18(urls[i]),r=[];if(q.low)r.push('résolution limitée');if(q.blur)r.push('netteté possiblement insuffisante');if(q.wide)r.push('photo très large : plusieurs clichés rapprochés peuvent aider');if(q.glare>.2)r.push('zones très claires : vérifier les reflets');if(r.length)warnings.push(`Photo ${i+1} (${q.w} × ${q.h}) : ${r.join(', ')}`);}catch(e){warnings.push(`Photo ${i+1} : contrôle impossible`);}}return !warnings.length||confirm(warnings.join('\n')+'\n\nContrôle indicatif, sans garantie. Continuer le scan ?');}
 function enhanceModal18(){const body=$('#mbox .mbody');if(!body)return;body.classList.add('enhanced-tools');body.querySelectorAll('p.hint').forEach(p=>{if(p.textContent.length<140||p.closest('details'))return;const d=document.createElement('details');d.className='enhance-help';const summary=document.createElement('summary');summary.textContent='Aide';p.before(d);d.append(summary,p);});
- const actions=['#qeOk','#straightRun','#straightSave','#spOk','#cropApply','#ogRep','#ogAdd','#zoneApply','#rrApply','#purchaseSave','#toolSaveNext','#filterApply19','#filterReset19'].map(sel=>$(sel)).filter(Boolean);
- const old=$('#mbox .tool-action-dock');if(old)old.remove();if(!actions.length)return;
- const dock=document.createElement('div');dock.className='tool-action-dock';const observer=new MutationObserver(()=>{actions.forEach((source,i)=>{const btn=dock.children[i];if(btn){btn.disabled=source.disabled;btn.innerHTML=source.innerHTML;}});});
- actions.forEach(source=>{const clone=document.createElement('button');clone.type='button';clone.className=source.className;clone.innerHTML=source.innerHTML;clone.disabled=source.disabled;clone.onclick=()=>source.click();dock.appendChild(clone);observer.observe(source,{attributes:true,childList:true,characterData:true,subtree:true,attributeFilter:['disabled']});});const cancel=document.createElement('button');cancel.type='button';cancel.className='btn s';cancel.textContent='Annuler';cancel.onclick=()=>closeModal();dock.appendChild(cancel);$('#mbox').appendChild(dock);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();observer.disconnect();};}
+ /* V2.20 : les boutons d'action sont DÉPLACÉS (et non copiés) dans la barre fixe : une seule commande par action. */
+ const actions=['#qeOk','#straightRun','#straightSave','#spOk','#cropApply','#ogRep','#ogAdd','#zoneApply','#rrApply','#purchaseSave','#filterReset19','#filterApply19','#toolSaveNext'].map(sel=>$(sel)).filter(Boolean);
+ const old=$('#mbox .tool-action-dock');if(!actions.length){old?.remove();return;}
+ const dock=document.createElement('div');dock.className='tool-action-dock';const sources=new Set();
+ const isCancel=el=>el.tagName==='BUTTON'&&!el.classList.contains('x')&&(el.hasAttribute('data-close')||el.dataset.dockCancel==='1');
+ let cancel=old?[...old.children].find(isCancel):null;
+ actions.forEach(a=>{const parent=a.parentElement;if(parent&&parent!==old)sources.add(parent);});
+ for(const parent of sources){const c=[...parent.querySelectorAll(':scope > button')].find(isCancel);if(c){if(!cancel)cancel=c;else if(c!==cancel)c.remove();}}
+ if(!cancel){cancel=document.createElement('button');cancel.type='button';cancel.className='btn s';cancel.textContent='Annuler';cancel.setAttribute('data-close','');}
+ cancel.dataset.dockCancel='1';dock.appendChild(cancel);const spacer=document.createElement('span');spacer.className='tsp';dock.appendChild(spacer);
+ actions.forEach(a=>dock.appendChild(a));
+ for(const parent of sources){if(![...parent.children].some(el=>!el.classList.contains('tsp')&&el.style.display!=='none'))parent.remove();}
+ old?.remove();$('#mbox').appendChild(dock);}
 
 function attachToolEnhance18(b,kind){const selector={quad:'#qeOk',straight:'#straightSave',split:'#spOk',cover:'#cropApply',origin:'#ogRep'}[kind];if(selector)toolSaveNext18(b,kind,selector);if(kind==='quad')nextCompare18(b,kind);enhanceModal18();}
 function holdDelay18(){return {short:450,normal:600,long:900}[localStorage.getItem('scanly_hold_delay')]||600;}
@@ -2160,25 +2205,30 @@ function openCoverTool(b){
  if($('#coverCropCurrent'))$('#coverCropCurrent').onclick=()=>start(b.coverOriginal||b.cover).catch(e=>toast('Image distante inaccessible : choisis le fichier photo. '+e.message));
 }
 async function openRectCrop({src,b,kind='zone',title,label='Analyser la zone',onApply,extra='',initialRect=null}){
+ /* V2.20 : même réglage fin que le détourage (coins, bords, loupe, zoom, flèches). Couverture : 4 coins libres + redressement. */
  const image=await srcToImg(src);let full=document.createElement('canvas');full.width=imgW(image);full.height=imgH(image);full.getContext('2d').drawImage(image,0,0);
- openModal(`<div class="dhead"><h3 data-no-i18n>${esc(title)}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Trace la zone utile. Ajuste les quatre coins. Mode Déplacer : déplacer la photo ; pincer ou utiliser +/− pour zoomer.</p>${extra}<div class="btns"><button type="button" class="btn s" id="cropDraw">Tracer un cadre</button><button type="button" class="btn s" id="cropPan">Déplacer</button><button type="button" class="btn s" id="cropMinus">−</button><button type="button" class="btn s" id="cropPlus">+</button><button type="button" class="btn s" id="cropFit">Toute la photo</button><button type="button" class="btn s" id="cropReset">Réinitialiser</button>${kind==='cover'?'<button type="button" class="btn s" id="cropRotate">↻ 90°</button>':''}</div><div id="cropArea" style="height:52vh;min-height:180px;position:relative;background:#101b2d;border-radius:8px;overflow:hidden"><canvas id="cropCanvas" style="display:block;width:100%;height:100%;touch-action:none"></canvas></div><p id="cropSize" class="hint" aria-live="polite"></p><div class="btns"><button type="button" class="btn s" data-close>Annuler</button><button type="button" class="btn p" id="cropApply">${esc(label)}</button></div><p id="cropMsg" class="hint" aria-live="polite"></p></div>`);
- const C=$('#cropCanvas'),area=$('#cropArea'),x=C.getContext('2d');let R=initialRect||{x:0,y:0,w:full.width,h:full.height},z=1,ox=0,oy=0,mode='draw',act=null,dirty=false,busy=false;const pointers=new Map();let pinch=null;
+ const quadMode=kind==='cover';
+ openModal(`<div class="dhead"><h3 data-no-i18n>${esc(title)}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">${quadMode?'Place les 4 coins dorés sur les angles réels de la couverture, même si la photo est prise de biais : l’aperçu montre la couverture redressée. Les carrés au milieu des côtés déplacent un bord ; glisser à l’intérieur déplace le cadre. Réglage fin : zoome (＋, pincer ou molette), une loupe apparaît pendant le déplacement ; touche un coin puis utilise les flèches.':'Trace la zone utile (bouton Tracer un cadre), puis ajuste ses coins et ses bords. Glisser à l’intérieur déplace la zone ; ailleurs, glisser déplace la photo. Réglage fin : zoome (＋, pincer ou molette) et utilise les flèches.'}</p>${extra}
+ <div class="fe20-wrap"><div class="fe20-area" id="cropArea"></div>${quadMode?'<div class="fe20-side cover20"><div class="hint">Aperçu redressé</div><img id="cropPrev" alt=""></div>':''}</div>
+ ${fineToolbar20()}
+ <div class="btns">${quadMode?'<button type="button" class="btn s" id="cropAuto">Détection automatique</button><button type="button" class="btn s" id="cropSquare">Rectangle droit</button><button type="button" class="btn s" id="cropFit">Toute la photo</button><button type="button" class="btn s" id="cropRotate">↻ 90°</button>':'<button type="button" class="btn s" id="cropDraw" aria-pressed="false">Tracer un cadre</button><button type="button" class="btn s" id="cropFit">Toute la photo</button>'}<span class="tsp"></span><button type="button" class="btn s" data-close>Annuler</button><button type="button" class="btn p" id="cropApply">${esc(label)}</button></div><p id="cropSize" class="hint" aria-live="polite"></p><p id="cropMsg" class="hint" aria-live="polite"></p></div>`);
+ const fullQ=()=>[[0,0],[full.width,0],[full.width,full.height],[0,full.height]];
+ const r0=initialRect;let Q=r0?[[r0.x,r0.y],[r0.x+r0.w,r0.y],[r0.x+r0.w,r0.y+r0.h],[r0.x,r0.y+r0.h]]:quadMode?coverGuess20(full):fullQ(),dirty=false,busy=false,pt=0;
+ const info=()=>{const B=quadBox(Q);if($('#cropSize'))$('#cropSize').textContent=`${Math.round(B.x1-B.x0)} × ${Math.round(B.y1-B.y0)} px`;};
+ const preview=()=>{info();if(!quadMode)return;clearTimeout(pt);pt=setTimeout(()=>{try{if($('#cropPrev'))$('#cropPrev').src=extractQuad(full,Q,520).crop;}catch(e){}},80);};
+ const ed=fineEditor20({area:$('#cropArea'),source:full,Q,mode:quadMode?'quad':'rect',onChange:q=>{Q=q;dirty=true;preview();}});
+ bindFineToolbar20($('#mbox'),ed,()=>({x0:0,y0:0,x1:full.width,y1:full.height}));
  const guard=()=>!busy&&(!dirty||confirm('Le cadrage non appliqué sera abandonné. Continuer ?'));modalLeaveGuard=guard;toolNav(b,kind,guard);
- const clampR=()=>{R.x=clamp(R.x,0,full.width-2);R.y=clamp(R.y,0,full.height-2);R.w=clamp(R.w,2,full.width-R.x);R.h=clamp(R.h,2,full.height-R.y);};
- function draw(){if(!C.isConnected)return;const r=area.getBoundingClientRect();C.width=Math.max(1,Math.round(r.width*devicePixelRatio));C.height=Math.max(1,Math.round(r.height*devicePixelRatio));x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);x.clearRect(0,0,r.width,r.height);x.drawImage(full,ox,oy,full.width*z,full.height*z);x.fillStyle='rgba(0,0,0,.35)';x.beginPath();x.rect(0,0,r.width,r.height);x.rect(ox+R.x*z,oy+R.y*z,R.w*z,R.h*z);x.fill('evenodd');x.strokeStyle='#D4AF7C';x.lineWidth=2;x.strokeRect(ox+R.x*z,oy+R.y*z,R.w*z,R.h*z);for(const [a,c] of [[R.x,R.y],[R.x+R.w,R.y],[R.x+R.w,R.y+R.h],[R.x,R.y+R.h]]){x.beginPath();x.arc(ox+a*z,oy+c*z,8,0,Math.PI*2);x.fillStyle='#D4AF7C';x.fill();}$('#cropSize').textContent=`${Math.round(R.w)} × ${Math.round(R.h)} px`;} 
- const fit=()=>{const r=area.getBoundingClientRect();z=Math.min(r.width/full.width,r.height/full.height)*.96;ox=(r.width-full.width*z)/2;oy=(r.height-full.height*z)/2;draw();};
- const pos=e=>{const r=C.getBoundingClientRect();return {sx:e.clientX-r.left,sy:e.clientY-r.top};},ip=p=>({x:clamp((p.sx-ox)/z,0,full.width),y:clamp((p.sy-oy)/z,0,full.height)});
- const zoom=(f,p)=>{const nz=clamp(z*f,.03,30);ox=p.sx-(p.sx-ox)*nz/z;oy=p.sy-(p.sy-oy)*nz/z;z=nz;draw();};
- C.onpointerdown=e=>{if(busy)return;e.preventDefault();C.setPointerCapture(e.pointerId);const p=pos(e);pointers.set(e.pointerId,p);if(pointers.size===2){const [a,c]=[...pointers.values()];pinch={d:Math.max(1,Math.hypot(a.sx-c.sx,a.sy-c.sy)),sx:(a.sx+c.sx)/2,sy:(a.sy+c.sy)/2};act=null;return;}const p0=ip(p),corners=[[R.x,R.y],[R.x+R.w,R.y],[R.x+R.w,R.y+R.h],[R.x,R.y+R.h]],k=corners.findIndex(c=>Math.hypot(ox+c[0]*z-p.sx,oy+c[1]*z-p.sy)<18);act=mode==='pan'?{t:'pan',p,ox,oy}:k>=0?{t:'corner',k,R:{...R}}:{t:'new',p:p0};};
- C.onpointermove=e=>{if(!pointers.has(e.pointerId)||busy)return;const p=pos(e);pointers.set(e.pointerId,p);if(pointers.size===2&&pinch){const [a,c]=[...pointers.values()],d=Math.max(1,Math.hypot(a.sx-c.sx,a.sy-c.sy)),mid={sx:(a.sx+c.sx)/2,sy:(a.sy+c.sy)/2};zoom(d/pinch.d,mid);ox+=mid.sx-pinch.sx;oy+=mid.sy-pinch.sy;pinch={d,...mid};draw();return;}if(!act)return;const q=ip(p);if(act.t==='pan'){ox=act.ox+p.sx-act.p.sx;oy=act.oy+p.sy-act.p.sy;}else{dirty=true;if(act.t==='new')R={x:Math.min(act.p.x,q.x),y:Math.min(act.p.y,q.y),w:Math.abs(q.x-act.p.x),h:Math.abs(q.y-act.p.y)};else{const A=act.R,opp=[[A.x+A.w,A.y+A.h],[A.x,A.y+A.h],[A.x,A.y],[A.x+A.w,A.y]][act.k];R={x:Math.min(q.x,opp[0]),y:Math.min(q.y,opp[1]),w:Math.abs(q.x-opp[0]),h:Math.abs(q.y-opp[1])};}clampR();}draw();};
- const up=e=>{pointers.delete(e.pointerId);act=null;if(pointers.size<2)pinch=null;};C.onpointerup=up;C.onpointercancel=up;
- C.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015),pos(e));},{passive:false});
- $('#cropDraw').onclick=()=>mode='draw';$('#cropPan').onclick=()=>mode='pan';$('#cropPlus').onclick=()=>zoom(1.25,{sx:area.clientWidth/2,sy:area.clientHeight/2});$('#cropMinus').onclick=()=>zoom(.8,{sx:area.clientWidth/2,sy:area.clientHeight/2});$('#cropFit').onclick=fit;$('#cropReset').onclick=()=>{R={x:0,y:0,w:full.width,h:full.height};dirty=true;draw();};
- if($('#cropRotate'))$('#cropRotate').onclick=()=>{const c=document.createElement('canvas');c.width=full.height;c.height=full.width;const t=c.getContext('2d');t.translate(c.width,0);t.rotate(Math.PI/2);t.drawImage(full,0,0);full=c;R={x:0,y:0,w:full.width,h:full.height};dirty=true;fit();};
- const onResize=()=>fit();window.addEventListener('resize',onResize);const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();window.removeEventListener('resize',onResize);pointers.clear();};
- $('#cropApply').onclick=async()=>{if(busy)return;clampR();if(R.w<8||R.h<8){$('#cropMsg').textContent='Zone trop petite.';return;}busy=true;$('#cropApply').disabled=true;try{const c=document.createElement('canvas');c.width=Math.round(R.w);c.height=Math.round(R.h);c.getContext('2d').drawImage(full,R.x,R.y,R.w,R.h,0,0,c.width,c.height);const result={src:c.toDataURL('image/jpeg',.94),rect:{x:R.x/full.width,y:R.y/full.height,w:R.w/full.width,h:R.h/full.height},fullSrc:full.toDataURL('image/jpeg',.92),fullW:full.width,fullH:full.height};dirty=false;modalLeaveGuard=null;await onApply(result);}catch(e){if(C.isConnected){$('#cropMsg').textContent=e.message;$('#cropApply').disabled=false;modalLeaveGuard=guard;}}finally{busy=false;}};
+ const prev=modalExtraCleanup;modalExtraCleanup=()=>{prev?.();ed.destroy();clearTimeout(pt);};
+ $('#cropFit').onclick=()=>{if(quadMode){Q=fullQ();ed.setQ(Q);dirty=true;preview();}else{Q=fullQ();ed.setQ(Q);dirty=true;info();}ed.fit({x0:0,y0:0,x1:full.width,y1:full.height});};
+ if($('#cropDraw'))$('#cropDraw').onclick=e=>{const on=ed.toggleDraw();e.currentTarget.setAttribute('aria-pressed',String(on));e.currentTarget.classList.toggle('on',on);};
+ if($('#cropSquare'))$('#cropSquare').onclick=()=>{const B=quadBox(Q);Q=[[B.x0,B.y0],[B.x1,B.y0],[B.x1,B.y1],[B.x0,B.y1]];ed.setQ(Q);dirty=true;preview();};
+ if($('#cropAuto'))$('#cropAuto').onclick=()=>{Q=coverGuess20(full,true);ed.setQ(Q);dirty=true;preview();};
+ if($('#cropRotate'))$('#cropRotate').onclick=()=>{const c=document.createElement('canvas');c.width=full.height;c.height=full.width;const t=c.getContext('2d');t.translate(c.width,0);t.rotate(Math.PI/2);t.drawImage(full,0,0);full=c;Q=fullQ();ed.setSource(full,Q);dirty=true;preview();ed.fit({x0:0,y0:0,x1:full.width,y1:full.height});};
+ $('#cropApply').onclick=async()=>{if(busy)return;const B=quadBox(Q);if(B.x1-B.x0<8||B.y1-B.y0<8){$('#cropMsg').textContent='Zone trop petite.';return;}busy=true;$('#cropApply').disabled=true;try{let out;if(quadMode){out=extractQuad(full,Q,1800).crop;}else{const c=document.createElement('canvas');c.width=Math.round(B.x1-B.x0);c.height=Math.round(B.y1-B.y0);c.getContext('2d').drawImage(full,B.x0,B.y0,B.x1-B.x0,B.y1-B.y0,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',.94);}
+  const result={src:out,rect:{x:B.x0/full.width,y:B.y0/full.height,w:(B.x1-B.x0)/full.width,h:(B.y1-B.y0)/full.height},quad:Q.map(p=>[p[0]/full.width,p[1]/full.height]),fullSrc:full.toDataURL('image/jpeg',.92),fullW:full.width,fullH:full.height};dirty=false;modalLeaveGuard=null;await onApply(result);}catch(e){if($('#cropMsg')){$('#cropMsg').textContent=e.message;$('#cropApply').disabled=false;modalLeaveGuard=guard;}}finally{busy=false;}};
  if(kind==='cover')attachToolEnhance18(b,'cover');else enhanceModal18();
- fit();
+ ed.fit({x0:0,y0:0,x1:full.width,y1:full.height});preview();
 }
 async function openZoneTool(b){
  const imp=origImport(b),pi=b.srcRef?.pi??0,src=imp?.hd?.[pi]||imp?.photos?.[pi];
@@ -2460,8 +2510,8 @@ function showInRoom(id) {
   const b = books.find(x => x.id === id); if (!b) return;
   closeDrawer(); setView('lib'); Object.assign(F, {q: '', type: '', status: '', author: '', genre: ''}); $('#q').value = ''; aiHits = null;
   if (b.wish && !CAM.ghost) { CAM.ghost = true; localStorage.setItem('scanly_ghost', '1'); }
-  if (curCase !== ALL) curCase = caseOf(b); renderAll(); focusBook(id);
-  const el = $(`#unit .book[data-id="${id}"]`); if (el) { el.classList.add('hit', 'flash'); setTimeout(() => el.classList.remove('hit', 'flash'), 3800); }
+  if (curCase !== ALL) curCase = caseOf(b); renderAll(); renderRoom(true);
+  requestAnimationFrame(() => setTimeout(() => locateBook20(id), 60));
 }
 const defaultCase = () => cases.some(c => c.id === curCase) ? curCase : (cases[0]?.id || null);
 
@@ -2706,8 +2756,7 @@ function renderReview(scroll = false) {
       openQuadEditor({src: shots[d._shot], quad, title: `Détourage du livre n° ${+qe.dataset.qe + 1}`, onSave: async (qn, sp) => {
         d.quad = qn; d.spineImg = sp.crop; d.color = sp.color; if (d.pxMed) { d.hU = Math.round(clamp(170 * sp.hpx / d.pxMed, 90, 300)); d.wU = Math.round(clamp(170 * sp.wpx / d.pxMed, 6, 95)); }
         const xs = qn.map(p => p[0] * 1000), ys = qn.map(p => p[1] * 1000); d._box = [Math.min(...ys), Math.min(...xs), Math.max(...ys), Math.max(...xs)];
-        back(); toast('Détourage mis à jour'); }});
-      $$('#mbox [data-close]').forEach(x => x.addEventListener('click', e2 => { e2.stopPropagation(); setTimeout(back, 0); }, true));
+        back(); toast('Détourage mis à jour'); }}).then(() => $$('#mbox [data-close]').forEach(x => x.addEventListener('click', e2 => { e2.stopPropagation(); if (modalLeaveGuard && !modalLeaveGuard()) return; modalLeaveGuard = null; runModalCleanup(); setTimeout(back, 0); }, true)));
       return; }
     const bb = e.target.closest('.bbox'); if (bb) { const tr = $(`#review tr[data-i="${bb.dataset.bi}"]`); tr.scrollIntoView({behavior: 'smooth', block: 'center'}); tr.querySelector('[data-k=title]').focus(); }
   };
@@ -2895,7 +2944,7 @@ ${catalog() || '(vide)'}`;
 async function backupNow() {
   if (!books.length && !cases.length) return toast('Rien à sauvegarder pour l\'instant');
   const data = {app: 'SCANLY', version: VERSION, date: new Date().toISOString(), cases, imports, books: books.map(b => ({...b, shelfId: b.caseId})),
-    shelves: cases.map(c => ({id: c.id, name: c.name, photos: [], createdAt: c.createdAt})), seriesMeta: SMETA};
+    shelves: cases.map(c => ({id: c.id, name: c.name, photos: [], createdAt: c.createdAt})), seriesMeta: SMETA, types: [...TYPES]};
   const n = await saveFile(`scanly_sauvegarde_${today()}.json`, JSON.stringify(data), 'application/json', '.json', 'Sauvegarde SCANLY');
   if (n) { localStorage.setItem('scanly_lastsave', new Date().toISOString()); toast('Sauvegarde enregistrée : ' + n); renderDash(); }
 }
@@ -2915,6 +2964,7 @@ async function importFile(f) {
     await DB.putMany('cases', cs.map(c => ({rows: 3, createdAt: Date.now(), ...c}))); await DB.putMany('books', bk);
     if (Array.isArray(d.imports)) await DB.putMany('imports', d.imports);
     if (d.seriesMeta) { SMETA = {...SMETA, ...d.seriesMeta}; localStorage.setItem('scanly_series', JSON.stringify(SMETA)); }
+    if (Array.isArray(d.types)) applyTypesSetting20([...new Set([...TYPES.filter(t => t !== 'Autre'), ...d.types])]);
     await load(); renderAll(); closeModal(); toast('Import terminé');
   } catch (er) { toast('Import impossible : ' + er.message); }
 }
@@ -3260,7 +3310,8 @@ function domColor(d, w, h) {
 }
 const imgW = img => img.naturalWidth || img.videoWidth || img.width, imgH = img => img.naturalHeight || img.videoHeight || img.height;
 /* Cherche le quadrilatère exact de la tranche autour d'un cadre approximatif B {x0,y0,x1,y1} (pixels) */
-function autoQuad(img, B, tHint = null) {
+function autoQuad(img, B, tHint = null) { try { return autoQuad20(img, B, tHint); } catch (e) { console.warn('SCANLY V2.20 détourage', e); return autoQuadV1(img, B, tHint); } }
+function autoQuadV1(img, B, tHint = null) {
   const IW = imgW(img), IH = imgH(img), bw = Math.max(2, B.x1 - B.x0), bh = Math.max(4, B.y1 - B.y0);
   const mx = .35 * bw + .06 * bh, my = .08 * bh;
   const rx0 = clamp(B.x0 - mx, 0, IW), rx1 = clamp(B.x1 + mx, 0, IW), ry0 = clamp(B.y0 - my, 0, IH), ry1 = clamp(B.y1 + my, 0, IH);
@@ -3357,46 +3408,30 @@ async function restraightenMany(list, btn) {
   if (btn) btn.innerHTML = lbl; renderAll(); toast(`${n} tranche(s) redressée(s) et re-détourée(s). Ajuste un livre à la main depuis sa fiche si besoin.`, 6000);
 }
 
-/* ----- Éditeur de détourage : 4 coins déplaçables + aperçu redressé ----- */
+/* ----- Éditeur de détourage V2.20 : zoom, loupe, réglage au pixel près + aperçu redressé ----- */
 async function openQuadEditor({src, quad, title = 'Ajuster le détourage', onSave, toolBook = null}) {
   const img = await srcToImg(src), IW = imgW(img), IH = imgH(img);
   let Q = quad ? quadPx(quad, img) : [[0, 0], [IW, 0], [IW, IH], [0, IH]];
-  const originalQ=JSON.stringify(Q);
+  const originalQ = JSON.stringify(Q);
   const bb = quadBox(Q), bw = bb.x1 - bb.x0, bh = bb.y1 - bb.y0;
   const R = {x0: clamp(bb.x0 - Math.max(.8 * bw, .12 * bh), 0, IW), y0: clamp(bb.y0 - .1 * bh, 0, IH), x1: clamp(bb.x1 + Math.max(.8 * bw, .12 * bh), 0, IW), y1: clamp(bb.y1 + .1 * bh, 0, IH)};
-  const s = Math.min(Math.min(520,innerHeight*.58) / (R.y1 - R.y0), Math.min(560,innerWidth-48) / (R.x1 - R.x0), 4), vw = Math.round((R.x1 - R.x0) * s), vh = Math.round((R.y1 - R.y0) * s);
   openModal(`<div class="dhead"><h3>${esc(title)}</h3><button class="x" data-close>×</button></div><div class="mbody">
-    <p class="hint" style="margin-top:0">Fais glisser les 4 coins dorés sur les bords réels de la tranche (y compris si le livre penche). L'aperçu à droite montre la tranche redressée, telle qu'elle apparaîtra sur l'étagère.</p>
-    <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
-      <div id="qeWrap" style="position:relative;width:${vw}px;height:${vh}px;flex:none;background:#000;border-radius:8px;overflow:hidden;user-select:none">
-        <canvas id="qeCan" width="${vw}" height="${vh}" style="display:block"></canvas>
-        <svg id="qeSvg" width="${vw}" height="${vh}" style="position:absolute;inset:0;pointer-events:none"><polygon id="qePoly" fill="rgba(212,175,124,.15)" stroke="#D4AF7C" stroke-width="2"/></svg>
-        ${[0, 1, 2, 3].map(i => `<div class="qeh" data-h="${i}" style="position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#D4AF7C;border:2px solid #0B1F44;cursor:grab;box-shadow:0 0 0 2px rgba(255,255,255,.6)"></div>`).join('')}
-      </div>
-      <div style="text-align:center"><div class="hint" style="margin-bottom:6px">Aperçu redressé</div><img id="qePrev" alt="" style="height:${Math.min(vh, 420)}px;max-width:120px;object-fit:contain;background:#222;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.35)"></div>
-    </div>
+    <p class="hint" style="margin-top:0">Fais glisser les 4 coins dorés sur les bords réels de la tranche (y compris si le livre penche). Les carrés au milieu des côtés déplacent un bord entier ; glisser à l'intérieur déplace tout le cadre. Pour un réglage fin : zoome (＋, pincer ou molette), une loupe apparaît pendant le déplacement ; touche un coin puis utilise les flèches pour l'ajuster au pixel près. L'aperçu montre la tranche redressée, telle qu'elle apparaîtra sur l'étagère.</p>
+    <div class="fe20-wrap"><div class="fe20-area" id="qeArea"></div><div class="fe20-side"><div class="hint">Aperçu redressé</div><img id="qePrev" alt=""></div></div>
+    ${fineToolbar20()}
     <div class="btns"><button class="btn s" id="qeAuto">Détection automatique</button><button class="btn s" id="qeStraight">Rectangle droit</button><span class="tsp"></span><button class="btn s" data-close>Annuler</button><button class="btn g" id="qeOk">Appliquer</button></div></div>`);
-  const cv = $('#qeCan'); cv.getContext('2d').drawImage(img, R.x0, R.y0, R.x1 - R.x0, R.y1 - R.y0, 0, 0, vw, vh);
-  const toV = p => [(p[0] - R.x0) * s, (p[1] - R.y0) * s], toI = p => [p[0] / s + R.x0, p[1] / s + R.y0];
   let pt = 0;
-  const draw = (prev = true) => { const V = Q.map(toV); $('#qePoly').setAttribute('points', V.map(p => p.join(',')).join(' '));
-    $$('.qeh').forEach((h, i) => { h.style.left = V[i][0] + 'px'; h.style.top = V[i][1] + 'px'; });
-    if (prev) { clearTimeout(pt); pt = setTimeout(() => { try { $('#qePrev').src = extractQuad(img, Q).crop; } catch (e) {} }, 60); } };
-  draw();
-  let dg = -1;
-  $('#qeWrap').onmousedown = e => { const h = e.target.closest('.qeh'); if (!h) return; dg = +h.dataset.h; e.preventDefault(); };
-  const mv = e => { if (dg < 0 || !$('#qeWrap')) return; const r = $('#qeWrap').getBoundingClientRect(); Q[dg] = toI([clamp(e.clientX - r.left, 0, vw), clamp(e.clientY - r.top, 0, vh)]); draw(); };
-  const up = () => { dg = -1; };
-  window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
-  const cleanup = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
-  $('#qeAuto').onclick = () => { Q = autoQuad(img, quadBox(Q)).quad; draw(); };
-  $('#qeStraight').onclick = () => { const b = quadBox(Q); Q = [[b.x0, b.y0], [b.x1, b.y0], [b.x1, b.y1], [b.x0, b.y1]]; draw(); };
-  const guard=()=>JSON.stringify(Q)===originalQ||confirm('Le détourage non enregistré sera abandonné. Continuer ?');modalLeaveGuard=guard;
-  modalExtraCleanup=()=>{cleanup();clearTimeout(pt);};
-  if(toolBook)toolNav(toolBook,'quad',guard);
-  $('#qeOk').onclick = async () => { if(toolBook&&!await safetyPoint18('Avant détourage'))return;const sp = extractQuad(img, Q);modalLeaveGuard=null; closeModal(); await onSave(quadNorm(Q, img), sp); };
-  if(toolBook)attachToolEnhance18(toolBook,'quad');
-  $$('#mbox [data-close]').forEach(b => b.addEventListener('click', cleanup));
+  const preview = () => { clearTimeout(pt); pt = setTimeout(() => { try { if ($('#qePrev')) $('#qePrev').src = extractQuad(img, Q).crop; } catch (e) {} }, 70); };
+  const ed = fineEditor20({area: $('#qeArea'), source: img, Q, onChange: q => { Q = q; preview(); }});
+  bindFineToolbar20($('#mbox'), ed, () => R);
+  ed.fit(R); preview();
+  $('#qeAuto').onclick = () => { const b = quadBox(Q), dy = ((Q[3][1] - Q[0][1]) + (Q[2][1] - Q[1][1])) / 2, dx = ((Q[3][0] - Q[0][0]) + (Q[2][0] - Q[1][0])) / 2; Q = autoQuad(img, b, dy > 0 ? clamp(Math.atan(dx / dy) / DEG, -25, 25) : null).quad; ed.setQ(Q); preview(); };
+  $('#qeStraight').onclick = () => { const b = quadBox(Q); Q = [[b.x0, b.y0], [b.x1, b.y0], [b.x1, b.y1], [b.x0, b.y1]]; ed.setQ(Q); preview(); };
+  const guard = () => JSON.stringify(Q) === originalQ || confirm('Le détourage non enregistré sera abandonné. Continuer ?'); modalLeaveGuard = guard;
+  const prevCleanup = modalExtraCleanup; modalExtraCleanup = () => { prevCleanup?.(); ed.destroy(); clearTimeout(pt); };
+  if (toolBook) toolNav(toolBook, 'quad', guard);
+  $('#qeOk').onclick = async () => { if (toolBook && !await safetyPoint18('Avant détourage')) return; const sp = extractQuad(img, Q); modalLeaveGuard = null; closeModal(); await onSave(quadNorm(Q, img), sp); };
+  if (toolBook) attachToolEnhance18(toolBook, 'quad'); else enhanceModal18();
 }
 
 /* =====================================================================
@@ -3430,7 +3465,7 @@ window.addEventListener('mouseup', async () => {
   if (!sdrag) return; const S = sdrag; sdrag = null; document.body.style.cursor = ''; document.body.classList.remove('dnd');
   $$('#caseBar .dropok').forEach(x => x.classList.remove('dropok'));
   S.grps.forEach(g => { g.style.transform = ''; g.classList.remove('lift', 'anim'); });
-  if (!S.moved && !S.toCase) return toast('Maintiens le bouton ⇕ et glisse vers le haut ou le bas pour déplacer l\'étagère', 4000);
+  if (!S.moved && !S.toCase) return; // V2.20 : un simple clic ouvre le menu de l'étagère
   justDragged = true; setTimeout(() => justDragged = false, 80);
   const inRow = books.filter(b => caseOf(b) === S.cid && (b.row || 1) === S.r);
   if (S.toCase) {
@@ -3793,7 +3828,8 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         if (p && p.row === s.row && (s.cont || sameBook(p, s))) { const ty = Math.min(p.Q[0][1], s.Q[1][1]); p.Q = [[p.Q[0][0], ty], [s.Q[1][0], ty], s.Q[2], p.Q[3]]; if (!p.t && s.t) Object.assign(p, {t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c}); p.Qr = [p.Qr[0], s.Qr[1], s.Qr[2], p.Qr[3]]; p.wImg = (p.wImg || 0) + (s.wImg || 0); p.merged = true; }
         else M.push({...s}); });
       const pos = {};
-      M.forEach(s => { const sp = s.merged ? warp(img, s.Q) : s.sp, xs = s.Q.map(p => p[0]), ys = s.Q.map(p => p[1]);
+      setMsg(`Photo ${ii + 1}/${urls.length} : affinage du détourage…`); await sleep(10);
+      M.forEach(s => { const Qf = s.spineQ ? s.Q : refineScanQuad20(img, s.Q), refined = Qf !== s.Q; s.Q = Qf; const sp = s.merged || refined ? warp(img, s.Q) : s.sp, xs = s.Q.map(p => p[0]), ys = s.Q.map(p => p[1]);
         const box = [Math.min(...ys) / H, Math.min(...xs) / W, Math.max(...ys) / H, Math.max(...xs) / W].map(v => Math.round(CL(v * 1000, 0, 1000)));
         CACHE.set(box.join(','), {crop: sp.crop, color: sp.color, wpx: sp.wpx, hpx: sp.hpx, quad: s.Q.map(p => [+(p[0] / W).toFixed(5), +(p[1] / H).toFixed(5)]), tilt: s.tilt});
         pos[s.row] = (pos[s.row] || 0) + 1;
@@ -3856,7 +3892,7 @@ async function snapshot() {
   const imgs = new Map(), trash = await DB.all('trash').catch(() => []);
   const core = {app: 'SCANLY', version: VERSION, date: new Date().toISOString(), device: SY.device,
     books: await extern(books, imgs), cases: await extern(cases, imgs), imports: await extern(imports, imgs), trash: await extern(trash, imgs),
-    seriesMeta: SMETA, settings: {theme: localStorage.getItem('scanly_theme') || '', ghost: localStorage.getItem('scanly_ghost'), photo: localStorage.getItem('scanly_photo')}};
+    seriesMeta: SMETA, settings: {theme: localStorage.getItem('scanly_theme') || '', ghost: localStorage.getItem('scanly_ghost'), photo: localStorage.getItem('scanly_photo'), types: [...TYPES]}};
   return {core, imgs};
 }
 async function headInfo() { // dernier envoi présent sur GitHub
@@ -3908,6 +3944,7 @@ async function syncPull(h) {
     try { for (const st of ['books', 'cases', 'imports', 'trash']) { await DB.clear(st); if ((d[st] || []).length) await DB.putMany(st, d[st]); } } finally { SY.mute--; }
     if (d.seriesMeta) { SMETA = d.seriesMeta; localStorage.setItem('scanly_series', JSON.stringify(SMETA)); }
     if (d.settings?.theme && THEMES[d.settings.theme]) { theme = d.settings.theme; localStorage.setItem('scanly_theme', theme); }
+    if (Array.isArray(d.settings?.types)) applyTypesSetting20(d.settings.types);
     UNDO.stack = []; UNDO.redo = []; persistUndo(); SEL.clear();
     await load(); rt = activeTheme(); applyTheme(); renderAll(); renderRoom(true);
     SY.last = {sha: h.sha, date: h.date, device: h.device}; SY.dirty = false;
@@ -4046,6 +4083,333 @@ window.syncBoot = syncBoot; window.bindSyncSettings = bindSyncSettings;
 })();
 
 (function(){const lib=document.getElementById('v-lib'),btn=document.getElementById('smartMode');let quick=localStorage.getItem('scanly_smart_read')==='1';function update(){lib.classList.toggle('smart-read',quick);btn.setAttribute('aria-pressed',String(quick));btn.classList.toggle('on',quick);btn.textContent=quick?'Immersion 3D':'Lecture rapide';btn.title=quick?'Revenir aux perspectives 3D':'Vue frontale et effets réduits';}btn.addEventListener('click',function(e){e.stopPropagation();quick=!quick;localStorage.setItem('scanly_smart_read',quick?'1':'0');update();});update();})();
+/* SCANLY V2.20 – détourage précis.
+   Un vrai bord de livre est une ligne continue sur presque toute la hauteur : on mesure la
+   présence du contour bande par bande (le texte du titre, présent seulement par endroits,
+   est écarté), on tient compte des couleurs et du sillon sombre entre deux livres, puis
+   chaque bord est ajusté séparément par une droite (perspective). */
+function edgeMaps20(cv){
+  const w=cv.width,h=cv.height,d=cv.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data,n=w*h;
+  const L=new Float32Array(n),A=new Float32Array(n),B=new Float32Array(n);
+  for(let i=0,j=0;j<n;i+=4,j++){const r=d[i],g=d[i+1],b=d[i+2];L[j]=.299*r+.587*g+.114*b;A[j]=.7*(r-g);B[j]=.7*((r+g)/2-b);}
+  const ex=new Float32Array(n),ey=new Float32Array(n);
+  for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const i=y*w+x,a=i-w,c=i+w;
+    const lx=(L[a+1]+2*L[i+1]+L[c+1])-(L[a-1]+2*L[i-1]+L[c-1]),ly=(L[c-1]+2*L[c]+L[c+1])-(L[a-1]+2*L[a]+L[a+1]);
+    const ax=(A[a+1]+2*A[i+1]+A[c+1])-(A[a-1]+2*A[i-1]+A[c-1]),ay=(A[c-1]+2*A[c]+A[c+1])-(A[a-1]+2*A[a]+A[a+1]);
+    const bx=(B[a+1]+2*B[i+1]+B[c+1])-(B[a-1]+2*B[i-1]+B[c-1]),by=(B[c-1]+2*B[c]+B[c+1])-(B[a-1]+2*B[a]+B[a+1]);
+    const mx=Math.sqrt(lx*lx+ax*ax+bx*bx),my=Math.sqrt(ly*ly+ay*ay+by*by);
+    ex[i]=mx>.7*my?mx:.25*mx;ey[i]=my>.7*mx?my:.25*my;}
+  return {w,h,L,A,B,ex,ey};
+}
+function pct20(arr,p){const s=Float32Array.from(arr).sort();return s.length?s[Math.min(s.length-1,Math.max(0,Math.floor(p*(s.length-1))))]:0;}
+/* profil « présent sur toute la hauteur » des contours verticaux, entre ya et yb */
+function vConsistency20(M,ya,yb,nb,x0,x1){
+  const {w,ex,L}=M,bands=[],dark=[],step=Math.max(1,(yb-ya)/nb);x0=Math.max(1,Math.floor(x0));x1=Math.min(w-2,Math.ceil(x1));
+  for(let j=0;j<nb;j++){const y0=Math.round(ya+j*step),y1=Math.max(y0+1,Math.round(ya+(j+1)*step)),P=new Float32Array(w),ML=new Float32Array(w);
+    for(let y=y0;y<y1;y++){const o=y*w;for(let x=x0;x<=x1;x++){P[x]+=ex[o+x];ML[x]+=L[o+x];}}
+    const rows=y1-y0;for(let x=x0;x<=x1;x++){P[x]/=rows;ML[x]/=rows;}
+    const sc=pct20(P.subarray(x0,x1+1),.85)+1e-3,Q=new Float32Array(w);for(let x=x0;x<=x1;x++)Q[x]=Math.min(2.5,Math.max(P[x-1]||0,P[x],P[x+1]||0)/sc);bands.push(Q);
+    const r=2,V=new Float32Array(w);for(let x=x0+r;x<=x1-r;x++)V[x]=Math.max(0,(ML[x-r]+ML[x+r])/2-ML[x]);const vs=pct20(V.subarray(x0,x1+1),.9)+4,Vn=new Float32Array(w);for(let x=x0;x<=x1;x++)Vn[x]=Math.min(2,V[x]/vs);dark.push(Vn);}
+  const S=new Float32Array(w),lo=Math.floor(nb*.2),hi=Math.max(lo+1,Math.ceil(nb*.6)),vals=new Float32Array(nb),dv=new Float32Array(nb);
+  for(let x=x0;x<=x1;x++){let mean=0;for(let j=0;j<nb;j++){vals[j]=bands[j][x];dv[j]=dark[j][x];mean+=vals[j];}vals.sort();dv.sort();let core=0;for(let j=lo;j<hi;j++)core+=vals[j];let dk=0;for(let j=lo;j<hi;j++)dk+=dv[j];
+    S[x]=core/(hi-lo)+.25*mean/nb+.35*dk/(hi-lo);}
+  return S;
+}
+/* ajuste une droite x = a + b·(y − ym) sur le bord le plus net autour de x0, bande par bande */
+function fitEdge20(M,x0,ya,yb,win,nb=16){
+  const {w,ex}=M,pts=[],step=(yb-ya)/nb,ym=(ya+yb)/2;
+  for(let j=0;j<nb;j++){const y0=Math.round(ya+j*step),y1=Math.max(y0+1,Math.round(ya+(j+1)*step)),a=Math.max(1,Math.floor(x0-win)),b=Math.min(w-2,Math.ceil(x0+win));if(b-a<2)continue;
+    const P=new Float32Array(b-a+1);for(let y=y0;y<y1;y++){const o=y*w;for(let x=a;x<=b;x++)P[x-a]+=ex[o+x];}
+    let bi=0,bv=-1;for(let i=0;i<P.length;i++){const v=P[i]*(1-.25*Math.abs(a+i-x0)/Math.max(1,win));if(v>bv){bv=v;bi=i;}}
+    let sub=0;if(bi>0&&bi<P.length-1){const l=P[bi-1],c=P[bi],r=P[bi+1],den=l-2*c+r;if(den<0)sub=Math.max(-.5,Math.min(.5,.5*(l-r)/den));}
+    const mean=P.reduce((s,v)=>s+v,0)/P.length;if(P[bi]>1.25*mean)pts.push({y:(y0+y1)/2-ym,x:a+bi+sub,wt:P[bi]-mean});}
+  const fit=list=>{let sw=0,sy=0,sx=0,syy=0,sxy=0;list.forEach(p=>{sw+=p.wt;sy+=p.wt*p.y;sx+=p.wt*p.x;syy+=p.wt*p.y*p.y;sxy+=p.wt*p.x*p.y;});const den=sw*syy-sy*sy;const b=Math.abs(den)>1e-9?(sw*sxy-sy*sx)/den:0,bb=Math.max(-.07,Math.min(.07,b));return {a:(sx-bb*sy)/Math.max(1e-9,sw),b:bb};};
+  if(pts.length<Math.max(4,nb*.35))return {at:y=>x0,ok:false};
+  let F=fit(pts),use=pts;for(let it=0;it<2;it++){const res=use.map(p=>Math.abs(p.x-(F.a+F.b*p.y))),mad=pct20(res,.5);const keep=use.filter((p,i)=>res[i]<=Math.max(1.2,2.5*mad));if(keep.length<Math.max(4,nb*.35))break;use=keep;F=fit(use);}
+  if(Math.abs(F.a+F.b*0-x0)>win*1.05)return {at:y=>x0,ok:false};
+  return {at:y=>F.a+F.b*(y-ym),ok:true,n:use.length};
+}
+/* bord haut / bas : changement net de couleur entre la tranche et ce qui est au-dessus / en dessous */
+function hStep20(M,xL,xR,y,s){const {w,L,A,B}=M;let n=0,nu=0,up=[0,0,0],dn=[0,0,0];
+  for(let k=1;k<=s;k++){const ya=y-k,yb=y+k;if(ya<0||yb>=M.h)continue;const a=Math.round(xL(ya)),b=Math.round(xR(ya)),c=Math.round(xL(yb)),d=Math.round(xR(yb)),wa=b-a,wb=d-c;if(wa<3||wb<3)continue;
+    for(let x=a+Math.ceil(wa*.18);x<=b-Math.ceil(wa*.18);x++){const i=ya*w+x;up[0]+=L[i];up[1]+=A[i];up[2]+=B[i];nu++;}
+    for(let x=c+Math.ceil(wb*.18);x<=d-Math.ceil(wb*.18);x++){const i=yb*w+x;dn[0]+=L[i];dn[1]+=A[i];dn[2]+=B[i];n++;}}
+  if(!n||!nu)return 0;const m=up.map(v=>v/nu),q=dn.map(v=>v/n);return Math.sqrt((m[0]-q[0])**2+(m[1]-q[1])**2+(m[2]-q[2])**2);}
+function autoQuad20(img,B,tHint=null,opts={}){
+  const local=!!opts.local,IW=imgW(img),IH=imgH(img),bw=Math.max(2,B.x1-B.x0),bh=Math.max(4,B.y1-B.y0);
+  const mx=(local?.45:.7)*bw+.06*bh,my=(local?.1:.14)*bh;
+  const rx0=clamp(B.x0-mx,0,IW),rx1=clamp(B.x1+mx,0,IW),ry0=clamp(B.y0-my,0,IH),ry1=clamp(B.y1+my,0,IH);
+  const k=Math.min(3,720/Math.max(1,ry1-ry0)),w=Math.max(12,Math.round((rx1-rx0)*k)),h=Math.max(12,Math.round((ry1-ry0)*k));
+  const C0=document.createElement('canvas');C0.width=w;C0.height=h;const c0=C0.getContext('2d');c0.imageSmoothingQuality='high';c0.drawImage(img,rx0,ry0,rx1-rx0,ry1-ry0,0,0,w,h);
+  const bx0=(B.x0-rx0)*k,bx1=(B.x1-rx0)*k,by0=(B.y0-ry0)*k,by1=(B.y1-ry0)*k,bwk=bx1-bx0,bhk=by1-by0;
+  const S0=sobel(grayOf(C0),w,h);
+  const t=estimateTilt(S0.gx,S0.gy,w,h,bx0-.3*bwk,bx1+.3*bwk,by0+.1*bhk,by1-.1*bhk,tHint);
+  const tr=t*DEG,cs=Math.cos(tr),sn=Math.sin(tr),cx=w/2,cy=h/2;
+  const rot=(p,s)=>[cs*(p[0]-cx)-s*sn*(p[1]-cy)+cx,s*sn*(p[0]-cx)+cs*(p[1]-cy)+cy];
+  const C1=document.createElement('canvas');C1.width=w;C1.height=h;const c1=C1.getContext('2d');c1.fillStyle='#000';c1.fillRect(0,0,w,h);c1.translate(cx,cy);c1.rotate(tr);c1.drawImage(C0,-cx,-cy);
+  const M=edgeMaps20(C1);
+  const bc=rot([(bx0+bx1)/2,(by0+by1)/2],1),as=Math.abs(sn);
+  const wT=Math.max(.35*bwk,(bwk-bhk*as)/Math.max(.5,cs)),hT=Math.max(.6*bhk,(bhk-wT*as)/Math.max(.5,cs));
+  const ya=clamp(bc[1]-.42*hT,1,h-2),yb=clamp(bc[1]+.42*hT,ya+2,h-1);
+  const eL=bc[0]-wT/2,eR=bc[0]+wT/2,span=(local?.32:.6)*wT+2;
+  const S=vConsistency20(M,ya,yb,10,eL-span-3,eR+span+3);
+  const peaks=(lo,hi,e)=>{const out=[];for(let x=Math.max(2,Math.round(lo));x<=Math.min(w-3,Math.round(hi));x++)if(S[x]>=S[x-1]&&S[x]>=S[x+1]&&S[x]>.15)out.push({x,v:S[x]*(1-.3*Math.min(1,Math.abs(x-e)/span))});out.sort((a,b)=>b.v-a.v);return out.slice(0,8);};
+  const cl=peaks(eL-span,bc[0]-.12*wT,eL),cr=peaks(bc[0]+.12*wT,eR+span,eR);
+  let L=eL,R=eR,best=-1;const wmin=(local?.6:.4)*wT,wmax=(local?1.4:1.6)*wT;
+  for(const a of cl.length?cl:[{x:eL,v:0}])for(const b of cr.length?cr:[{x:eR,v:0}]){const ww=b.x-a.x;if(ww<wmin||ww>wmax)continue;let inner=0;const m=Math.max(2,Math.round(.12*ww));for(let x=a.x+m;x<=b.x-m;x++)inner=Math.max(inner,S[x]);const v=a.v+b.v-.9*Math.max(0,inner-.35*Math.min(a.v,b.v));if(v>best){best=v;L=a.x;R=b.x;}}
+  const win=Math.max(2,.08*(R-L)),yA=clamp(bc[1]-.46*hT,1,h-2),yB=clamp(bc[1]+.46*hT,yA+2,h-1);
+  const fL=fitEdge20(M,L,yA,yB,win),fR=fitEdge20(M,R,yA,yB,win);
+  let xL=fL.at,xR=fR.at;if(!(xR(bc[1])-xL(bc[1])>wmin*.85)){xL=()=>L;xR=()=>R;}
+  const s=Math.max(2,Math.round(.02*hT)),eT=bc[1]-hT/2,eB=bc[1]+hT/2,wy=(local?.08:.16)*hT;
+  const Qy=y=>{let q=0,n=0;const a=Math.round(xL(y)),b=Math.round(xR(y)),m=Math.ceil((b-a)*.15);for(let x=a+m;x<=b-m;x++){if(x<1||x>=w-1)continue;q+=M.ey[y*w+x];n++;}return n?q/n:0;};
+  const pickY=(lo,hi,e)=>{let by=e,bv=-1;const vals=[];for(let y=Math.max(s+1,Math.round(lo));y<=Math.min(h-s-2,Math.round(hi));y++)vals.push([y,hStep20(M,xL,xR,y,s)+.15*Qy(y)]);const mxv=Math.max(1,...vals.map(v=>v[1]));vals.forEach(([y,v])=>{const sc=v/mxv*(1-.35*Math.abs(y-e)/Math.max(1,wy));if(sc>bv){bv=sc;by=y;}});return {y:by,v:mxv};};
+  const pt=pickY(eT-(local?.06*hT:wy),eT+(local?.05*hT:wy),eT),pb=pickY(eB-(local?.1*hT:wy),eB+(local?.04:.1)*hT,eB);
+  let T=pt.v>14?pt.y:eT,Bt=pb.v>14?pb.y:eB;if(Bt-T<.72*hT||Bt-T>1.3*hT){T=eT;Bt=eB;}
+  const dx=.006*(R-L)+.35,dy=.002*(Bt-T);
+  const quad=[[xL(T)+dx,T+dy],[xR(T)-dx,T+dy],[xR(Bt)-dx,Bt-dy],[xL(Bt)+dx,Bt-dy]].map(p=>{const q=rot(p,-1);return [rx0+q[0]/k,ry0+q[1]/k];});
+  return {quad,tilt:t,edges:[fL.ok,fR.ok]};
+}
+/* découpe du scan : affine chaque tranche localement (bords, haut et bas) */
+function refineScanQuad20(img,Q){
+  try{const B=quadBox(Q),dy=((Q[3][1]-Q[0][1])+(Q[2][1]-Q[1][1]))/2,dx=((Q[3][0]-Q[0][0])+(Q[2][0]-Q[1][0]))/2;
+    const tHint=dy>0?clamp(Math.atan(dx/dy)/DEG,-25,25):null,r=autoQuad20(img,B,tHint,{local:true}),q=r.quad;
+    const wOld=(Math.hypot(Q[1][0]-Q[0][0],Q[1][1]-Q[0][1])+Math.hypot(Q[2][0]-Q[3][0],Q[2][1]-Q[3][1]))/2,wNew=(Math.hypot(q[1][0]-q[0][0],q[1][1]-q[0][1])+Math.hypot(q[2][0]-q[3][0],q[2][1]-q[3][1]))/2;
+    const hOld=Math.abs(dy),hNew=((q[3][1]-q[0][1])+(q[2][1]-q[1][1]))/2;
+    if(!(wNew>.6*wOld&&wNew<1.4*wOld&&hNew>.8*hOld&&hNew<1.06*hOld))return Q;return q;}catch(e){console.warn('SCANLY V2.20 affinage',e);return Q;}
+}
+
+/* =====================================================================
+   SCANLY V2.20 – fiche ouvrage réorganisée, réglage fin commun (détourage
+   et couverture), localisation du livre dans la pièce, étagères, types.
+   ===================================================================== */
+const FICHE_SEC20 = (() => { try { return JSON.parse(localStorage.getItem('scanly_fiche_sections') || '{}'); } catch (e) { return {}; } })();
+function ficheSecOpen20(key, def) { return key in FICHE_SEC20 ? !!FICHE_SEC20[key] : def; }
+function bindFiche20(b, isNew) {
+  $$('#dBody details.fsec20').forEach(d => d.addEventListener('toggle', () => { if (d.dataset.sec === 'loan') return; FICHE_SEC20[d.dataset.sec] = d.open; localStorage.setItem('scanly_fiche_sections', JSON.stringify(FICHE_SEC20)); }));
+  const t = $('#bTypes20'); if (t) t.onclick = e => { e.preventDefault(); openTypes20(); };
+  $('#dBody').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); $('#bSave')?.click(); } }); // PC : Ctrl+Entrée, Mac : ⌘+Entrée
+  const sel = $('#eType'); if (sel) sel.addEventListener('change', async () => { if (sel.value !== '__newType') return; const n = (prompt('Nom du nouveau type de livre :', '') || '').trim(); if (!n) { sel.value = b.type || 'Autre'; return; } addType20(n); sel.innerHTML = typeOptions20(n); bookDirty = true; });
+}
+
+/* ---------- Types de livre modifiables ---------- */
+function ensureTypes20() {
+  for (const b of books) if (b.type && !TYPES.includes(b.type)) { const i = TYPES.indexOf('Autre'); TYPES.splice(i < 0 ? TYPES.length : i, 0, b.type); }
+  if (!TYPES.includes('Autre')) TYPES.push('Autre');
+}
+function loadTypes20() { try { const saved = JSON.parse(localStorage.getItem('scanly_types') || 'null'); if (Array.isArray(saved) && saved.length) TYPES.splice(0, TYPES.length, ...[...new Set(saved.filter(s => typeof s === 'string' && s.trim()).map(s => s.trim()))]); } catch (e) {} if (!TYPES.includes('Autre')) TYPES.push('Autre'); }
+function saveTypes20() { localStorage.setItem('scanly_types', JSON.stringify(TYPES)); try { SY.dirty = true; } catch (e) {} }
+function addType20(n) { if (!TYPES.includes(n)) { const i = TYPES.indexOf('Autre'); TYPES.splice(i < 0 ? TYPES.length : i, 0, n); saveTypes20(); } }
+function typeOptions20(cur) { ensureTypes20(); const list = cur && !TYPES.includes(cur) ? [...TYPES, cur] : TYPES; return list.map(t => `<option value="${esc(t)}" ${cur === t ? 'selected' : ''}>${esc(t)}</option>`).join('') + '<option value="__newType">＋ Nouveau type…</option>'; }
+function applyTypesSetting20(list) { if (!Array.isArray(list) || !list.length) return; TYPES.splice(0, TYPES.length, ...[...new Set(list.filter(s => typeof s === 'string' && s.trim()))]); if (!TYPES.includes('Autre')) TYPES.push('Autre'); localStorage.setItem('scanly_types', JSON.stringify(TYPES)); }
+async function renameType20(from, to) {
+  to = String(to || '').trim(); if (!to || to === from) return false;
+  const L = books.filter(b => b.type === from), merge = TYPES.includes(to);
+  if (!confirm(`${merge ? 'Fusionner' : 'Renommer'} « ${from} » en « ${to} » ?\n${L.length} livre(s) concerné(s), y compris les souhaits. Les autres informations ne changent pas.`)) return false;
+  if (L.length && !await safetyPoint18('Avant changement de type')) return false;
+  L.forEach(b => { b.type = to; b.updatedAt = Date.now(); }); if (L.length) await DB.putMany('books', L);
+  const i = TYPES.indexOf(from); if (merge) { if (i >= 0) TYPES.splice(i, 1); } else if (i >= 0) TYPES[i] = to; else addType20(to);
+  if (F.type === from) F.type = to; saveTypes20(); renderAll(); toast(`${L.length} livre(s) : type « ${to} »`); return true;
+}
+async function deleteType20(name) {
+  const L = books.filter(b => b.type === name); if (name === 'Autre') return toast('Le type « Autre » est conservé');
+  if (!confirm(`Supprimer le type « ${name} » ?${L.length ? `\n${L.length} livre(s) passeront en « Autre ».` : ''}`)) return;
+  if (L.length) { if (!await safetyPoint18('Avant suppression de type')) return; L.forEach(b => { b.type = 'Autre'; b.updatedAt = Date.now(); }); await DB.putMany('books', L); }
+  const i = TYPES.indexOf(name); if (i >= 0) TYPES.splice(i, 1); if (F.type === name) F.type = ''; saveTypes20(); renderAll(); openTypes20();
+}
+function openTypes20() {
+  ensureTypes20(); const fromFiche = $('#drawer').classList.contains('on') && $('#eType');
+  const count = t => books.filter(b => b.type === t).length;
+  const html = () => `<div class="dhead"><h3>Types de livre</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Renommer un type change l’intitulé de tous les livres concernés. Choisir un nom déjà existant fusionne les deux types. Un point de restauration est créé avant la modification.</p>
+    <table class="mini types20" data-no-i18n>${TYPES.map((t, i) => `<tr><td><input class="fld" data-type-name="${i}" value="${esc(t)}" aria-label="Nom du type"></td><td class="hint">${count(t)} livre(s)</td><td style="white-space:nowrap"><button type="button" class="btn s sm" data-type-ren="${i}">Renommer</button>${t !== 'Autre' ? `<button type="button" class="btn k sm" data-type-del="${i}" aria-label="Supprimer le type">✕</button>` : ''}</td></tr>`).join('')}</table>
+    <div class="btns"><input class="fld" id="typeNew20" placeholder="Nouveau type" style="flex:1;min-width:160px"><button type="button" class="btn g" id="typeAdd20">Ajouter</button></div></div>`;
+  openModal(html(), 'sm');
+  const root = $('#mbox');
+  root.onclick = async e => { const r = e.target.closest('[data-type-ren]'), d = e.target.closest('[data-type-del]');
+    if (r) { const i = +r.dataset.typeRen, from = TYPES[i], to = $(`[data-type-name="${i}"]`).value; if (await renameType20(from, to)) { openTypes20(); refreshTypeSelect20(); } }
+    if (d) { await deleteType20(TYPES[+d.dataset.typeDel]); refreshTypeSelect20(); } };
+  $('#typeAdd20').onclick = () => { const n = $('#typeNew20').value.trim(); if (!n) return; addType20(n); openTypes20(); refreshTypeSelect20(); };
+  function refreshTypeSelect20() { const s = fromFiche && $('#eType'); if (s) { const cur = TYPES.includes(s.value) ? s.value : (books.find(b => b.id === NAV.cur)?.type || 'Autre'); s.innerHTML = typeOptions20(cur); } }
+}
+
+/* ---------- Voir dans la pièce : zoom + mise en évidence ---------- */
+function locateBook20(id) {
+  const el = $(`#unit .book[data-id="${id}"]`); if (!el) return toast('Livre non visible dans la pièce (filtre ou meuble masqué)');
+  const b = stageBox([el]), bh = b.y1 - b.y0, cx = (b.x0 + b.x1) / 2, half = Math.max(bh * 1.15, (b.x1 - b.x0) * 4);
+  zoomToBox({x0: cx - half, x1: cx + half, y0: b.y0 - bh * .35, y1: b.y1 + bh * .25}, .92, .86);
+  $$('#unit .locate20').forEach(x => x.classList.remove('locate20')); $$('#unit .locpin20').forEach(x => x.remove());
+  el.classList.add('locate20', 'hit');
+  const pin = document.createElement('div'); pin.className = 'locpin20'; pin.setAttribute('aria-hidden', 'true'); pin.textContent = '▼';
+  pin.style.left = (parseFloat(el.style.left) + parseFloat(el.style.width) / 2) + 'px'; pin.style.top = (parseFloat(el.style.top) - 46) + 'px'; $('#unit').appendChild(pin);
+  const bk = books.find(x => x.id === id); toast(`« ${bk ? dispTitle(bk) : ''} » ${IS_TOUCH ? '– Vue › « Tout voir » pour revenir' : '– Échap ou « Tout voir » pour revenir'}`, 4000);
+  clearTimeout(window._loc20); window._loc20 = setTimeout(() => { el.classList.remove('locate20', 'hit'); pin.remove(); }, 6500);
+}
+
+/* ---------- Étagère : menu (clic sur ⇕) et suppression ---------- */
+function openShelfMenu20(key) {
+  const i = key.lastIndexOf('|'), cid = key.slice(0, i), row = +key.slice(i + 1), c = cases.find(x => x.id === cid); if (!c) return;
+  const L = books.filter(b => caseOf(b) === cid && (b.row || 1) === row && !b.wish), W = books.filter(b => caseOf(b) === cid && (b.row || 1) === row && b.wish);
+  openModal(`<div class="dhead"><h3 data-no-i18n>Étagère ${row} – ${esc(c.name)}</h3><button class="x" data-close>×</button></div><div class="mbody">
+    <p class="hint">${L.length} livre(s) sur cette étagère${W.length ? ` et ${W.length} souhait(s) affiché(s) en fantôme (non supprimés)` : ''}. Pour déplacer l’étagère : maintenir ⇕ puis glisser vers le haut, le bas ou l’onglet d’un autre meuble.</p>
+    <div class="shelfmenu20"><button type="button" class="btn s" id="shSel20">☑ Sélectionner ces livres</button>
+    <button type="button" class="btn k" id="shEmpty20" ${L.length ? '' : 'disabled'}>Supprimer les livres de l’étagère</button>
+    <button type="button" class="btn k" id="shDel20">Supprimer l’étagère</button></div>
+    <p class="hint">« Supprimer l’étagère » met ses livres dans la corbeille (restaurables 30 jours) et fait remonter les étagères du dessous. Un point de restauration est créé avant.</p></div>`, 'sm');
+  $('#shSel20').onclick = () => { closeModal(); CAM.sel = true; L.forEach(b => SEL.add(b.id)); renderRoom(); renderList(); };
+  $('#shEmpty20').onclick = async () => { closeModal(); await deleteBooks(L.map(b => b.id), `Étagère ${row} vidée`); };
+  $('#shDel20').onclick = async () => { closeModal(); await deleteShelf20(cid, row); };
+}
+async function deleteShelf20(cid, row) {
+  const c = cases.find(x => x.id === cid); if (!c) return;
+  const L = books.filter(b => caseOf(b) === cid && (b.row || 1) === row && !b.wish), W = books.filter(b => caseOf(b) === cid && (b.row || 1) === row && b.wish);
+  if (!confirm(`Supprimer l’étagère ${row} de « ${c.name} » ?${L.length ? `\n${L.length} livre(s) iront dans la corbeille (restaurables).` : ''}\nLes étagères du dessous remonteront d’un cran.`)) return;
+  if (!await safetyPoint18('Avant suppression d’étagère')) return;
+  const batch = 'del_' + uid(), now = Date.now(), ids = new Set(L.map(b => b.id));
+  if (L.length) { await DB.putMany('trash', L.map(b => ({...b, trashBatch: batch, deletedAt: now, trashLabel: `Étagère ${row} – ${c.name}`}))); await DB.delMany('books', [...ids]); books = books.filter(b => !ids.has(b.id)); L.forEach(b => SEL.delete(b.id)); }
+  const below = books.filter(b => caseOf(b) === cid && (b.row || 1) > row); below.forEach(b => b.row = (b.row || 1) - 1);
+  W.forEach(b => { b.row = Math.max(1, row - (row > 1 ? 1 : 0)); }); const moved = [...below, ...W]; if (moved.length) await DB.putMany('books', moved);
+  const oldRows = c.rows || 3; c.rows = Math.max(1, oldRows - 1); await DB.put('cases', c);
+  renderAll();
+  showUndo(`Étagère ${row} supprimée${L.length ? ` (${L.length} livre(s) en corbeille)` : ''}`, async () => {
+    books.filter(b => caseOf(b) === cid && (b.row || 1) >= row && !W.includes(b)).forEach(b => b.row = (b.row || 1) + 1); W.forEach(b => b.row = row);
+    await DB.putMany('books', books.filter(b => caseOf(b) === cid)); c.rows = oldRows; await DB.put('cases', c); if (L.length) await restoreTrash(batch); else renderAll(); });
+}
+
+/* ---------- Réglage fin partagé : détourage, couverture, zone ---------- */
+function fineToolbar20() {
+  return `<div class="fe20-tools" role="group" aria-label="Réglage fin"><button type="button" class="btn s sm" data-fe="out" aria-label="Zoom arrière" title="Zoom arrière">−</button><button type="button" class="btn s sm" data-fe="in" aria-label="Zoom avant" title="Zoom avant">＋</button><button type="button" class="btn s sm" data-fe="fit">Ajuster la vue</button><span class="fe20-pad"><button type="button" class="btn s sm" data-fe="corner" title="Choisir le coin à régler">Coin suivant</button><button type="button" class="btn s sm" data-fe="l" aria-label="Gauche" title="Déplacer le coin choisi">←</button><button type="button" class="btn s sm" data-fe="u" aria-label="Haut" title="Déplacer le coin choisi">↑</button><button type="button" class="btn s sm" data-fe="d" aria-label="Bas" title="Déplacer le coin choisi">↓</button><button type="button" class="btn s sm" data-fe="r" aria-label="Droite" title="Déplacer le coin choisi">→</button></span><span class="hint fe20-info" aria-live="polite"></span></div>`;
+}
+function bindFineToolbar20(root, ed, fitBox) {
+  const info = root.querySelector('.fe20-info'); ed.onInfo = t => { if (info) info.textContent = t; }; ed.info();
+  root.querySelectorAll('[data-fe]').forEach(btn => {
+    const k = btn.dataset.fe, act = () => ({in: () => ed.zoomBy(1.4), out: () => ed.zoomBy(1 / 1.4), fit: () => ed.fit(ed.polyBox(.25)), corner: () => ed.nextCorner(), l: () => ed.nudge(-1, 0), r: () => ed.nudge(1, 0), u: () => ed.nudge(0, -1), d: () => ed.nudge(0, 1)})[k]?.();
+    if ('lrud'.includes(k) && k.length === 1) { let t1 = 0, t2 = 0; const stop = () => { clearTimeout(t1); clearInterval(t2); };
+      btn.addEventListener('pointerdown', e => { e.preventDefault(); act(); t1 = setTimeout(() => { t2 = setInterval(act, 55); }, 380); });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop)); btn.addEventListener('click', e => e.preventDefault());
+      btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } }); }
+    else btn.onclick = act;
+  });
+}
+function fineEditor20({area, source, Q, mode = 'quad', onChange = () => {}}) {
+  const cv = document.createElement('canvas'); cv.className = 'fe20-canvas'; cv.tabIndex = 0; cv.setAttribute('role', 'application');
+  cv.setAttribute('aria-label', 'Zone de réglage : glisser les coins ou les bords ; flèches = ajuster le coin sélectionné'); area.appendChild(cv);
+  const ctx = cv.getContext('2d'), coarse = matchMedia('(pointer:coarse)').matches, HR = coarse ? 30 : 16, CR = coarse ? 11 : 7;
+  let src = source, SW = imgW(src), SH = imgH(src), z = 1, ox = 0, oy = 0, sel = 0, act = null, drawMode = false, raf = 0, alive = true, fitted = false;
+  Q = Q.map(p => [p[0], p[1]]);
+  const ptrs = new Map(); let pinch = null;
+  const S = p => [p[0] * z + ox, p[1] * z + oy], I = (sx, sy) => [(sx - ox) / z, (sy - oy) / z];
+  const dims = () => { const r = area.getBoundingClientRect(); return {w: Math.max(1, r.width), h: Math.max(1, r.height)}; };
+  const clampP = p => [clamp(p[0], 0, SW), clamp(p[1], 0, SH)];
+  const rectFrom = (a, b) => { const x0 = Math.min(a[0], b[0]), x1 = Math.max(a[0], b[0]), y0 = Math.min(a[1], b[1]), y1 = Math.max(a[1], b[1]); return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]; };
+  const inside = (p, P) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) if ((P[i][1] > p[1]) !== (P[j][1] > p[1]) && p[0] < (P[j][0] - P[i][0]) * (p[1] - P[i][1]) / (P[j][1] - P[i][1] + 1e-9) + P[i][0]) c = !c; return c; };
+  const req = () => { if (!raf) raf = requestAnimationFrame(render); };
+  const api = {onInfo: null};
+  const emit = () => { onChange(Q.map(p => [p[0], p[1]])); api.info(); req(); };
+  function render() {
+    raf = 0; if (!alive || !cv.isConnected) return; const {w, h} = dims(), d = devicePixelRatio || 1;
+    if (!fitted) { api.fit(polyBox(.3)); fitted = true; }
+    if (cv.width !== Math.round(w * d) || cv.height !== Math.round(h * d)) { cv.width = Math.round(w * d); cv.height = Math.round(h * d); }
+    ctx.setTransform(d, 0, 0, d, 0, 0); ctx.fillStyle = '#0d1626'; ctx.fillRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = z < 3; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(src, ox, oy, SW * z, SH * z);
+    const V = Q.map(S);
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.moveTo(V[0][0], V[0][1]); for (let i = 1; i < 4; i++) ctx.lineTo(V[i][0], V[i][1]); ctx.closePath(); ctx.fill('evenodd');
+    ctx.lineWidth = 2; ctx.strokeStyle = '#D4AF7C'; ctx.beginPath(); V.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.stroke();
+    for (let i = 0; i < 4; i++) { const a = V[i], b = V[(i + 1) % 4], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], s = coarse ? 7 : 5; ctx.fillStyle = act && act.t === 'edge' && act.k === i ? '#fff' : '#D4AF7C'; ctx.strokeStyle = '#0B1F44'; ctx.lineWidth = 1.5; ctx.fillRect(m[0] - s, m[1] - s, 2 * s, 2 * s); ctx.strokeRect(m[0] - s, m[1] - s, 2 * s, 2 * s); }
+    V.forEach((p, i) => { ctx.beginPath(); ctx.arc(p[0], p[1], CR, 0, Math.PI * 2); ctx.fillStyle = i === sel ? '#ffffff' : '#D4AF7C'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#0B1F44'; ctx.stroke(); ctx.fillStyle = '#0B1F44'; ctx.fillRect(p[0] - 1, p[1] - 1, 2, 2); });
+    if (act && (act.t === 'corner' || act.t === 'edge')) loupe(act.t === 'corner' ? Q[act.k] : [(Q[act.k][0] + Q[(act.k + 1) % 4][0]) / 2, (Q[act.k][1] + Q[(act.k + 1) % 4][1]) / 2], act.sp);
+  }
+  function loupe(pt, at) {
+    const {w, h} = dims(), R = Math.max(46, Math.min(78, Math.min(w, h) * .2)), Z = Math.max(z * 3.5, 1.5);
+    const sp = at || S(pt), cx = sp[0] < w / 2 ? w - R - 10 : R + 10, cy = sp[1] < h / 2 && sp[0] > w / 2 - R && sp[0] < w / 2 + R ? h - R - 10 : R + 10;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip(); ctx.fillStyle = '#000'; ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+    ctx.imageSmoothingEnabled = Z < 3; ctx.drawImage(src, cx - pt[0] * Z, cy - pt[1] * Z, SW * Z, SH * Z);
+    ctx.strokeStyle = 'rgba(212,175,124,.95)'; ctx.lineWidth = 1.5; ctx.beginPath(); Q.forEach((p, i) => { const x = cx + (p[0] - pt[0]) * Z, y = cy + (p[1] - pt[1]) * Z; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx - 5, cy); ctx.moveTo(cx + 5, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy - 5); ctx.moveTo(cx, cy + 5); ctx.lineTo(cx, cy + R); ctx.stroke();
+    ctx.restore(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.lineWidth = 3; ctx.strokeStyle = '#D4AF7C'; ctx.stroke();
+  }
+  function polyBox(m = 0) { const B = quadBox(Q), bw = B.x1 - B.x0, bh = B.y1 - B.y0, mm = Math.max(bw, bh) * m; return {x0: B.x0 - Math.max(mm, bw * .6), y0: B.y0 - mm * .4, x1: B.x1 + Math.max(mm, bw * .6), y1: B.y1 + mm * .4}; }
+  function setCorner(k, p) { p = clampP(p); if (mode === 'rect') { Q = rectFrom(p, Q[(k + 2) % 4]); let best = 0, bd = 1e18; Q.forEach((q, i) => { const dd = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2; if (dd < bd) { bd = dd; best = i; } }); sel = best; if (act && act.t === 'corner') act.k = best; } else Q[k] = p; }
+  function hit(sx, sy) {
+    const V = Q.map(S); let k = -1, bd = HR * HR; V.forEach((p, i) => { const dd = (p[0] - sx) ** 2 + (p[1] - sy) ** 2; if (dd < bd) { bd = dd; k = i; } }); if (k >= 0) return {t: 'corner', k};
+    for (let i = 0; i < 4; i++) { const a = V[i], b = V[(i + 1) % 4], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if ((m[0] - sx) ** 2 + (m[1] - sy) ** 2 < HR * HR) return {t: 'edge', k: i}; }
+    if (!drawMode && inside([sx, sy], V)) return {t: 'move'};
+    return drawMode ? {t: 'new'} : {t: 'pan'};
+  }
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener('pointerdown', e => {
+    e.preventDefault(); cv.focus({preventScroll: true}); try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    const sp = pos(e); ptrs.set(e.pointerId, sp);
+    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = {d: Math.max(1, Math.hypot(a[0] - b[0], a[1] - b[1])), m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]}; act = null; req(); return; }
+    const h = hit(sp[0], sp[1]), ip = I(sp[0], sp[1]);
+    if (h.t === 'corner') { sel = h.k; act = {t: 'corner', k: h.k, off: [Q[h.k][0] - ip[0], Q[h.k][1] - ip[1]], sp}; }
+    else if (h.t === 'edge') act = {t: 'edge', k: h.k, start: ip, Q0: Q.map(p => [...p]), sp};
+    else if (h.t === 'move') act = {t: 'move', start: ip, Q0: Q.map(p => [...p])};
+    else if (h.t === 'new') act = {t: 'new', start: clampP(ip)};
+    else act = {t: 'pan', sp, ox, oy};
+    req(); api.info();
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!ptrs.has(e.pointerId)) { const sp = pos(e), h = hit(sp[0], sp[1]); cv.style.cursor = h.t === 'corner' ? 'crosshair' : h.t === 'edge' ? 'move' : h.t === 'move' ? 'grab' : h.t === 'new' ? 'crosshair' : 'grab'; return; }
+    const sp = pos(e); ptrs.set(e.pointerId, sp);
+    if (ptrs.size === 2 && pinch) { const [a, b] = [...ptrs.values()], d = Math.max(1, Math.hypot(a[0] - b[0], a[1] - b[1])), m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; zoomAt(d / pinch.d, m); ox += m[0] - pinch.m[0]; oy += m[1] - pinch.m[1]; pinch = {d, m}; req(); return; }
+    if (!act) return; const ip = I(sp[0], sp[1]);
+    if (act.t === 'pan') { ox = act.ox + sp[0] - act.sp[0]; oy = act.oy + sp[1] - act.sp[1]; req(); return; }
+    act.sp = sp;
+    if (act.t === 'corner') setCorner(act.k, [ip[0] + act.off[0], ip[1] + act.off[1]]);
+    else if (act.t === 'edge') { const dx = ip[0] - act.start[0], dy = ip[1] - act.start[1], k = act.k, j = (k + 1) % 4; Q = act.Q0.map(p => [...p]);
+      if (mode === 'rect') { const B = quadBox(act.Q0); if (k === 0) B.y0 = clamp(B.y0 + dy, 0, B.y1 - 2); if (k === 1) B.x1 = clamp(B.x1 + dx, B.x0 + 2, SW); if (k === 2) B.y1 = clamp(B.y1 + dy, B.y0 + 2, SH); if (k === 3) B.x0 = clamp(B.x0 + dx, 0, B.x1 - 2); Q = rectFrom([B.x0, B.y0], [B.x1, B.y1]); }
+      else { Q[k] = clampP([act.Q0[k][0] + dx, act.Q0[k][1] + dy]); Q[j] = clampP([act.Q0[j][0] + dx, act.Q0[j][1] + dy]); } }
+    else if (act.t === 'move') { const B = quadBox(act.Q0); const dx = clamp(ip[0] - act.start[0], -B.x0, SW - B.x1), dy = clamp(ip[1] - act.start[1], -B.y0, SH - B.y1); Q = act.Q0.map(p => [p[0] + dx, p[1] + dy]); }
+    else if (act.t === 'new') { const p = clampP(ip); if (Math.abs(p[0] - act.start[0]) > 2 && Math.abs(p[1] - act.start[1]) > 2) Q = rectFrom(act.start, p); }
+    emit();
+  });
+  const up = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) { act = null; req(); } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(Math.exp(-e.deltaY * .0015), pos(e)); }, {passive: false});
+  cv.addEventListener('dblclick', e => { e.preventDefault(); zoomAt(2, pos(e)); });
+  function zoomAt(f, p) { const nz = clamp(z * f, .02, 40); ox = p[0] - (p[0] - ox) * nz / z; oy = p[1] - (p[1] - oy) * nz / z; z = nz; api.info(); req(); }
+  /* flèches : actives quand la photo a le focus (clic dessus) ; sinon elles gardent leur rôle (livre précédent / suivant) */
+  const key = e => { if (!alive || document.activeElement !== cv) return; const m = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[e.key];
+    if (m) { e.preventDefault(); e.stopImmediatePropagation(); api.nudge(m[0] * (e.shiftKey ? 10 : 1), m[1] * (e.shiftKey ? 10 : 1)); }
+    else if (e.key === 'Tab' && !e.ctrlKey && !e.altKey) { e.preventDefault(); e.stopImmediatePropagation(); api.nextCorner(e.shiftKey ? -1 : 1); }
+    else if (e.key === '+' || e.key === '=') { e.preventDefault(); api.zoomBy(1.4); } else if (e.key === '-') { e.preventDefault(); api.zoomBy(1 / 1.4); } };
+  window.addEventListener('keydown', key, true);
+  const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => req()) : null; ro?.observe(area);
+  Object.assign(api, {
+    get Q() { return Q.map(p => [p[0], p[1]]); },
+    setQ(q) { Q = q.map(p => clampP(p)); api.info(); req(); },
+    setSource(s, q) { src = s; SW = imgW(s); SH = imgH(s); Q = q.map(p => clampP(p)); req(); },
+    fit(B) { const {w, h} = dims(), bw = Math.max(4, B.x1 - B.x0), bh = Math.max(4, B.y1 - B.y0); z = clamp(Math.min(w / bw, h / bh) * .94, .02, 40); ox = w / 2 - (B.x0 + bw / 2) * z; oy = h / 2 - (B.y0 + bh / 2) * z; fitted = true; api.info(); req(); },
+    zoomBy(f) { const {w, h} = dims(); zoomAt(f, [w / 2, h / 2]); },
+    nextCorner(d = 1) { sel = (sel + 4 + d) % 4; api.info(); req(); const p = S(Q[sel]), {w, h} = dims(); if (p[0] < 0 || p[1] < 0 || p[0] > w || p[1] > h) { ox += w / 2 - p[0]; oy += h / 2 - p[1]; } },
+    nudge(dx, dy) { const step = Math.max(.5, 1 / z); setCorner(sel, [Q[sel][0] + dx * step, Q[sel][1] + dy * step]); act = {t: 'corner', k: sel, off: [0, 0], sp: null}; emit(); clearTimeout(api._nt); api._nt = setTimeout(() => { if (act && !ptrs.size) { act = null; req(); } }, 900); },
+    toggleDraw() { drawMode = !drawMode; return drawMode; },
+    polyBox,
+    info() { const names = ['haut gauche', 'haut droit', 'bas droit', 'bas gauche']; api.onInfo?.(`Coin sélectionné : ${names[sel]} · zoom ${Math.round(z * 100)} %`); },
+    destroy() { alive = false; window.removeEventListener('keydown', key, true); ro?.disconnect(); if (raf) cancelAnimationFrame(raf); }
+  });
+  req();
+  return api;
+}
+/* couverture : recherche des 4 bords dominants (droites) autour du centre de la photo */
+function coverGuess20(full, auto = false) {
+  const W = imgW(full), H = imgH(full), whole = [[0, 0], [W, 0], [W, H], [0, H]]; if (!auto) return whole;
+  try {
+    const k = Math.min(1, 420 / Math.max(W, H)), w = Math.max(16, Math.round(W * k)), h = Math.max(16, Math.round(H * k)), c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(full, 0, 0, w, h);
+    const M = edgeMaps20(c), angles = []; for (let a = -10; a <= 10; a += 1) angles.push(Math.tan(a * DEG));
+    const line = (vertical, lo, hi, prefOuter) => { let best = null; const n = vertical ? h : w, m = vertical ? w : h, E = vertical ? M.ex : M.ey;
+      for (const t of angles) for (let o = Math.max(2, Math.round(lo)); o <= Math.min(m - 3, Math.round(hi)); o++) { const seg = 8, sums = new Float32Array(seg);
+        for (let s = Math.round(n * .04); s < n * .96; s += 2) { const q = Math.round(o + (s - n / 2) * t); if (q < 1 || q >= m - 1) continue; sums[Math.min(seg - 1, Math.floor(s / n * seg))] += vertical ? E[s * w + q] : E[q * w + s]; }
+        const srt = Array.from(sums).sort((a, b) => a - b), v = (srt[2] + srt[3] + srt[4]) / 3 * (1 + .35 * Math.abs(o - m / 2) / (m / 2) * prefOuter);
+        if (!best || v > best.v) best = {o, t, v}; }
+      return best; };
+    const L = line(true, 0, w * .45, 1), R = line(true, w * .55, w, 1), T = line(false, 0, h * .45, 1), B = line(false, h * .55, h, 1);
+    if (![L, R, T, B].every(Boolean)) return whole;
+    const meet = (V, Hh) => { /* x = V.o + (y - h/2)·V.t ; y = H.o + (x - w/2)·H.t */ let x = V.o, y = Hh.o; for (let i = 0; i < 6; i++) { y = Hh.o + (x - w / 2) * Hh.t; x = V.o + (y - h / 2) * V.t; } return [clamp(x / k, 0, W), clamp(y / k, 0, H)]; };
+    const q = [meet(L, T), meet(R, T), meet(R, B), meet(L, B)], area = Math.abs(q.reduce((s, p, i) => { const n2 = q[(i + 1) % 4]; return s + p[0] * n2[1] - n2[0] * p[1]; }, 0)) / 2;
+    return area > W * H * .12 ? q : whole;
+  } catch (e) { console.warn('SCANLY couverture', e); return whole; }
+}
+
 </script>
 <script src="i18n.js"></script>
 </body>
