@@ -1,0 +1,40 @@
+SCANLY V2.29 - NOUVEAU DESIGN
+Base exclusive : SCANLY V2.28.
+
+1. BARRE D'ONGLETS EN BAS (iPhone)
+   Bibliothèque, Ajouter, Prêts, Souhaits, Profil, toujours à portée du pouce.
+   Elle remplace le menu ☰ et le bouton +. Une pastille rouge signale les prêts en retard.
+   - Ajouter : photographier une étagère, importer des photos, scanner plusieurs livres,
+     saisir un livre, importer un fichier (Goodreads, Babelio, CSV).
+   - Prêts : tous les prêts en cours, avec « Fiche » et « Relancer ».
+   - Profil : chiffres clés, tableau de bord, à vérifier, assistant IA, sauvegarde,
+     synchronisation, paramètres et apparence.
+
+2. EN-TETE ALLEGE
+   Sur iPhone, la recherche devient une loupe. Un toucher l'ouvre sur toute la largeur,
+   le × la vide et la referme.
+
+3. ZOOM AU PINCEMENT
+   Sur écran tactile, les boutons − et + disparaissent : pince l'écran pour zoomer.
+   Toucher le pourcentage remet la vue entière.
+
+4. PARAMETRES EN SECTIONS REPLIABLES
+   Une section ouverte à la fois. « Tout effacer » est rangé dans une zone « Avancé ».
+   Le bouton ⚙ sur ordinateur ouvre maintenant aussi les sections ajoutées en V2.27.
+
+5. FICHE LIVRE PLUS VISUELLE
+   Le livre en 3D, plus grand, sur un fond flouté tiré de sa couverture (ou de sa couleur).
+
+6. MODE SOMBRE
+   Paramètres › Apparence (ou Profil) : Automatique, Clair ou Sombre.
+   Automatique suit le réglage de l'iPhone.
+
+7. PETITES ANIMATIONS
+   Un livre rangé ou déplacé se pose sur l'étagère avec un léger éclat doré.
+   Les messages de réussite (livre ajouté, sauvegarde…) s'affichent avec une coche verte.
+   Les animations sont coupées si l'iPhone demande de réduire les animations.
+
+Technique
+- Nouveau fichier js/10_v229.js. Aucune modification des données : retour à la V2.28 possible.
+- Nouvelles préférences locales : scanly_mode29, scanly_setsec29, scanly_zoomtip29.
+- Textes traduits dans les 5 langues.

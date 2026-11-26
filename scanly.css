@@ -627,3 +627,111 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
 .cur27{padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer}.cur27:last-child{border-bottom:0}.cur27 .pbar{margin:4px 0}
 .goal27{margin-bottom:10px}.goal27 .pbar{margin:6px 0}
 .bilan27{display:flex;gap:16px}.bilan27 div{display:flex;flex-direction:column}.bilan27 b{font-size:22px}.bilan27 span{font-size:12px;color:var(--slate)}
+
+/* ===================== V2.29 : design ===================== */
+/* 1. Barre d'onglets (téléphone, portrait) */
+#tabs29{display:none}
+@media (max-width:900px) and (min-height:501px){
+  body.tabs29 #tabs29{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,31,68,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(212,175,124,.25);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  #tabs29 button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:#9fb0cc;font:600 10.5px var(--fB);padding:6px 2px 4px;border-radius:12px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;transition:color .2s}
+  #tabs29 button .ico{width:24px;height:24px;transition:transform .25s}
+  #tabs29 button.on{color:var(--gold)}#tabs29 button.on .ico{transform:translateY(-1px) scale(1.08)}
+  #tabs29 button[data-tab=add] .ico{width:30px;height:30px;color:var(--gold)}
+  #tabs29 .dot29{position:absolute;top:3px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--ko);color:#fff;font:700 10px/16px var(--fB);font-style:normal;padding:0 4px}
+  body.tabs29 .hmenu,body.tabs29 #fab{display:none!important}
+  body.tabs29 main{height:calc(100dvh - 121px - env(safe-area-inset-top) - 62px - env(safe-area-inset-bottom))}
+  body.tabs29 #toast{bottom:calc(78px + env(safe-area-inset-bottom))}
+  body.tabs29 #camBar{bottom:10px!important}
+  body.tabs29 #selBar{bottom:66px}
+  body.tabs29 #v-cat,body.tabs29 #v-list,body.tabs29 #v-series,body.tabs29 #v-dash,body.tabs29 #v-review,body.tabs29 #v-wish{padding-bottom:30px}
+  body.tabs29 .mbox.sm,body.tabs29 .mbox{padding-bottom:env(safe-area-inset-bottom)}
+}
+.sheet29{display:flex;flex-direction:column;gap:8px}
+.sheet29-b{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--white);color:var(--navy);cursor:pointer;transition:transform .15s,border-color .15s}
+.sheet29-b:active{transform:scale(.98)}.sheet29-b:hover{border-color:var(--gold)}
+.sheet29-b .si{width:42px;height:42px;flex:none;border-radius:12px;background:rgba(212,175,124,.18);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold2)}
+.sheet29-b b{display:block;font:700 15px var(--fT)}.sheet29-b small{display:block;color:var(--slate);font-size:12.5px;margin-top:1px}
+.me29{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;grid-auto-flow:column;text-align:center;background:linear-gradient(135deg,var(--navy3),#0B1F44);color:#F8F6F0;border-radius:16px;padding:14px 6px;margin-bottom:6px}
+.me29 b{font:800 24px var(--fT);color:var(--gold)}.me29 span{font-size:12px;opacity:.85}
+.mode29{display:flex;gap:4px;background:rgba(100,116,139,.12);padding:4px;border-radius:12px;margin:6px 0 4px}
+.mode29 button{flex:1;border:0;background:none;padding:9px 6px;border-radius:9px;font:600 13px var(--fB);color:var(--navy);cursor:pointer}
+.mode29 button.on{background:var(--white);box-shadow:0 1px 4px rgba(0,0,0,.15);color:var(--navy)}
+.loan29{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.loan29 .lc{width:44px;flex:none}.loan29 .lc img,.loan29 .lc .cover,.loan29 .lc .phc{width:44px!important;height:64px!important;object-fit:cover;border-radius:4px;font-size:7px!important;overflow:hidden}
+.loan29 .lt{flex:1;min-width:0}.loan29 .lt b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.loan29 .lt small{color:var(--slate)}
+.loan29.late .lt small{color:var(--ko);font-weight:600}.loan29 .la{display:flex;flex-direction:column;gap:6px}
+.empty29{color:var(--slate);text-align:center;padding:30px 10px}
+
+/* 2. Recherche en loupe (téléphone) */
+.qclose29{display:none}
+@media (max-width:900px){
+  body:not(.search29) .hsearch{flex:0 0 44px!important;width:44px;height:40px;margin-left:auto;border-radius:12px;cursor:pointer;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center}
+  body:not(.search29) .hsearch input,body:not(.search29) .hsearch .mic{display:none}
+  body:not(.search29) .hsearch svg{position:static!important;transform:none!important;width:20px;height:20px}
+  body:not(.search29) header .brand .word{display:block}
+  body.search29 .hsearch{position:absolute;left:10px;right:10px;bottom:12px;z-index:5;margin:0;animation:open29 .22s ease-out}
+  body.search29 header .hright{visibility:hidden}
+  body.search29 .qclose29{display:block;position:absolute;right:42px;top:50%;transform:translateY(-50%);background:none;border:0;color:#F8F6F0;font-size:24px;line-height:1;padding:4px 8px;cursor:pointer}
+  body.search29 .hsearch input{padding-right:76px}
+}
+@keyframes open29{from{opacity:0;transform:scaleX(.6);transform-origin:right}to{opacity:1;transform:none}}
+
+/* 3. Zoom au pincement : boutons − / + masqués sur écran tactile */
+body.touch29 #camBar [data-z="-1"],body.touch29 #camBar [data-z="1"]{display:none}
+body.touch29 #zoomLbl{cursor:pointer;padding:6px 10px;border-radius:8px;min-width:54px;text-align:center}
+body.touch29 #zoomLbl:active{background:rgba(212,175,124,.2)}
+
+/* 4. Paramètres repliables */
+details.sec29{border:1px solid var(--line);border-radius:14px;margin:0 0 10px;background:var(--white);overflow:hidden}
+details.sec29>summary{list-style:none;cursor:pointer;padding:13px 40px 13px 14px;position:relative}
+details.sec29>summary::-webkit-details-marker{display:none}
+details.sec29>summary::after{content:"›";position:absolute;right:16px;top:50%;transform:translateY(-50%) rotate(90deg);font-size:22px;color:var(--gold2);transition:transform .2s}
+details.sec29[open]>summary::after{transform:translateY(-50%) rotate(-90deg)}
+details.sec29>summary .step{margin:0!important;padding:0!important;border:0!important}
+details.sec29[open]{padding:0 14px 14px}details.sec29[open]>summary{margin:0 -14px 4px}
+details.sec29.adv29{border-color:rgba(192,80,63,.45)}details.sec29.adv29>summary .step{color:var(--ko)}
+
+/* 5. Fiche livre : couverture sur fond flouté */
+.det-top.hero29{position:relative;isolation:isolate;padding:22px 18px;border-radius:20px;overflow:hidden;margin:-4px -4px 14px;background:#0B1F44;color:#F8F6F0}
+.det-top.hero29::before{content:"";position:absolute;inset:-40px;z-index:-2;background:var(--hero29) center/cover no-repeat;filter:blur(34px) saturate(1.5);opacity:.85;transform:scale(1.15)}
+.det-top.hero29::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(11,31,68,.25),rgba(11,31,68,.78))}
+.det-top.hero29 h2,.det-top.hero29 h2+div{color:#F8F6F0!important;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.det-top.hero29 .hint,.det-top.hero29 small{color:#d9dfeb!important}
+.det-top.hero29 .b3v{transform:scale(1.12);transform-origin:center;margin:8px 10px}
+@media (max-width:900px){.det-top.hero29 .b3v{transform:scale(1.22);margin:18px 0 22px}.det-top.hero29{text-align:center}}
+
+/* 7. Animations */
+@keyframes pop29{0%{translate:0 -26px;opacity:.2;filter:brightness(1.6)}55%{translate:0 2px;opacity:1}75%{translate:0 -3px;filter:brightness(1.25) drop-shadow(0 0 10px rgba(212,175,124,.9))}100%{translate:0 0;filter:none}}
+#unit .book.pop29{animation:pop29 .75s cubic-bezier(.2,.8,.3,1.2) both}
+@keyframes bump29{0%{transform:translateX(-50%) translateY(14px) scale(.92)}60%{transform:translateX(-50%) translateY(-3px) scale(1.03)}100%{transform:translateX(-50%) translateY(0) scale(1)}}
+.toast.on.bump29{animation:bump29 .38s ease-out}
+.toast.ok29{border-left-color:var(--ok);padding-left:44px}
+.toast.ok29::before{content:"✓";position:absolute;left:12px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:var(--ok);color:#fff;font:800 13px/22px var(--fB);text-align:center;animation:check29 .5s .1s both}
+@keyframes check29{0%{transform:scale(0) rotate(-45deg)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+.modal.on .mbox,.drawer.on{animation:rise29 .28s cubic-bezier(.2,.8,.3,1)}
+@keyframes rise29{from{opacity:.4;translate:0 18px}to{opacity:1;translate:0 0}}
+.bk{transition:transform .2s}.bk:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){#unit .book.pop29,.toast.on.bump29,.toast.ok29::before,.modal.on .mbox,.drawer.on,body.search29 .hsearch{animation:none!important}}
+
+/* 6. Mode sombre */
+html[data-mode29=dark]{color-scheme:dark}
+html[data-mode29=dark] body{background:#081329;color:#ECE7DC}
+html[data-mode29=dark] :is(main,.toolbar,.mbox,.drawer,#v-review,#v-wish){--navy:#ECE7DC;--white:#13244b;--line:#2a3d68;--slate:#a3b2cc;--gold2:#e0c08f}
+html[data-mode29=dark] :is(main,.toolbar){background:#081329}
+html[data-mode29=dark] :is(.mbox,.drawer){background:#0f1d3e;color:#ECE7DC}
+html[data-mode29=dark] :is(.seg,.isbnbox,#selBar select,#selBar input,.pbar,.vol.miss,.badge,.desc,.spinebox,.res img,.res .ph,.shoot,.drop,.prog,.dest,.msg.a,.smode,#v-review,#v-wish,.brief-summary19,.fsub20,.dest select,.dest input){background:#0c1936}
+html[data-mode29=dark] :is(.toolbar,.chip,.tsel,.stat,table.list,.fld,.btn.s,.thcard,.enhance-card,.enhance-sticky,.tool-action-dock,.fsec20,.scard,.dcard,.alt,.smo){background:#13244b;color:#ECE7DC;border-color:#2a3d68}
+html[data-mode29=dark] :is(.dhead,table.list th){background:#0B1F44;color:#F8F6F0}
+html[data-mode29=dark] .seg button.on,html[data-mode29=dark] .msg.u,html[data-mode29=dark] .wcard .ic{background:#29488c;color:#F8F6F0}
+html[data-mode29=dark] .btn.p{background:#2f55a4;color:#F8F6F0}
+html[data-mode29=dark] .btn.g{color:#0B1F44}
+html[data-mode29=dark] #caseBar button.on,html[data-mode29=dark] #themeBar button.on{color:#0B1F44}
+html[data-mode29=dark] table.list tr:hover td{background:#1a2f5e}
+html[data-mode29=dark] .fld::placeholder{color:#7f8fae}
+html[data-mode29=dark] .hint,html[data-mode29=dark] .l{color:#a3b2cc}
+html[data-mode29=dark] details.sec29,html[data-mode29=dark] .sheet29-b{background:#13244b}
+html[data-mode29=dark] .mode29 button.on{background:#29488c;color:#F8F6F0}
+html[data-mode29=dark] ::-webkit-scrollbar-thumb{background:#33497a}
+body.search29 .hsearch input::-webkit-search-cancel-button{display:none;-webkit-appearance:none}
+@media (max-width:900px) and (min-height:501px){body.tabs29 .toast{max-width:calc(100vw - 32px);width:max-content}}
+html[data-mode29=dark] :is(.lbar,#listBar,#listBar>div){background:#13244b;color:#ECE7DC;border-color:#2a3d68}
