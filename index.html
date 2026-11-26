@@ -758,7 +758,7 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.22';
+const VERSION = '2.23';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
 const STATUS = ['À lire','En cours','Lu','Prêté'];
@@ -1967,7 +1967,7 @@ function viewer3D(b) {
   const f = (cls, w, h, tf, bg, inner = '') => `<i class="fc ${cls}" style="width:${w}px;height:${h}px;left:${(W - w) / 2}px;top:${(H - h) / 2}px;transform:${tf};background:${bg}">${inner}</i>`;
   return `<div class="b3v" id="b3v" title="Fais tourner le livre à la souris" style="position:relative"><div class="b3v-shadow"></div><div class="bx in" style="width:${W}px;height:${H}px">
     ${f('front', W, H, `translateZ(${D / 2}px)`, `linear-gradient(135deg,${col},${shade(col, .62)})`, `<div class="ftx" style="color:${tc}">${esc(dispTitle(b))}<small>${esc(b.author || '')}</small></div>${b.cover ? `<img src="${esc(b.cover)}" alt="" onerror="this.remove()">` : ''}`)}
-    ${f('back', W, H, `rotateY(180deg) translateZ(${D / 2}px)`, `linear-gradient(135deg,${shade(col, .8)},${shade(col, .6)})`)}
+    ${f('back', W, H, `rotateY(180deg) translateZ(${D / 2}px)`, `linear-gradient(135deg,${shade(col, .8)},${shade(col, .6)})`, b.backCover ? `<img src="${esc(b.backCover)}" alt="" onerror="this.remove()">` : '')}
     ${f('spine', D, H, `rotateY(-90deg) translateZ(${W / 2}px)`, b.spineImg ? `url('${spineURL(b)}') center/100% 100%,${col}` : `linear-gradient(90deg,${shade(col, .7)},${shade(col, 1.08)} 50%,${shade(col, .72)})`, b.spineImg ? '' : `<div class="stx" style="color:${tc}">${esc(b.series && b.volume ? b.series + ' ' + b.volume : dispTitle(b))}</div>`)}
     ${f('pages', D, H - 6, `rotateY(90deg) translateZ(${W / 2 - 3}px)`, pages)}
     ${f('top', W - 6, D, `rotateX(90deg) translateZ(${H / 2 - 3}px)`, pagesH)}
@@ -1984,7 +1984,8 @@ function initViewer() {
   const mv = e => { if (!dn) return; ry = dn.ry + (e.clientX - dn.x) * .6; rx = clamp(dn.rx - (e.clientY - dn.y) * .4, -40, 40); setT(); };
   const up = () => { if (!dn) return; dn = null; v.style.cursor = ''; bx.style.transition = 'transform .5s ease-out'; };
   v.addEventListener('mousedown', down); window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
-  viewerCleanup = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); viewerCleanup = null; };
+  window.flipViewer22 = () => { bx.classList.remove('in'); bx.style.transition = 'transform .7s ease-in-out'; ry = Math.cos(ry * Math.PI / 180) > 0 ? 180 - 28 : 28; rx = 4; setT(); return Math.cos(ry * Math.PI / 180) < 0; };
+  viewerCleanup = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); window.flipViewer22 = null; viewerCleanup = null; };
 }
 const origDiff = b => b.orig && (b.orig.caseId !== (b.caseId || null) || b.orig.row !== (b.row || 1) || b.orig.position !== b.position);
 function openBook(idOrBook, isNew = false, nav = false) {
@@ -2023,7 +2024,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
     ${sec20('loan', 'Prêt', `<div class="g3"><div><label class="l">Prêté à</label><input class="fld" id="eLoan" value="${esc(b.loanTo)}" placeholder="Nom de la personne"></div><div><label class="l">Date du prêt</label><input class="fld" id="eLoanD" type="date" value="${esc(b.loanDate)}"></div><div><label class="l">Retour prévu</label><input class="fld" id="eLoanR" type="date" value="${esc(b.loanDue)}"></div></div>
     ${isLoaned(b) ? `<div class="btns" style="margin-top:8px"><button class="btn s sm" id="bRet">Le livre m'a été rendu</button></div>` : '<p class="hint">Sans date de retour, un rappel est prévu 30 jours après le prêt.</p>'}`, isLoaned(b))}
     ${b.wish ? wishFields18(b) : ''}
-    ${sec20('images', 'Tranche et couverture', `${spineTools20}<div class="fsub20"><b>Couverture et photo</b><div class="btns"><button type="button" class="btn s sm" id="bCoverOpen">${b.coverManual ? 'Modifier la couverture' : 'Ajouter une couverture'}</button>${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">\uD83D\uDCF7 Reprendre sur la photo d'origine</button>` : ''}<button type="button" class="btn s sm" id="bZone">Rescanner une zone</button></div>${!b.coverManual && b.cover ? '<button type="button" class="btn s sm" id="bCoverCheck21" title="Cherche une couverture qui correspond vraiment à ce titre ; si aucune n’est trouvée, la couverture actuelle est retirée">Couverture incorrecte ?</button>' : ''}${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}</div>`, true)}
+    ${sec20('images', 'Tranche et couverture', `${spineTools20}<div class="fsub20"><b>Couverture et photo</b><div class="btns"><button type="button" class="btn s sm" id="bCoverOpen">${b.coverManual ? 'Modifier la couverture' : 'Ajouter une couverture'}</button><button type="button" class="btn s sm" id="bBackOpen" title="Photo de la 4e de couverture (dos du livre : résumé, prix, code-barres)">${b.backCover ? 'Modifier le dos du livre' : 'Ajouter le dos du livre'}</button>${b.backCover ? '<button type="button" class="btn s sm" id="bBackFlip" aria-pressed="false">↻ Voir le dos</button>' : ''}${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">\uD83D\uDCF7 Reprendre sur la photo d'origine</button>` : ''}<button type="button" class="btn s sm" id="bZone">Rescanner une zone</button></div>${!b.coverManual && b.cover ? '<button type="button" class="btn s sm" id="bCoverCheck21" title="Cherche une couverture qui correspond vraiment à ce titre ; si aucune n’est trouvée, la couverture actuelle est retirée">Couverture incorrecte ?</button>' : ''}${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}</div>`, true)}
     ${sec20('notes', 'Notes personnelles', `<textarea class="fld" id="eNotes" aria-label="Notes personnelles">${esc(b.notes)}</textarea>`)}`,
     `<div class="btns" style="padding:12px 18px;border-top:1px solid var(--line);margin:0"><button class="btn p" id="bSave">${isNew ? 'Ajouter à ma bibliothèque' : 'Enregistrer'}</button>${isNew ? '' : '<button class="btn k" id="bDel">Supprimer</button>'}</div>`);
   initViewer(); renderNav(isNew ? null : b.id);
@@ -2105,6 +2106,8 @@ function openBook(idOrBook, isNew = false, nav = false) {
   };
   $('#bEdition').onclick=async()=>{if(await prepareToolBook())editionPicker18(b);};
   $('#bCoverOpen').onclick = async () => {if(await prepareToolBook())openCoverTool(b);};
+  if ($('#bBackOpen')) $('#bBackOpen').onclick = async () => { if (await prepareToolBook()) openBackTool22(b); };
+  if ($('#bBackFlip')) $('#bBackFlip').onclick = e => { const back = window.flipViewer22?.(); e.currentTarget.textContent = back ? '↻ Voir la couverture' : '↻ Voir le dos'; e.currentTarget.setAttribute('aria-pressed', String(!!back)); $('#b3v')?.scrollIntoView({block: 'nearest', behavior: 'smooth'}); };
   $('#bZone').onclick = async () => {if(await prepareToolBook())openZoneTool(b);};
   $('#bGB').onclick = async e => { await read(); if (!b.title) return toast('Saisis d\'abord le titre'); e.currentTarget.innerHTML = '<span class="spin"></span> Recherche…'; await enrich(b, true); if (!isNew) await saveBook(b); reopen(); toast('Fiche complétée'); };
   $('#bAI').onclick = async e => { await read(); if (!b.title) return toast('Saisis d\'abord le titre'); e.currentTarget.innerHTML = '<span class="spin"></span> IA…';
@@ -2171,7 +2174,7 @@ function enhanceModal18(){const body=$('#mbox .mbody');if(!body)return;body.clas
  for(const parent of sources){if(![...parent.children].some(el=>!el.classList.contains('tsp')&&el.style.display!=='none'))parent.remove();}
  old?.remove();$('#mbox').appendChild(dock);}
 
-function attachToolEnhance18(b,kind){const selector={quad:'#qeOk',straight:'#straightSave',split:'#spOk',cover:'#cropApply',origin:'#ogRep'}[kind];if(selector)toolSaveNext18(b,kind,selector);if(kind==='quad')nextCompare18(b,kind);enhanceModal18();}
+function attachToolEnhance18(b,kind){const selector={quad:'#qeOk',straight:'#straightSave',split:'#spOk',cover:'#cropApply',back:'#cropApply',origin:'#ogRep'}[kind];if(selector)toolSaveNext18(b,kind,selector);if(kind==='quad')nextCompare18(b,kind);enhanceModal18();}
 function holdDelay18(){return {short:450,normal:600,long:900}[localStorage.getItem('scanly_hold_delay')]||600;}
 async function editionPicker18(b){const original=JSON.parse(JSON.stringify(b));openModal(`<div class="dhead"><h3>Choisir une édition</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Vérifie titre, tome, éditeur, année et ISBN. Une couverture personnelle reste protégée. Aucune édition n’est appliquée automatiquement.</p><div class="g2"><div><label class="l">Série à conserver ou corriger</label><input class="fld" id="editionSeries" value="${esc(b.series||'')}"></div><div><label class="l">Tome lu sur l’édition (ne pas déduire)</label><input class="fld" type="number" min="1" id="editionVolume" value="${b.volume||''}"></div></div><div id="editionRows" aria-live="polite">Recherche…</div></div>`);try{let items=await gBooks(b.isbn?'isbn:'+b.isbn:'intitle:'+b.title+(b.author?' inauthor:'+b.author:''),8);const rows=items.map(it=>{const v=it.volumeInfo||{},ids=v.industryIdentifiers||[];return {it,title:v.title,subtitle:v.subtitle,author:(v.authors||[]).join(', '),publisher:v.publisher,year:v.publishedDate,isbn:(ids.find(x=>x.type==='ISBN_13')||ids[0])?.identifier,cover:v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail,source:'Google Books'};});if(b.isbn){const ol=await olByIsbn(b.isbn);if(ol)rows.push({title:ol.title,subtitle:ol.subtitle,author:(ol.author_name||[]).join(', '),publisher:(ol.publisher||[])[0],year:ol.publish_year?.[0],isbn:b.isbn,cover:ol.coverUrl,source:'Open Library',ol});}const root=$('#editionRows');if(!root)return;root.innerHTML=rows.map((r,i)=>`<article class="enhance-card"><img src="${esc((r.cover||'').replace('http:','https:'))}" style="max-width:90px;max-height:130px;object-fit:contain" alt=""><div data-no-i18n><h3>${esc(r.title)}</h3><p>${esc(r.subtitle||'')}<br>${esc(r.author)}<br>${esc(r.publisher||'')} · ${esc(r.year||'')}<br>ISBN ${esc(r.isbn||'')} · ${r.source}</p></div><button type="button" class="btn s" data-edition="${i}">Choisir cette édition</button></article>`).join('')||'<p>Aucune édition trouvée. Vérifie l’ISBN ou utilise la BnF.</p>';root.onclick=async e=>{const btn=e.target.closest('[data-edition]');if(!btn)return;const r=rows[+btn.dataset.edition];if(!confirm('Remplacer les informations bibliographiques par cette édition ? Notes, statut et emplacement sont conservés.'))return;if(!await safetyPoint18('Avant choix d’édition'))return;if(r.it){applyGB(b,r.it,true);b.title=r.title||b.title;}else{for(const k of ['title','author','publisher','isbn'])if(r[k])b[k]=r[k];if(r.year)b.year=parseInt(r.year)||b.year;if(r.ol.number_of_pages_median)b.pages=r.ol.number_of_pages_median;if(!b.coverManual&&r.cover)b.cover=r.cover;}b.series=$('#editionSeries').value.trim();b.volume=parseInt($('#editionVolume').value)||null;b.editionSource=r.source;b.unknown=false;await saveBook(b);closeModal();renderAll();openBook(b.id,false,true);};}catch(e){if($('#editionRows'))$('#editionRows').textContent=e.message;}}
 
@@ -2216,7 +2219,7 @@ async function showBriefSummary19(b,isNew){const box=$('#briefSummaryBox19'),but
 }
 
 async function prepareToolBook(){if(!bookDirty)return true;if(!confirm('Enregistrer les modifications de la fiche avant d’ouvrir cet outil ? Annuler reste sur la fiche.'))return false;const save=$('#bSave');if(save?.onclick)await save.onclick();return !bookDirty;}
-function toolList(b, kind){const list=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&(['cover','bnf','zone'].includes(kind)||o.spineImg)));if(!list.includes(b.id))list.unshift(b.id);return list;}
+function toolList(b, kind){const list=(NAV.list||navList()).filter(id=>books.some(o=>o.id===id&&(['cover','back','bnf','zone'].includes(kind)||o.spineImg)));if(!list.includes(b.id))list.unshift(b.id);return list;}
 function toolNav(b,kind,guard=()=>true){
  const list=toolList(b,kind),at=list.indexOf(b.id),head=$('#mbox .dhead');if(!head)return;
  const n=document.createElement('div');n.className='tool-nav';n.innerHTML=`<button type="button" class="btn s sm" id="toolPrev" aria-label="Livre précédent" ${at>0?'':'disabled'}>‹</button><span>${at+1} / ${list.length}</span><button type="button" class="btn s sm" id="toolNext" aria-label="Livre suivant" ${at<list.length-1?'':'disabled'}>›</button>`;head.insertBefore(n,head.querySelector('[data-close]'));
@@ -2236,6 +2239,7 @@ async function openBookTool(b,kind){
  if(kind==='origin')return openOrigin(b);
  if(kind==='split')return openSplit(b);
  if(kind==='cover')return openCoverTool(b);
+ if(kind==='back')return openBackTool22(b);
  if(kind==='zone')return openZoneTool(b);
  if(kind==='bnf'){openBook(b.id,false,true);$('#bBnf').click();return;}
  if(kind==='straight'){
@@ -2244,6 +2248,15 @@ async function openBookTool(b,kind){
   $('#straightRun').onclick=async()=>{const root=$('#straightPreview');busy=true;try{const copy=JSON.parse(JSON.stringify(b));await restraighten(copy);if(!root.isConnected)return;draft=copy;root.src=copy.spineImg;$('#straightSave').disabled=false;}catch(e){if(root.isConnected)$('#straightMsg').textContent=e.message;}finally{busy=false;}};
   $('#straightSave').onclick=async()=>{if(!draft||busy)return;if(!await safetyPoint18('Avant redressement'))return;busy=true;preserveSpine18(b);for(const k of ['spineImg','spineOrig','quad','srcRef','color','wU','hU'])if(k in draft)b[k]=draft[k];await saveBook(b);draft=null;busy=false;renderAll();toast('Tranche redressée');};attachToolEnhance18(b,'straight');return;
  }
+}
+/* V2.23 : dos du livre (4e de couverture) – photo personnelle, même réglage fin que la couverture */
+function openBackTool22(b){
+ openModal(`<div class="dhead"><h3 data-no-i18n>Dos du livre – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Photographie la 4e de couverture (résumé, prix, code-barres), puis place les 4 coins sur ses angles : l’image est redressée même si la photo est prise de biais.</p>${b.backCover?`<img src="${esc(b.backCover)}" alt="Dos du livre" style="max-height:48vh;max-width:100%;object-fit:contain;display:block;margin:0 auto 10px"><div class="btns"><button type="button" class="btn s" id="backCropCurrent">Rogner le dos actuel</button><button type="button" class="btn k" id="backRemove">Retirer le dos</button></div>`:''}<div class="btns"><label class="btn p" style="cursor:pointer">Choisir une photo<input type="file" id="backPick" accept="image/*" hidden></label><label class="btn g" style="cursor:pointer">📷 Prendre une photo<input type="file" id="backCam" accept="image/*" capture="environment" hidden></label></div><p id="backMsg" class="hint"></p></div>`,'sm');toolNav(b,'back');
+ const start=src=>openRectCrop({src,b,kind:'back',title:`Rogner le dos – ${dispTitle(b)}`,label:'Enregistrer le dos',onApply:async result=>{if(!await safetyPoint18('Avant ajout du dos du livre'))return;const im=await srcToImg(result.src);b.backCover=resize(im,1400,.9);b.backCoverOriginal=result.fullSrc;if(books.some(o=>o.id===b.id))await saveBook(b);renderAll();openBook(books.some(o=>o.id===b.id)?b.id:b,!books.some(o=>o.id===b.id),true);openBackTool22(b);toast('Dos du livre enregistré');}});
+ const pick=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const u=URL.createObjectURL(f);try{const im=await srcToImg(u);const c=document.createElement('canvas'),k=Math.min(1,3200/Math.max(imgW(im),imgH(im)));c.width=Math.round(imgW(im)*k);c.height=Math.round(imgH(im)*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);await start(c.toDataURL('image/jpeg',.94));}catch(err){toast('Image non lisible : '+err.message);}finally{URL.revokeObjectURL(u);}};
+ $('#backPick').onchange=pick;$('#backCam').onchange=pick;
+ if($('#backCropCurrent'))$('#backCropCurrent').onclick=()=>start(b.backCoverOriginal||b.backCover).catch(e=>toast('Image inaccessible : '+e.message));
+ if($('#backRemove'))$('#backRemove').onclick=async()=>{if(!confirm('Retirer la photo du dos de ce livre ?'))return;const old=[b.backCover,b.backCoverOriginal];delete b.backCover;delete b.backCoverOriginal;await saveBook(b);closeModal();renderAll();openBook(b.id,false,true);showUndo('Dos du livre retiré',async()=>{[b.backCover,b.backCoverOriginal]=old;await saveBook(b);renderAll();openBook(b.id,false,true);});};
 }
 function openCoverTool(b){
  openModal(`<div class="dhead"><h3 data-no-i18n>Couverture – ${esc(dispTitle(b))}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Choisis une photo, puis rogne-la avant de l’enregistrer. Les recherches automatiques ne remplaceront pas ta couverture personnelle.</p>${b.cover?`<img src="${esc(b.cover)}" style="max-height:48vh;max-width:100%;object-fit:contain"><div class="btns"><button type="button" class="btn s" id="coverCropCurrent">Rogner la couverture actuelle</button></div>`:''}<label class="btn p" style="cursor:pointer">Choisir une photo<input type="file" id="coverPick" accept="image/*" hidden></label><p id="coverMsg" class="hint"></p></div>`,'sm');toolNav(b,'cover');
@@ -2254,7 +2267,7 @@ function openCoverTool(b){
 async function openRectCrop({src,b,kind='zone',title,label='Analyser la zone',onApply,extra='',initialRect=null}){
  /* V2.20 : même réglage fin que le détourage (coins, bords, loupe, zoom, flèches). Couverture : 4 coins libres + redressement. */
  const image=await srcToImg(src);let full=document.createElement('canvas');full.width=imgW(image);full.height=imgH(image);full.getContext('2d').drawImage(image,0,0);
- const quadMode=kind==='cover';
+ const quadMode=kind==='cover'||kind==='back';
  openModal(`<div class="dhead"><h3 data-no-i18n>${esc(title)}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">${quadMode?'Place les 4 coins dorés sur les angles réels de la couverture, même si la photo est prise de biais : l’aperçu montre la couverture redressée. Les carrés au milieu des côtés déplacent un bord ; glisser à l’intérieur déplace le cadre. Réglage fin : zoome (＋, pincer ou molette), une loupe apparaît pendant le déplacement ; touche un coin puis utilise les flèches.':'Trace la zone utile (bouton Tracer un cadre), puis ajuste ses coins et ses bords. Glisser à l’intérieur déplace la zone ; ailleurs, glisser déplace la photo. Réglage fin : zoome (＋, pincer ou molette) et utilise les flèches.'}</p>${extra}
  <div class="fe20-wrap"><div class="fe20-area" id="cropArea"></div>${quadMode?'<div class="fe20-side cover20"><div class="hint">Aperçu redressé</div><img id="cropPrev" alt=""></div>':''}</div>
  ${fineToolbar20()}
@@ -2274,7 +2287,7 @@ async function openRectCrop({src,b,kind='zone',title,label='Analyser la zone',on
  if($('#cropRotate'))$('#cropRotate').onclick=()=>{const c=document.createElement('canvas');c.width=full.height;c.height=full.width;const t=c.getContext('2d');t.translate(c.width,0);t.rotate(Math.PI/2);t.drawImage(full,0,0);full=c;Q=fullQ();ed.setSource(full,Q);dirty=true;preview();ed.fit({x0:0,y0:0,x1:full.width,y1:full.height});};
  $('#cropApply').onclick=async()=>{if(busy)return;const B=quadBox(Q);if(B.x1-B.x0<8||B.y1-B.y0<8){$('#cropMsg').textContent='Zone trop petite.';return;}busy=true;$('#cropApply').disabled=true;try{let out;if(quadMode){out=extractQuad(full,Q,1800).crop;}else{const c=document.createElement('canvas');c.width=Math.round(B.x1-B.x0);c.height=Math.round(B.y1-B.y0);c.getContext('2d').drawImage(full,B.x0,B.y0,B.x1-B.x0,B.y1-B.y0,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',.94);}
   const result={src:out,rect:{x:B.x0/full.width,y:B.y0/full.height,w:(B.x1-B.x0)/full.width,h:(B.y1-B.y0)/full.height},quad:Q.map(p=>[p[0]/full.width,p[1]/full.height]),fullSrc:full.toDataURL('image/jpeg',.92),fullW:full.width,fullH:full.height};dirty=false;modalLeaveGuard=null;await onApply(result);}catch(e){if($('#cropMsg')){$('#cropMsg').textContent=e.message;$('#cropApply').disabled=false;modalLeaveGuard=guard;}}finally{busy=false;}};
- if(kind==='cover')attachToolEnhance18(b,'cover');else enhanceModal18();
+ if(kind==='cover'||kind==='back')attachToolEnhance18(b,kind);else enhanceModal18();
  ed.fit({x0:0,y0:0,x1:full.width,y1:full.height});preview();
 }
 async function openZoneTool(b){
@@ -2536,7 +2549,7 @@ function openSplit(b) {
     const row = books.filter(x => x.caseId === b.caseId && (x.row || 1) === (b.row || 1)).sort((p, q) => (p.position || 0) - (q.position || 0)), at = row.indexOf(b);
     for (let j = 0; j < fr.length - 1; j++) { const x0 = Math.round(fr[j] * w), x1 = Math.max(x0 + 2, Math.round(fr[j + 1] * w)), c = document.createElement('canvas'); c.width = x1 - x0; c.height = h; c.getContext('2d').drawImage(im, x0, 0, x1 - x0, h, 0, 0, x1 - x0, h);
       const crop = c.toDataURL('image/jpeg', .88), o = j === 0 ? b : newBook({caseId: b.caseId, row: b.row, type: b.type, importId: b.importId, orig: b.orig ? {...b.orig} : undefined, hU: b.hU, pxMed: b.pxMed});
-      o.spineImg = crop; o.wU = originalWidth ? Math.max(6, Math.round(originalWidth * (fr[j + 1] - fr[j]))) : undefined; o.cover = j === 0 ? o.cover : null; o.quad = null;
+      o.spineImg = crop; o.wU = originalWidth ? Math.max(6, Math.round(originalWidth * (fr[j + 1] - fr[j]))) : undefined; o.cover = j === 0 ? o.cover : null; if (j) { delete o.backCover; delete o.backCoverOriginal; } o.quad = null;
       if(originalQuad){const mix=(a,c,f)=>[a[0]+(c[0]-a[0])*f,a[1]+(c[1]-a[1])*f];o.quad=[mix(originalQuad[0],originalQuad[1],fr[j]),mix(originalQuad[0],originalQuad[1],fr[j+1]),mix(originalQuad[3],originalQuad[2],fr[j+1]),mix(originalQuad[3],originalQuad[2],fr[j])];if(originalRef)o.srcRef={...originalRef};o.spineOrig=null;}
       if (j > 0) { o.title = ''; o.unknown = true; } made.push(o); }
     made[0].title = ''; made[0].unknown = true; ['author', 'series', 'volume', 'publisher', 'isbn', 'cover', 'coverManual', 'coverOriginal', 'coverSource', 'description', 'price', 'priceSource', 'year', 'pages', 'genre'].forEach(k => delete made[0][k]);

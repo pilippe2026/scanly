@@ -1,3 +1,30 @@
+SCANLY V2.23 - DOS DU LIVRE (4E DE COUVERTURE)
+Base exclusive : archive SCANLY V2.22 fournie par Philippe.
+
+- AJOUTER LE DOS DU LIVRE
+  Fiche > Tranche et couverture > Couverture et photo > « Ajouter le dos du livre ».
+  Choisir une photo (Photos / Fichiers / PC) ou « Prendre une photo » (camera arriere
+  sur iPhone / iPad). Meme reglage fin que la couverture : 4 coins libres, image
+  redressee meme prise de biais, Detection automatique, Rectangle droit, zoom,
+  loupe, fleches, rotation 90°. « Enregistrer le dos » et « Enregistrer et suivant ».
+  Ensuite : « Modifier le dos du livre », « Rogner le dos actuel », « Retirer le dos »
+  (avec Annuler 10 s). Point de restauration avant enregistrement.
+- AFFICHAGE
+  Le livre 3D de la fiche montre le dos sur sa face arriere.
+  Bouton « ↻ Voir le dos » / « ↻ Voir la couverture » pour le retourner ;
+  on peut aussi le faire tourner au doigt ou a la souris.
+- DONNEES
+  Le dos suit la sauvegarde exportee, les points de restauration et la synchronisation
+  GitHub (images envoyees une seule fois). Separer un livre en plusieurs ne copie
+  pas le dos sur les nouveaux livres. Aucune recherche automatique ne le remplace.
+
+TESTS : syntaxe JS ; Chromium PC et emulation iPhone, photo de dos de test prise de
+biais : ajout, detection des coins, enregistrement, affichage 3D retourne, presence
+dans la synchronisation. Non teste : appareil physique, GitHub reel.
+
+MISE A JOUR : sauvegarde exportee ; envoyer sur GitHub le CONTENU du dossier SCANLY V2.23 ;
+fermer et rouvrir l'application.
+
 SCANLY V2.22 - « COUVERTURE INCORRECTE ? » FONCTIONNE MEME SI GOOGLE BOOKS EST LIMITE
 Base exclusive : archive SCANLY V2.21 fournie par Philippe.
 
