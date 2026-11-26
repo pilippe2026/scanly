@@ -758,7 +758,7 @@ body.utility-view .toolbar>:not(#viewSeg){display:none}body.utility-view #fab{di
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.20';
+const VERSION = '2.21';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
 const STATUS = ['À lire','En cours','Lu','Prêté'];
@@ -999,7 +999,7 @@ async function recognize(urls) {
 }
 
 /* ---------- Enrichissement ---------- */
-async function gBooks(q, max = 5, options = {}) { try { const d=await SCANLY_SOURCES.request(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&printType=books`,'json',options);const items=d.items||[];if(/^isbn:/i.test(q)){const id=q.slice(5).replace(/[^0-9X]/gi,'');return items.filter(it=>(it.volumeInfo?.industryIdentifiers||[]).some(x=>SCANLY_SOURCES.validISBN(x.identifier)&&SCANLY_SOURCES.isbn13(x.identifier)===SCANLY_SOURCES.isbn13(id)));}return items;}catch(e){options.onError?.('Google Books : '+e.message);return [];} }
+async function gBooks(q, max = 5, options = {}) { try { const d=await SCANLY_SOURCES.request(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&printType=books`,'json',options);const items=d.items||[];if(/^isbn:/i.test(q)){const id=q.slice(5).replace(/[^0-9X]/gi,'');return items.filter(it=>(it.volumeInfo?.industryIdentifiers||[]).some(x=>SCANLY_SOURCES.validISBN(x.identifier)&&SCANLY_SOURCES.isbn13(x.identifier)===SCANLY_SOURCES.isbn13(id)));}return items;}catch(e){window.NETERR21=(window.NETERR21||0)+1;options.onError?.('Google Books : '+e.message);return [];} }
 
 function applyGB(b, it, force) {
   const v = it.volumeInfo || {}, s = it.saleInfo || {};
@@ -1020,7 +1020,7 @@ async function openLib(b) {
     if (!b.publisher && doc.publisher) b.publisher = doc.publisher[0];
     if (!b.isbn && doc.isbn) b.isbn = doc.isbn.find(i => i.length === 13) || doc.isbn[0];
     if (!b.pages && doc.number_of_pages_median) b.pages = doc.number_of_pages_median;
-    if (!b.cover && doc.cover_i && volMatch(doc.title, b.volume)) b.cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
+    if (!b.cover && !b.coverManual && doc.cover_i && titleMatch21(b, doc.title, '', (doc.author_name || []).join(' ')) && volMatch(doc.title, b.volume)) b.cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`;
   } catch (e) {}
 }
 /* V1.9.8 : couverture propre à chaque tome */
@@ -1038,12 +1038,26 @@ async function olIsbnCover(isbn) { // Open Library : couverture directe par ISBN
   try { const rr = await SCANLY_SOURCES.request(`https://openlibrary.org/api/books?bibkeys=ISBN:${c}&format=json&jscmd=data`);
     const d = rr['ISBN:' + c]; return d && d.cover ? (d.cover.medium || d.cover.large || d.cover.small) : null; } catch (e) { return null; }
 }
-async function coverFor(b, avoid) {
+/* V2.21 : une couverture n'est retenue que si la notice correspond VRAIMENT au livre (titre, sinon série + tome ; auteur si connu). */
+function titleMatch21(b, title, subtitle, authors) {
+  const full = (title || '') + ' ' + (subtitle || ''), ts = Math.max(sim(b.title, full), sim(b.title, title)), nb = norm(b.title), nt = norm(title);
+  const short = nb.split(' ').filter(w => w.length > 1).length <= 2;
+  let ok = short ? (nt === nb || nt.startsWith(nb + ' ') || nb.startsWith(nt + ' ') && nt.length > 3 || ts >= 1 && norm(full).includes(nb)) : ts >= .7;
+  if (!ok && b.series && b.volume) ok = sim(b.series, full) >= .7 && volMatch(full, b.volume);
+  if (ok && b.author && authors && String(authors).trim()) { const last = norm(b.author.split(',')[0]).split(' ').pop(); if (last && last.length > 2 && !norm(authors).includes(last) && sim(b.author, authors) < .5) ok = false; }
+  return ok;
+}
+const gbMatch21 = (b, it) => { const v = it?.volumeInfo || {}; return titleMatch21(b, v.title, v.subtitle, (v.authors || []).join(' ')); };
+async function olIsbnRecord21(isbn) { const c = String(isbn).replace(/[^0-9X]/gi, ''); if (c.length < 10) return null;
+  try { const rr = await SCANLY_SOURCES.request(`https://openlibrary.org/api/books?bibkeys=ISBN:${c}&format=json&jscmd=data`); return rr['ISBN:' + c] || null; } catch (e) { return null; } }
+async function coverFor(b, avoid) { b._coverSrc21 = null; const u = await coverFor21(b, avoid); return u; }
+async function coverFor21(b, avoid) {
   const v = b.volume, ser = b.series || '', au = b.author ? b.author.split(',')[0].trim().split(' ').pop() : '';
   const used = u => !u || (avoid && avoid.has(ckey(u)));
-  const tryIsbn = async isbn => { const c = String(isbn || '').replace(/[^0-9X]/gi, ''); if (c.length < 10) return null;
-    const it = (await gBooks('isbn:' + c, 3))[0], u = gbCover(it); if (u && !used(u)) return u;
-    const o = await olIsbnCover(c); return o && !used(o) ? o : null; };
+  const tryIsbn = async (isbn, verify = true) => { const c = String(isbn || '').replace(/[^0-9X]/gi, ''); if (c.length < 10) return null;
+    const it = (await gBooks('isbn:' + c, 3))[0], u = gbCover(it); if (u && !used(u) && (!verify || gbMatch21(b, it))) return u;
+    const rec = await olIsbnRecord21(c), o = rec?.cover && (rec.cover.medium || rec.cover.large || rec.cover.small);
+    return o && !used(o) && (!verify || titleMatch21(b, rec.title, rec.subtitle, (rec.authors || []).map(a => a.name).join(' '))) ? o : null; };
   // 1. ISBN connu
   if (b.isbn) { const u = await tryIsbn(b.isbn); if (u) return u; }
   // 2. série + tome / titre dans Google Books
@@ -1052,20 +1066,38 @@ async function coverFor(b, avoid) {
   if (ser && v) { qs.push(`${ser} tome ${v}` + (au ? ' inauthor:' + au : '')); qs.push(`intitle:"${ser}" ${v}`); }
   qs.push('intitle:' + b.title + (au ? ' inauthor:' + au : ''));
   for (const q of qs) for (const it of await gBooks(q, 10)) { const vi = it.volumeInfo || {}, t = vtxt(vi), u = gbCover(it);
-    if (used(u)) continue;
-    const okSer = !ser || sim(ser, t) >= .5 || sim(b.title, t) >= .5, okVol = !v || volMatch(t, v) || volMatch(b.title, v) && sim(b.title, t) >= .8;
-    if (okSer && okVol) return u;
-    const ids = vi.industryIdentifiers || []; if (okSer && v && ids.length && !ser) return u; }
+    if (used(u) || !gbMatch21(b, it)) continue;
+    const okVol = !v || volMatch(t, v) || volMatch(b.title, v) && sim(b.title, t) >= .8;
+    if (okVol) return u; }
   // 3. Open Library (recherche)
-  try { const p = new URLSearchParams({q: (ser && v ? ser + ' ' + v : b.title) + (au ? ' ' + au : ''), limit: '10', fields: 'title,cover_i'});
+  try { const p = new URLSearchParams({q: (ser && v ? ser + ' ' + v : b.title) + (au ? ' ' + au : ''), limit: '10', fields: 'title,subtitle,author_name,cover_i'});
     const rr = await SCANLY_SOURCES.request('https://openlibrary.org/search.json?' + p);
-    for (const d of (rr.docs || [])) { const u = d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : null; if (!used(u) && (!v || volMatch(d.title, v))) return u; }
+    for (const d of (rr.docs || [])) { const u = d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : null; if (!used(u) && titleMatch21(b, d.title, d.subtitle, (d.author_name || []).join(' ')) && (!v || volMatch(d.title + ' ' + (d.subtitle || ''), v))) return u; }
   } catch (e) {}
   // 4. l'IA retrouve l'ISBN de l'édition française de ce tome
   if (cfg.key && (ser || b.title)) { try {
     const o = await gemini([{text: `Donne l'ISBN-13 de l'édition française de : « ${b.title} »${ser ? `, série « ${ser} »` : ''}${v ? `, tome ${v}` : ''}${b.author ? `, ${b.author}` : ''}${b.publisher ? `, éditeur ${b.publisher}` : ''}. Si tu n'es pas sûr, null. JSON : {"isbn":"…"}`}], {json: true, timeout: 60000});
     const u = await tryIsbn(o.isbn); if (u) { if (!b.isbn) b.isbn = String(o.isbn).replace(/[^0-9X]/gi, ''); return u; } } catch (e) {} }
   return null;
+}
+/* V2.21 : revérification stricte des couvertures automatiques */
+async function recheckCover21(b, avoid) {
+  const before = window.NETERR21 || 0, u = await coverFor21(b, avoid);
+  if ((window.NETERR21 || 0) > before && !u) return 'unchecked';
+  if (u) { if (ckey(u) === ckey(b.cover)) return 'kept'; b.cover = u; return 'changed'; }
+  b.cover = null; return 'removed';
+}
+async function auditCovers21(btn) {
+  const todo = books.filter(b => b.cover && !b.coverManual && b.title && !b.unknown);
+  if (!todo.length) return toast('Aucune couverture automatique à revérifier');
+  if (!confirm(`Revérifier ${todo.length} couverture(s) trouvée(s) automatiquement ?\nUne couverture dont la notice ne correspond pas au titre (ou à la série + tome) est remplacée par la bonne, sinon retirée (la tranche/la carte s'affiche à la place).\nLes couvertures personnelles ne sont pas modifiées. Durée : plusieurs minutes pour une grande bibliothèque.`)) return;
+  if (!await safetyPoint18('Avant revérification des couvertures')) return;
+  const lbl = btn ? btn.innerHTML : '', R = {kept: 0, changed: 0, removed: 0, unchecked: 0}; let k = 0;
+  await pool(todo, 3, async b => { const avoid = new Set(books.filter(x => x !== b && x.cover && x.series && norm(x.series) === norm(b.series || '') && x.volume !== b.volume).map(x => ckey(x.cover)));
+    const r = await recheckCover21(b, avoid); R[r]++; if (r === 'changed' || r === 'removed') await DB.put('books', b);
+    k++; if (btn) btn.innerHTML = `<span class="spin"></span> ${k}/${todo.length}`; });
+  if (btn) btn.innerHTML = lbl; renderAll();
+  toast(`Couvertures : ${R.kept} confirmée(s), ${R.changed} remplacée(s), ${R.removed} retirée(s)${R.unchecked ? `, ${R.unchecked} non vérifiée(s) (réseau)` : ''}.`, 9000);
 }
 async function fixCovers(btn) {
   if(!await safetyPoint18('Avant correction groupée des couvertures'))return;
@@ -1095,6 +1127,7 @@ async function enrich(b, force = false) {
     if (v.language === 'fr') sc += .1; if (v.imageLinks) sc += .05;
     if (sc > bs) { bs = sc; best = it; } }
   const prevCover = b.cover;
+  if (best && !gbMatch21(b, best)) best = null; // V2.21 : notice d'un autre livre -> ni infos ni couverture
   if (best && bs >= .6) applyGB(b, best, force);
   if (b.volume && b.series && b.cover && b.cover !== prevCover && books.some(x => x !== b && x.series && norm(x.series) === norm(b.series) && x.volume !== b.volume && ckey(x.cover) === ckey(b.cover))) b.cover = prevCover || null;   // V2.0 : pas la couverture d'un autre tome de la série
   if (!best || bs < .6 || !b.cover) await openLib(b);
@@ -1288,10 +1321,12 @@ function renderCaseBar(groups) {
     (groups.length > 1 ? `<button data-case="${ALL}" class="${curCase === ALL ? 'on' : ''}" title="Tous les meubles réunis en un seul, par zones">Vue d'ensemble<span class="n">${books.filter(b => !b.wish).length}</span>${allHits ? `<span class="hitn">${allHits}</span>` : ''}</button><span class="sep"></span>` : '') +
     groups.map(g => { const h = hitsOf(g); return `<button data-case="${g.id}" class="${g.id === curCase ? 'on' : ''}" title="Glisse un livre ici pour le déplacer dans ce meuble">${esc(g.name)}<span class="n">${ownN(g)}</span>${h ? `<span class="hitn">${h}</span>` : ''}</button>`; }).join('') +
     `<button data-case="__add" title="Nouveau meuble">＋ Meuble</button>` +
-    (kc ? `<span class="sep"></span><div class="rowb"><button data-rows="-1" title="Retirer la dernière étagère (si elle est vide)">−</button><span class="rn">${rowsCount({...kc, bs: books.filter(b => b.caseId === kc.id)})} étagères</span><button data-rows="1" title="Ajouter une étagère à ce meuble">＋ Étagère</button></div>` : '') + '</div></div>';
+    (kc ? `<span class="sep"></span><div class="rowb"><button data-rows="-1" title="Retirer la dernière étagère (si elle est vide)">−</button><span class="rn">${rowsCount({...kc, bs: books.filter(b => b.caseId === kc.id)})} étagères</span><button data-rows="1" title="Ajouter une étagère à ce meuble">＋ Étagère</button></div><button data-shelves21="1" title="Choisir une étagère : sélectionner, vider ou supprimer">Gérer / supprimer une étagère…</button><button data-sel21="1" title="Toucher des livres pour les déplacer ou les supprimer">☑ Sélectionner des livres</button>` : '') + '</div></div>';
 }
 $('#caseBar').onclick = async e => {
   const rb = e.target.closest('[data-rows]'); if (rb) return changeRows(+rb.dataset.rows);
+  if (e.target.closest('[data-shelves21]')) return openShelves21();
+  if (e.target.closest('[data-sel21]')) { CAM.sel = true; renderRoom(); return toast('Touche les livres à sélectionner, puis Supprimer ou Déplacer dans la barre du bas', 4500); }
   const b = e.target.closest('[data-case]'); if (!b) return;
   if (b.dataset.case === '__clearai') { aiHits = null; return renderRoom(); }
   if (b.dataset.case === '__add') { const n = prompt('Nom du nouveau meuble :', 'Bureau – Étagère'); if (!n) return; curCase = (await newCase(n)).id; }
@@ -1983,7 +2018,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
     ${sec20('loan', 'Prêt', `<div class="g3"><div><label class="l">Prêté à</label><input class="fld" id="eLoan" value="${esc(b.loanTo)}" placeholder="Nom de la personne"></div><div><label class="l">Date du prêt</label><input class="fld" id="eLoanD" type="date" value="${esc(b.loanDate)}"></div><div><label class="l">Retour prévu</label><input class="fld" id="eLoanR" type="date" value="${esc(b.loanDue)}"></div></div>
     ${isLoaned(b) ? `<div class="btns" style="margin-top:8px"><button class="btn s sm" id="bRet">Le livre m'a été rendu</button></div>` : '<p class="hint">Sans date de retour, un rappel est prévu 30 jours après le prêt.</p>'}`, isLoaned(b))}
     ${b.wish ? wishFields18(b) : ''}
-    ${sec20('images', 'Tranche et couverture', `${spineTools20}<div class="fsub20"><b>Couverture et photo</b><div class="btns"><button type="button" class="btn s sm" id="bCoverOpen">${b.coverManual ? 'Modifier la couverture' : 'Ajouter une couverture'}</button>${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">\uD83D\uDCF7 Reprendre sur la photo d'origine</button>` : ''}<button type="button" class="btn s sm" id="bZone">Rescanner une zone</button></div>${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}</div>`, true)}
+    ${sec20('images', 'Tranche et couverture', `${spineTools20}<div class="fsub20"><b>Couverture et photo</b><div class="btns"><button type="button" class="btn s sm" id="bCoverOpen">${b.coverManual ? 'Modifier la couverture' : 'Ajouter une couverture'}</button>${!isNew && origImport(b) ? `<button class="btn g sm" id="bOrigPhoto" title="Ouvrir la photo d'origine complète pour recadrer ce livre ou ajouter un livre manquant / tronqué">\uD83D\uDCF7 Reprendre sur la photo d'origine</button>` : ''}<button type="button" class="btn s sm" id="bZone">Rescanner une zone</button></div>${!b.coverManual && b.cover ? '<button type="button" class="btn s sm" id="bCoverCheck21" title="Cherche une couverture qui correspond vraiment à ce titre ; si aucune n’est trouvée, la couverture actuelle est retirée">Couverture incorrecte ?</button>' : ''}${b.coverManual ? '<p class="hint">Couverture personnelle protégée</p>' : ''}</div>`, true)}
     ${sec20('notes', 'Notes personnelles', `<textarea class="fld" id="eNotes" aria-label="Notes personnelles">${esc(b.notes)}</textarea>`)}`,
     `<div class="btns" style="padding:12px 18px;border-top:1px solid var(--line);margin:0"><button class="btn p" id="bSave">${isNew ? 'Ajouter à ma bibliothèque' : 'Enregistrer'}</button>${isNew ? '' : '<button class="btn k" id="bDel">Supprimer</button>'}</div>`);
   initViewer(); renderNav(isNew ? null : b.id);
@@ -2028,6 +2063,12 @@ function openBook(idOrBook, isNew = false, nav = false) {
   if ($('#bDel')) $('#bDel').onclick = async () => { if (await deleteBooks([b.id], `« ${dispTitle(b)} »`)) closeDrawer(); };
   bindISBNForm19(b,isNew);
   bindFiche20(b,isNew);
+  if ($('#bCoverCheck21')) $('#bCoverCheck21').onclick = async e => { if (!await prepareToolBook()) return; const btn = e.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Recherche…';
+    const avoid = new Set(books.filter(x => x !== b && x.cover && x.series && norm(x.series) === norm(b.series || '') && x.volume !== b.volume).map(x => ckey(x.cover)));
+    const old = b.cover; avoid.add(ckey(old)); const r = await recheckCover21(b, avoid);
+    if (r === 'unchecked') { btn.disabled = false; btn.textContent = 'Couverture incorrecte ?'; return toast('Recherche impossible (réseau) : couverture conservée'); }
+    await saveBook(b); renderAll(); openBook(b.id, false, true);
+    showUndo(r === 'removed' ? 'Couverture retirée (aucune couverture correspondant au titre)' : 'Nouvelle couverture trouvée', async () => { b.cover = old; await saveBook(b); renderAll(); openBook(b.id, false, true); }); };
   if ($('#bLoc')) $('#bLoc').onclick = () => showInRoom(b.id);
   if ($('#bOrig')) $('#bOrig').onclick = async () => { closeDrawer(); setView('lib'); curCase = b.orig.caseId || curCase; await reorderByOrig([b], `Remise en place de « ${dispTitle(b)} »`); showUndo(`« ${dispTitle(b)} » remis à sa place d'origine`); setTimeout(() => showInRoom(b.id), 50); };
   if ($('#bRet')) $('#bRet').onclick = async () => { await read(); returnLoan(b); await saveBook(b); reopen(); toast('Retour enregistré'); };
@@ -3018,7 +3059,7 @@ function openSettings() {
     <div class="btns"><button class="btn s" id="pCsv">Exporter pour Excel (CSV)…</button><button class="btn s" id="pImg">Image de la bibliothèque…</button><button class="btn s" id="pPdf">Inventaire PDF (assurance)…</button></div>
     <p class="hint">iPhone : le fichier de sauvegarde est compatible avec BiblioScan, dans les deux sens.</p>
     <div class="step" style="margin-top:22px">Corbeille</div><div id="pTrash"><p class="hint"><span class="spin"></span></p></div>
-    <div class="btns"><button class="btn s" id="pStraight" title="Re-détourage précis et redressement vertical de toutes les tranches photographiées">Redresser toutes les tranches photo</button><button class="btn s" id="pCov" title="Recherche une couverture propre à chaque tome (séries dont plusieurs tomes ont le même visuel)">Corriger les couvertures</button><button class="btn s" id="pEnr">Compléter les fiches incomplètes</button><button class="btn k" id="pWipe">Tout effacer</button></div>
+    <div class="btns"><button class="btn s" id="pStraight" title="Re-détourage précis et redressement vertical de toutes les tranches photographiées">Redresser toutes les tranches photo</button><button class="btn s" id="pCov" title="Recherche une couverture propre à chaque tome (séries dont plusieurs tomes ont le même visuel)">Corriger les couvertures</button><button class="btn s" id="pCov21" title="Revérifie toutes les couvertures trouvées automatiquement : une couverture qui ne correspond pas au titre est remplacée ou retirée. Les couvertures personnelles ne sont pas touchées.">Revérifier les couvertures automatiques</button><button class="btn s" id="pEnr">Compléter les fiches incomplètes</button><button class="btn k" id="pWipe">Tout effacer</button></div>
     <p class="hint" id="pInfo"></p></div>`, 'sm');
   $('#pTheme').onclick = e => { const c = e.target.closest('[data-th]'); if (!c) return; theme = c.dataset.th; localStorage.setItem('scanly_theme', theme); renderRoom(true); $$('#pTheme .thcard').forEach(x => x.classList.toggle('on', x.dataset.th === theme)); };
   const save = () => { localStorage.setItem('scanly_key', $('#pKey').value.trim()); localStorage.setItem('scanly_model', $('#pModel').value); };
@@ -3041,6 +3082,7 @@ function openSettings() {
   $('#pExp').onclick = backupNow; $('#pImp').onclick = openBackup; $('#pCsv').onclick = exportCsv; $('#pImg').onclick = exportImageFile; $('#pPdf').onclick = printInventory;
   $('#pStraight').onclick = e => restraightenMany(books.filter(b => !b.wish), e.currentTarget);
   $('#pCov').onclick = e => fixCovers(e.currentTarget);
+  $('#pCov21').onclick = e => auditCovers21(e.currentTarget);
   $('#pEnr').onclick = async e => { const todo = books.filter(b => !b.wish && b.title && (!b.cover || !b.year || !b.isbn)); if (!todo.length) return toast('Toutes les fiches sont complètes');
     closeModal(); bgComplete(todo, true, true); };
   $('#pWipe').onclick = async () => { if (!confirm('Effacer TOUTE la bibliothèque ? Pense à enregistrer une sauvegarde avant.') || !confirm('Confirmer la suppression définitive ?')) return;
@@ -4245,6 +4287,12 @@ function locateBook20(id) {
 }
 
 /* ---------- Étagère : menu (clic sur ⇕) et suppression ---------- */
+function openShelves21() {
+  const c = cases.find(x => x.id === curCase); if (!c) return toast('Choisis d’abord un meuble');
+  const n = rowsCount({...c, bs: books.filter(b => b.caseId === c.id)});
+  openModal(`<div class="dhead"><h3 data-no-i18n>Étagères – ${esc(c.name)}</h3><button class="x" data-close>×</button></div><div class="mbody"><p class="hint">Choisis l’étagère (1 = en haut).</p><div class="shelfmenu20">${Array.from({length: n}, (_, i) => { const k = books.filter(b => b.caseId === c.id && (b.row || 1) === i + 1 && !b.wish).length; return `<button type="button" class="btn s" data-sh21="${i + 1}">Étagère ${i + 1} · ${k} livre${k > 1 ? 's' : ''}</button>`; }).join('')}</div></div>`, 'sm');
+  $('#mbox').onclick = e => { const t = e.target.closest('[data-sh21]'); if (t) { closeModal(); openShelfMenu20(c.id + '|' + t.dataset.sh21); } };
+}
 function openShelfMenu20(key) {
   const i = key.lastIndexOf('|'), cid = key.slice(0, i), row = +key.slice(i + 1), c = cases.find(x => x.id === cid); if (!c) return;
   const L = books.filter(b => caseOf(b) === cid && (b.row || 1) === row && !b.wish), W = books.filter(b => caseOf(b) === cid && (b.row || 1) === row && b.wish);

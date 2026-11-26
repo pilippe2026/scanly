@@ -1,0 +1,32 @@
+SCANLY V2.21 - COUVERTURES FIABLES, SUPPRESSION D'ETAGERE VISIBLE
+Base exclusive : archive SCANLY V2.20 fournie par Philippe.
+
+- COUVERTURES AUTOMATIQUES
+  Cause : pour un livre sans serie ni tome, la recherche retenait le PREMIER resultat
+  Google Books / Open Library ayant une image, sans verifier le titre
+  (ex. « Aide-memoire des Fleurs du Dr Bach » -> couverture « Peggy Sue »).
+  Desormais une couverture n'est retenue que si la notice correspond au livre :
+  titre identique ou tres proche (titres courts : quasi exact), ou serie + tome ;
+  auteur coherent quand il est connu. Verification aussi pour les ISBN proposes
+  par l'IA et pour Open Library. Une notice d'un autre livre n'apporte plus ni
+  couverture ni informations a la fiche. Sinon : pas de couverture (tranche/carte).
+- CORRIGER LES COUVERTURES DEJA FAUSSES
+  Parametres > « Revérifier les couvertures automatiques » : toutes les couvertures
+  non personnelles sont controlees ; bonne couverture trouvee = remplacee, sinon
+  retiree. Point de restauration avant. Erreur reseau = couverture conservee.
+  Fiche > Tranche et couverture > « Couverture incorrecte ? » : le meme controle pour
+  un seul livre, en excluant la couverture actuelle ; bouton Annuler 10 s.
+  Les couvertures personnelles (Ajouter une couverture) ne sont jamais touchees.
+- SUPPRIMER UNE ETAGERE / DES LIVRES (iPhone)
+  Menu du meuble (bouton « Salon ▾ ») : « Gerer / supprimer une etagere… » (choix de
+  l'etagere puis Selectionner, Supprimer les livres, Supprimer l'etagere) et
+  « Selectionner des livres ». Le toucher sur le rond ⇕ reste disponible.
+
+TESTS : syntaxe JS ; Chromium emulation iPhone avec reponses Google/Open Library
+SIMULEES : Peggy Sue refusee pour le Dr Bach, bonne notice acceptee, aucun resultat
+coherent = pas de couverture, revérification (retrait), bouton de la fiche, nouveaux
+menus d'etagere. Non teste : bases reelles, appareil physique, GitHub.
+
+MISE A JOUR : sauvegarde exportee, puis envoyer sur GitHub le CONTENU du dossier
+SCANLY V2.21. Fermer et rouvrir l'application, puis lancer une fois
+Parametres > Revérifier les couvertures automatiques.
