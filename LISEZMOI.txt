@@ -1,3 +1,22 @@
+SCANLY V2.30 - MISES A JOUR AUTOMATIQUES FIABLES
+Base exclusive : SCANLY V2.29.
+
+1. LES NOUVELLES VERSIONS ARRIVENT TOUTES SEULES
+   Sur iPhone, l'ancienne version pouvait rester affichée un moment : le téléphone gardait
+   en mémoire les anciens fichiers. Désormais SCANLY vérifie s'il existe une nouvelle
+   version à chaque fois que tu reviens dans l'app, et se recharge tout seul quand elle est
+   prête (ou te le signale si une fiche est ouverte).
+
+2. NUMERO DE VERSION DANS LE PROFIL
+   Onglet Profil : la version installée est affichée sous les chiffres clés.
+
+Technique
+- sw.js : fichiers relus sans le cache du navigateur (cache: no-cache / reload).
+- Enregistrement du service worker avec updateViaCache: 'none', vérification au retour
+  dans l'app et toutes les 30 minutes, rechargement automatique au changement de version.
+- Aucune modification des données.
+
+
 SCANLY V2.29 - NOUVEAU DESIGN
 Base exclusive : SCANLY V2.28.
 

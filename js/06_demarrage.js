@@ -48,7 +48,7 @@ window.addEventListener('beforeunload', e => { if (BG.running) { e.preventDefaul
   if (!cfg.key) setTimeout(() => toast('Bienvenue dans SCANLY ! Commence par saisir ta clé Gemini (Paramètres).', 5000), 700);
   else if (late.length) setTimeout(() => toast(`${late.length} prêt(s) en retard : ${late.slice(0, 3).map(b => `« ${b.title} » (${b.loanTo || '?'})`).join(', ')} – voir le Tableau de bord`, 8000), 900);
   else if (books.length && (!last || Date.now() - new Date(last) > (persisted ? 14 : 7) * 864e5)) setTimeout(() => toast(persisted ? 'Pense à enregistrer une sauvegarde de ta bibliothèque (Ctrl+S)' : 'Stockage non protégé par le navigateur : enregistre une sauvegarde de ta bibliothèque (Paramètres › Sauvegarde et exports)', persisted ? 5000 : 8000), 900);
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) registerSW30();
 })();
 
 /* =====================================================================
