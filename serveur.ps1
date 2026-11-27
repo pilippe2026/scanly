@@ -9,7 +9,7 @@ $l = New-Object System.Net.HttpListener
 $l.Prefixes.Add($prefix)
 try { $l.Start() } catch { Write-Host "Port $port deja utilise : SCANEBOOK est probablement deja ouvert." -ForegroundColor Yellow; Start-Process $prefix; exit }
 Write-Host ""
-Write-Host "  SCANEBOOK V2.41 - Votre bibliotheque, en un scan." -ForegroundColor Yellow
+Write-Host "  SCANEBOOK V2.42 - Votre bibliotheque, en un scan." -ForegroundColor Yellow
 Write-Host "  Serveur local : $prefix"
 Write-Host "  Laisse cette fenetre ouverte (reduis-la). Ferme-la pour arreter SCANEBOOK."
 $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
