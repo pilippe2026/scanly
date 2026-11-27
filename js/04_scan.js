@@ -143,6 +143,7 @@ async function analyze() {
     } catch (e) { toast((merge ? 'Assemblage' : 'Photo ' + (bi + 1)) + ' : ' + e.message, 5000); }
   }
   detected.sort((a, b) => a._shot - b._shot || a.row - b.row || a.position - b.position);
+  REV38.merge = merge; prows38(); REV38.base = 1; rows38();
   const unk = detected.filter(d => d.unknown).length;
   $('#sProg').style.display = 'none'; $('#sGo').disabled = false;
   { const T = window.SCAN_T; if (T && T.steps.length) { const L = T.steps[T.steps.length - 1]; if (L.ms == null) L.ms = performance.now() - L.t; } }
@@ -153,6 +154,23 @@ function rebindScan() {
   $('#sCase').onchange = () => $('#sNew').style.display = $('#sCase').value === '__new' ? 'block' : 'none';
   $('#camOn').onclick = () => startCam(); $('#shoot').onclick = snap; $('#burstBtn').onclick = burst; $('#sGo').onclick = analyze; renderShots();
 }
+/* V2.38 : une seule numérotation (1 = étagère du haut, comme dans la pièce 3D).
+   _prow = rangée dans la photo (1 = la plus haute rangée où un livre a été lu, par photo) ;
+   d.row = étagère réelle du meuble, affichée dans le tableau et utilisée telle quelle au rangement. */
+const REV38 = {base: 1, merge: false};
+const grp38 = d => REV38.merge ? 0 : d._shot; // photos assemblées : une seule numérotation
+function prows38() {
+  const shotsSeen = [...new Set(detected.map(grp38))];
+  shotsSeen.forEach(si => { const L = detected.filter(d => grp38(d) === si), rs = [...new Set(L.map(d => d.row || 1))].sort((a, b) => a - b);
+    L.forEach(d => { d._prow = rs.indexOf(d.row || 1) + 1; delete d._rowMan; }); });
+}
+function rows38() {
+  const shotsSeen = [...new Set(detected.map(grp38))];
+  shotsSeen.forEach(si => { const L = detected.filter(d => grp38(d) === si && d._prow), S = L.filter(d => d._sel), ref = S.length ? S : L;
+    const top = Math.min(...ref.map(d => d._prow));
+    L.forEach(d => { if (!d._rowMan) d.row = clamp(REV38.base + d._prow - top, 1, 15); }); });
+}
+function showRows38() { $$('#review tr[data-i]').forEach(tr => { const d = detected[+tr.dataset.i], inp = tr.querySelector('[data-k=row]'); if (d && inp && document.activeElement !== inp) inp.value = d.row; }); }
 function renderReview(scroll = false) {
   const dups = detected.filter(d => d._dup).length, unk = detected.filter(d => d.unknown).length, used = [...new Set(detected.map(d => d._shot).filter(v => v != null && shots[v]))];
   const s1 = $('#sCase').value, nm = $('#sNew').value;
@@ -161,7 +179,7 @@ function renderReview(scroll = false) {
     <div class="hint"><b style="color:var(--navy)">${detected.length}</b> livre(s) repéré(s)${unk ? ` · <span style="color:var(--ko)">${unk} non reconnu(s) : ajoutés avec des champs vides à compléter</span>` : ''}${dups ? ` · ${dups} déjà présent(s) (décochés)` : ''}.</div>
     ${detected.some(d => d._box) ? `<div class="shots">${used.map(si => `<div class="shotv"><img src="${shots[si]}" alt="">${detected.map((d, i) => d._shot === si && d._box ? `<div class="bbox${d.unknown ? ' unk' : ''}${d._sel ? '' : ' off'}" data-bi="${i}" style="top:${d._box[0] / 10}%;left:${d._box[1] / 10}%;height:${Math.max(1, d._box[2] - d._box[0]) / 10}%;width:${Math.max(1, d._box[3] - d._box[1]) / 10}%"><span>${i + 1}</span></div>` : '').join('')}</div>`).join('')}</div>
       <p class="hint">Chaque cadre numéroté = une ligne du tableau (pointillés rouges = non reconnu). Survole une ligne pour la repérer, clique sur un cadre pour aller à la ligne.</p>` : ''}
-    <table class="rev"><tr><th>#</th><th><input type="checkbox" id="rAll" ${detected.every(d => d._sel) ? 'checked' : ''}></th><th>Tranche</th><th>Titre</th><th>Auteur</th><th>Série / T.</th><th>Type</th><th>Ét.</th><th>Pos.</th><th>Conf.</th></tr>
+    <table class="rev"><tr><th>#</th><th><input type="checkbox" id="rAll" ${detected.every(d => d._sel) ? 'checked' : ''}></th><th>Tranche</th><th>Titre</th><th>Auteur</th><th>Série / T.</th><th>Type</th><th title="Étagère du meuble (1 = en haut)">Étagère</th><th>Pos.</th><th>Conf.</th></tr>
     ${detected.map((d, i) => `<tr data-i="${i}" class="${d.unknown ? 'unk' : ''}"><td class="hint" style="padding-top:10px"><b>${i + 1}</b></td><td><input type="checkbox" data-k="_sel" ${d._sel ? 'checked' : ''}></td><td style="white-space:nowrap">${d.spineImg ? `<img class="crop" src="${d.spineImg}" alt="" style="display:inline-block;vertical-align:top">` : `<div class="sw" style="background:${colOf(d)};display:inline-block"></div>`}${d._box ? ` <button type="button" class="btn s sm" data-qe="${i}" title="Ajuster le détourage de ce livre (4 coins)" style="padding:3px 7px;vertical-align:top">✎</button>` : ''}</td>
       <td><input class="fld" data-k="title" value="${esc(d.title)}" placeholder="${d.unknown ? 'Non reconnu – à compléter (ou plus tard)' : ''}">${d._dup ? '<span class="badge k">Déjà présent</span>' : ''}${d.unknown ? '<span class="badge k">Non reconnu</span>' : d.confidence != null && d.confidence < .6 ? '<span class="badge g">À vérifier</span>' : ''}
         ${d._alts && d._alts.length ? `<div class="alts"><span class="hint">L'IA hésite :</span>${d._alts.map((a, k) => `<button type="button" class="alt" data-alt="${k}" title="Remplacer par cette proposition">↺ ${esc(a.titre)}${a.auteur ? ' – ' + esc(a.auteur) : ''}</button>`).join('')}</div>` : ''}</td>
@@ -172,14 +190,16 @@ function renderReview(scroll = false) {
       <td class="hint" style="padding-top:10px">${d.unknown ? '—' : d.confidence != null ? Math.round(d.confidence * 100) + '%' : ''}</td></tr>`).join('')}</table>
     <div class="dest"><b>Ranger dans</b><select id="rCase">${cases.map(c => `<option value="${c.id}" ${c.id === s1 ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="__new" ${s1 === '__new' ? 'selected' : ''}>＋ Nouveau meuble…</option></select>
       <input id="rNew" placeholder="Nom du nouveau meuble" value="${esc(nm)}" style="display:${s1 === '__new' ? 'block' : 'none'}">
-      <span>à partir de l'étagère</span><input id="rRow0" type="number" min="1" max="15" value="1" style="width:60px"><span class="hint">(la rangée 1 de la photo ira sur cette étagère ; les livres se placent à la suite de ceux déjà présents)</span></div>
+      <span>la rangée du haut de la photo va sur l'étagère</span><input id="rRow0" type="number" min="1" max="15" value="${REV38.base}" style="width:60px"><span class="hint">(1 = étagère du haut, comme les numéros de la pièce 3D ; la colonne « Étagère » montre où chaque livre sera rangé ; les livres se placent à la suite de ceux déjà présents)</span></div>
     <div class="btns"><label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="rGB" checked style="accent-color:var(--navy)"> Compléter via Google Books / Open Library</label>
       <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="rAI" checked style="accent-color:var(--navy)"> Compléter avec l'IA (genre, résumé, prix estimé)</label></div>
     <div class="btns"><button class="btn g" id="rAdd">Ranger dans ma bibliothèque</button></div>`;
   if (!detected.length) return;
   $('#rCase').onchange = () => $('#rNew').style.display = $('#rCase').value === '__new' ? 'block' : 'none';
+  $('#rRow0').oninput = () => { const v = parseInt($('#rRow0').value); if (!(v >= 1)) return; REV38.base = Math.min(15, v); rows38(); showRows38(); };
   $('#review table').oninput = e => { const tr = e.target.closest('tr[data-i]'); if (!tr) return; const d = detected[tr.dataset.i], k = e.target.dataset.k;
     d[k] = e.target.type === 'checkbox' ? e.target.checked : (['volume', 'row', 'position'].includes(k) ? (parseInt(e.target.value) || null) : e.target.value);
+    if (k === 'row') d._rowMan = true; if (k === '_sel') { rows38(); showRows38(); }
     if (k === '_sel') $(`#review .bbox[data-bi="${tr.dataset.i}"]`)?.classList.toggle('off', !e.target.checked); };
   $('#review').onclick = e => {
     const al = e.target.closest('[data-alt]'); if (al) { const i = +al.closest('tr').dataset.i, d = detected[i], k = +al.dataset.alt, a = d._alts[k];
@@ -203,8 +223,9 @@ function renderReview(scroll = false) {
 }
 async function addDetected() {
   const sel = detected.filter(d => d._sel); if (!sel.length) return toast('Aucun ouvrage sélectionné');
-  const useGB = $('#rGB').checked, useAI = $('#rAI').checked, row0 = Math.max(1, parseInt($('#rRow0').value) || 1) - 1;
-  const maxRow = Math.max(...sel.map(d => (d.row || 1) + row0));
+  const useGB = $('#rGB').checked, useAI = $('#rAI').checked; rows38();
+  sel.forEach(d => { d.row = clamp(parseInt(d.row) || 1, 1, 15); delete d._prow; delete d._rowMan; });
+  const maxRow = Math.max(...sel.map(d => d.row)); // V2.38 : d.row = étagère réelle, déjà affichée dans le tableau
   let dest = $('#rCase').value; if (dest === '__new') dest = (await newCase($('#rNew').value || 'Nouveau meuble', maxRow)).id;
   const kc = cases.find(c => c.id === dest); if (kc && (kc.rows || 3) < maxRow) { kc.rows = maxRow; await DB.put('cases', kc); }
   for (const d of sel.filter(d => d.title)) { const w = books.find(x => x.wish && keyOf(x) === keyOf(d)) || books.find(x => x.wish && x.series && d.series && norm(x.series) === norm(d.series) && x.volume === d.volume);
@@ -212,7 +233,7 @@ async function addDetected() {
   const imp = {id: 'imp_' + uid(), date: new Date().toISOString(), caseId: dest, count: sel.length, photos: [], hd: []}, piOf = {};
   for (const si of [...new Set(sel.map(d => d._shot))].filter(v => shots[v])) { const im = await srcToImg(shots[si]); piOf[si] = imp.hd.length; imp.photos.push(resize(im, 900, .6)); imp.hd.push(resize(im, 2200, .85)); }
   sel.forEach(d => { if (d.quad && piOf[d._shot] != null) d.srcRef = {imp: imp.id, pi: piOf[d._shot]}; });
-  const rows = new Map(); sel.forEach(d => { const r = (d.row || 1) + row0; if (!rows.has(r)) rows.set(r, []); rows.get(r).push(d); });
+  const rows = new Map(); sel.forEach(d => { const r = d.row; if (!rows.has(r)) rows.set(r, []); rows.get(r).push(d); });
   rows.forEach((L, r) => { const base = nextPos(dest, r) - 1; L.sort((a, b) => (a.position || 999) - (b.position || 999)).forEach((d, i) => { d.row = r; d.position = base + i + 1; }); });
   sel.forEach((d, i) => { d.title = String(d.title || '').trim(); d.unknown = !d.title; ['_sel', '_dup', '_shot', '_box', '_alts'].forEach(k => delete d[k]);
     d.caseId = dest; d.importId = imp.id; d.importOrder = i; d.orig = {caseId: dest, row: d.row, position: d.position}; d.addedAt = Date.now(); });

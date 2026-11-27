@@ -95,6 +95,8 @@ async function analyse34() {
   } catch (e) { $('#sMsg').textContent = 'Analyse interrompue : ' + e.message; $('#u34Go').disabled = false; modalLeaveGuard = null; return; }
   finally { if (prev == null) localStorage.removeItem('scanly_mode'); else localStorage.setItem('scanly_mode', prev); }
   modalLeaveGuard = null;
+  // V2.38 : rangées de chaque photo renumérotées depuis 1 (rangée du haut où un livre est vu), pour que l'étagère choisie soit bien celle du haut
+  [...new Set(det.map(d => d.shot))].forEach(si => { const L = det.filter(d => d.shot === si), rs = [...new Set(L.map(d => d.rang))].sort((x, y) => x - y); L.forEach(d => { d.rang = rs.indexOf(d.rang) + 1; d.row = base + d.rang - 1; }); });
   det.sort((a, b) => a.row - b.row || a.shot - b.shot || a.pos - b.pos);
   // plusieurs photos qui se chevauchent : un même livre vu deux fois n'est gardé qu'une fois
   const seen = new Set(); UPD34.det = det.filter(d => { if (!d.title) return true; const k = d.row + '|' + norm(d.title) + '|' + (d.volume || ''); if (seen.has(k)) return false; seen.add(k); return true; });
