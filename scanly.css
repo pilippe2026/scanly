@@ -840,3 +840,6 @@ html[data-mode29="dark"] .t41-x{color:#eef1f6}html[data-mode29="dark"] .t41-off{
   body:not(.search29) .hsearch{flex:0 0 40px!important;width:40px}
   header #hAI.ai42{width:40px}
 }
+
+/* V2.43 : pièce 3D en pause pendant l'assistant IA plein écran (mémoire Safari iPhone) */
+body.ai43 #stage{display:none!important}

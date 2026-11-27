@@ -366,7 +366,7 @@ function openAI() {
   $('#dBody').onclick = e => { const h = e.target.closest('[data-hl]'); if (h) highlightIds(h.dataset.hl.split(','));
     const rt = e.target.closest('[data-retry42]'); if (rt) { $('#aiQ').value = rt.dataset.retry42; rt.disabled = true; ask(); } };
   $('#aiSend').onclick = () => ask(); $('#aiQ').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } };
-  $('#aiQ').focus(); $('#dBody').scrollTop = 1e6;
+  if (!matchMedia('(pointer:coarse)').matches) $('#aiQ').focus(); $('#dBody').scrollTop = 1e6; // V2.43 : pas de clavier automatique sur écran tactile
 }
 function catalog() {
   return books.filter(b => b.title).map(b => `[${b.id}] ` + [b.title, b.author, b.type, b.genre, b.series ? b.series + (b.volume ? ' T' + b.volume : '') : '', b.year, b.publisher,
