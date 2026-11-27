@@ -1,0 +1,10 @@
+SCANEBOOK V2.40 - LOGO PLUS MODERNE
+Base exclusive : SCANEBOOK V2.39.
+
+Le nom dans l'en-tête s'écrit maintenant « ScaneBook » avec une police moderne (Outfit) :
+« Scane » en blanc, « Book » en doré, à côté du symbole habituel.
+La police est fournie avec l'application (dossier assets/fonts, licence libre SIL OFL) :
+elle s'affiche à l'identique sur iPhone, iPad, Mac et PC, même hors connexion.
+Le nom de l'application (titre, écran d'accueil, messages) reste SCANEBOOK.
+Aucune donnée modifiée.
+
