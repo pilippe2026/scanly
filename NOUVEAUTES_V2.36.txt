@@ -1,0 +1,14 @@
+SCANLY V2.36 - REDRESSEMENT AUTOMATIQUE DES PHOTOS
+Base exclusive : SCANLY V2.35.
+
+Avant la reconnaissance, chaque photo d'étagère est redressée automatiquement :
+- Inclinaison (téléphone penché) : mesurée sur les bords des livres et confirmée par les
+  étagères, corrigée jusqu'à 15°.
+- Perspective (photo prise d'en bas ou d'en haut, livres « en trapèze ») : mesurée par la
+  convergence des bords des livres, puis corrigée.
+La photo redressée sert au détourage, à la lecture et devient la photo d'origine enregistrée.
+Chaque tranche reste ensuite redressée individuellement (livres penchés), comme avant.
+Une photo déjà droite n'est pas modifiée. Un message indique la correction appliquée.
+Fonctionne dans « Scanner des tranches » et « Mettre à jour une étagère ».
+Case à cocher « Redresser automatiquement les photos » pour désactiver si besoin.
+
