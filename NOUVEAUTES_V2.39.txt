@@ -1,0 +1,24 @@
+SCANEBOOK V2.39 - SCANLY DEVIENT SCANEBOOK
+Base exclusive : SCANLY V2.38.
+
+L'application s'appelle désormais SCANEBOOK : en-tête, titre de la page, nom d'installation
+(écran d'accueil), messages, assistant, exports (inventaire, liste de souhaits, image) et
+traductions (anglais, espagnol, coréen, allemand). Les sauvegardes s'appellent
+scanebook_sauvegarde_AAAA-MM-JJ.json.
+
+Rien ne change pour les données : même base sur l'appareil, mêmes réglages, même adresse
+(https://pilippe2026.github.io/scanly/), même dépôt GitHub, même dossier de synchronisation
+scanly-data. Les anciennes sauvegardes SCANLY s'importent toujours.
+
+iPhone / iPad : l'icône déjà posée sur l'écran d'accueil garde le nom « SCANLY » (iOS ne
+renomme pas une icône existante), mais l'application s'ouvre bien en SCANEBOOK.
+ATTENTION : supprimer cette icône efface aussi la bibliothèque qu'elle contient sur cet appareil.
+Pour avoir le nom SCANEBOOK sous l'icône, sans rien perdre :
+  1. Dans l'ancienne icône : lancer une synchronisation, ou faire « Sauvegarder » (onglet Profil)
+     et garder le fichier dans Fichiers / iCloud Drive.
+  2. Dans Safari, ouvrir l'adresse ci-dessus, Partager › « Sur l'écran d'accueil » (nom SCANEBOOK).
+  3. Ouvrir la nouvelle icône, régler la synchronisation (ou « Ouvrir une sauvegarde… ») et vérifier
+     que tous les livres sont là.
+  4. Seulement ensuite, supprimer l'ancienne icône SCANLY.
+Mac / PC : le nom se met à jour tout seul à l'ouverture suivante (ou après réinstallation de l'app).
+

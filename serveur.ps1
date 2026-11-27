@@ -1,4 +1,4 @@
-# SCANLY - mini serveur local (aucune installation requise)
+# SCANEBOOK - mini serveur local (aucune installation requise)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $port = 8777
@@ -7,11 +7,11 @@ $mime = @{ '.html'='text/html; charset=utf-8'; '.js'='application/javascript; ch
   '.png'='image/png'; '.jpg'='image/jpeg'; '.ico'='image/x-icon'; '.json'='application/json'; '.webmanifest'='application/manifest+json'; '.svg'='image/svg+xml' }
 $l = New-Object System.Net.HttpListener
 $l.Prefixes.Add($prefix)
-try { $l.Start() } catch { Write-Host "Port $port deja utilise : SCANLY est probablement deja ouvert." -ForegroundColor Yellow; Start-Process $prefix; exit }
+try { $l.Start() } catch { Write-Host "Port $port deja utilise : SCANEBOOK est probablement deja ouvert." -ForegroundColor Yellow; Start-Process $prefix; exit }
 Write-Host ""
-Write-Host "  SCANLY V2.38 - Votre bibliotheque, en un scan." -ForegroundColor Yellow
+Write-Host "  SCANEBOOK V2.39 - Votre bibliotheque, en un scan." -ForegroundColor Yellow
 Write-Host "  Serveur local : $prefix"
-Write-Host "  Laisse cette fenetre ouverte (reduis-la). Ferme-la pour arreter SCANLY."
+Write-Host "  Laisse cette fenetre ouverte (reduis-la). Ferme-la pour arreter SCANEBOOK."
 $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if ($edge) { Start-Process $edge "--app=$prefix --start-maximized" } else { Start-Process $prefix }
 while ($l.IsListening) {

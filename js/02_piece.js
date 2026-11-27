@@ -1,4 +1,4 @@
-/* SCANLY – 02_piece.js : Rendu, univers, caméra, meubles, livres 3D, pièce, sélection, glisser-déposer, rangement, exports, catalogue, séries, tableau de bord.
+/* SCANEBOOK – 02_piece.js : Rendu, univers, caméra, meubles, livres 3D, pièce, sélection, glisser-déposer, rangement, exports, catalogue, séries, tableau de bord.
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
@@ -566,7 +566,7 @@ async function renderImage() {
     x.fillStyle = rt === 'futur' ? 'rgba(8,18,30,.9)' : rt === 'bnf' ? '#e9ebee' : '#D4AF7C'; x.fillRect(ox + l - tw / 2, oy + t, tw, 26);
     x.fillStyle = rt === 'futur' ? '#7fe3ff' : rt === 'magie' ? '#5e1a1a' : '#0B1F44'; x.textAlign = 'center'; x.fillText(txt, ox + l, oy + t + 17); x.textAlign = 'left'; });
   x.setTransform(1, 0, 0, 1, 0, 0);
-  x.fillStyle = 'rgba(11,31,68,.78)'; x.fillRect(0, cv.height - 40, cv.width, 40); x.fillStyle = '#F8F6F0'; x.font = '800 20px Segoe UI, Arial'; x.fillText('SCANLY', 20, cv.height - 13);
+  x.fillStyle = 'rgba(11,31,68,.78)'; x.fillRect(0, cv.height - 40, cv.width, 40); x.fillStyle = '#F8F6F0'; x.font = '800 20px Segoe UI, Arial'; x.fillText('SCANEBOOK', 20, cv.height - 13);
   x.font = '500 13px Segoe UI, Arial'; x.fillStyle = '#D4AF7C';
   x.fillText(`${new Date().toLocaleDateString('fr-FR')} · ${books.filter(b => !b.wish).length} ouvrages · ${curCase === ALL ? 'Vue d\'ensemble' : (cases.find(c => c.id === curCase)?.name || '')}`, 120, cv.height - 14);
   return cv;
@@ -579,11 +579,11 @@ async function printInventory() {
   const cv = await renderImage(), img = cv.toDataURL('image/jpeg', .85), own = sorted(books.filter(b => !b.wish)), val = own.reduce((s, b) => s + (Number(b.price) || 0), 0);
   const w = window.open('', '_blank'); if (!w) return toast('Autorise l\'ouverture de fenêtres pour imprimer');
   const rows = own.map(b => `<tr><td>${b.cover ? `<img src="${esc(b.cover)}" onerror="this.remove()">` : ''}</td><td><b>${esc(dispTitle(b))}</b></td><td>${esc(b.author)}</td><td>${esc(b.series ? b.series + (b.volume ? ' T' + b.volume : '') : '')}</td><td>${esc(b.type)}</td><td>${esc(b.publisher)}</td><td>${b.year || ''}</td><td>${esc(b.isbn)}</td><td>${esc(locOf(b))}</td><td style="text-align:right;white-space:nowrap">${eur(b.price, b.priceSource)}</td></tr>`).join('');
-  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Inventaire SCANLY ${today()}</title><style>
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Inventaire SCANEBOOK ${today()}</title><style>
     body{font:12px "Segoe UI",Arial;color:#0B1F44;margin:24px}h1{font:800 22px "Segoe UI";margin:0}.sub{color:#64748B;margin:4px 0 10px}
     img.lib{width:100%;border-radius:8px;margin:8px 0 16px}table{width:100%;border-collapse:collapse}th{background:#0B1F44;color:#F8F6F0;text-align:left;padding:5px;font-size:11px}
     td{border-bottom:1px solid #e4dfd3;padding:4px 5px;font-size:11px;vertical-align:middle}td img{height:40px;border-radius:2px}tr{page-break-inside:avoid}.tot{margin-top:10px;font:700 14px "Segoe UI"}@page{margin:12mm}</style></head><body>
-    <h1>SCANLY – Inventaire de ma bibliothèque</h1><div class="sub">Édité le ${new Date().toLocaleDateString('fr-FR')} · ${own.length} ouvrages · valeur estimée ${eur(val)}</div>
+    <h1>SCANEBOOK – Inventaire de ma bibliothèque</h1><div class="sub">Édité le ${new Date().toLocaleDateString('fr-FR')} · ${own.length} ouvrages · valeur estimée ${eur(val)}</div>
     <img class="lib" src="${img}"><table><tr><th></th><th>Titre</th><th>Auteur</th><th>Série</th><th>Type</th><th>Éditeur</th><th>Année</th><th>ISBN</th><th>Emplacement</th><th>Prix</th></tr>${rows}</table>
     <div class="tot">Valeur totale estimée : ${eur(val)}</div><p class="sub">Prix « ≈ » = estimation IA indicative.</p>
     <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);

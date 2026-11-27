@@ -1,4 +1,4 @@
-/* SCANLY – 08_tactile_et_v2.js : Tactile iPhone/iPad, ajouts V2.20 et suivants (types, réglage fin, étagères).
+/* SCANEBOOK – 08_tactile_et_v2.js : Tactile iPhone/iPad, ajouts V2.20 et suivants (types, réglage fin, étagères).
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
@@ -77,7 +77,7 @@
   document.addEventListener('touchend', e => { if (!sw) return; const t = e.changedTouches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y; const s1 = sw; sw = null;
     if (Date.now() - s1.time < 600 && Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy) && typeof goNav === 'function' && NAV.cur) goNav(dx < 0 ? 1 : -1); }, {passive: true});
   // astuces adaptées
-  const tip = document.querySelector('#welcome p'); if (tip) tip.textContent = 'Photographie les tranches de tes livres, BD ou mangas avec ton iPhone ou ton iPad : SCANLY les reconnaît et les range sur tes étagères.';
+  const tip = document.querySelector('#welcome p'); if (tip) tip.textContent = 'Photographie les tranches de tes livres, BD ou mangas avec ton iPhone ou ton iPad : SCANEBOOK les reconnaît et les range sur tes étagères.';
   const w1 = document.querySelector('.wcard[data-act=cam] span'); if (w1) w1.textContent = 'Appareil photo';
   const w2 = document.querySelector('.wcard[data-act=imp] span'); if (w2) w2.textContent = 'Depuis Photos ou Fichiers';
 })();
@@ -85,11 +85,11 @@
 (function () {
   const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   if (IS_IOS && !standalone && !localStorage.getItem('scanly_a2hs')) { localStorage.setItem('scanly_a2hs', '1');
-    setTimeout(() => toast('Astuce : Partager ⬆ puis « Sur l\'écran d\'accueil » pour installer SCANLY comme une app', 8000), 2500); }
+    setTimeout(() => toast('Astuce : Partager ⬆ puis « Sur l\'écran d\'accueil » pour installer SCANEBOOK comme une app', 8000), 2500); }
 })();
 
 (function(){const lib=document.getElementById('v-lib'),btn=document.getElementById('smartMode');let quick=localStorage.getItem('scanly_smart_read')==='1';function update(){lib.classList.toggle('smart-read',quick);btn.setAttribute('aria-pressed',String(quick));btn.classList.toggle('on',quick);btn.textContent=quick?'Immersion 3D':'Lecture rapide';btn.title=quick?'Revenir aux perspectives 3D':'Vue frontale et effets réduits';}btn.addEventListener('click',function(e){e.stopPropagation();quick=!quick;localStorage.setItem('scanly_smart_read',quick?'1':'0');update();});update();})();
-/* SCANLY V2.20 – détourage précis.
+/* SCANEBOOK V2.20 – détourage précis.
    Un vrai bord de livre est une ligne continue sur presque toute la hauteur : on mesure la
    présence du contour bande par bande (le texte du titre, présent seulement par endroits,
    est écarté), on tient compte des couleurs et du sillon sombre entre deux livres, puis
@@ -181,11 +181,11 @@ function refineScanQuad20(img,Q){
     const tHint=dy>0?clamp(Math.atan(dx/dy)/DEG,-25,25):null,r=autoQuad20(img,B,tHint,{local:true}),q=r.quad;
     const wOld=(Math.hypot(Q[1][0]-Q[0][0],Q[1][1]-Q[0][1])+Math.hypot(Q[2][0]-Q[3][0],Q[2][1]-Q[3][1]))/2,wNew=(Math.hypot(q[1][0]-q[0][0],q[1][1]-q[0][1])+Math.hypot(q[2][0]-q[3][0],q[2][1]-q[3][1]))/2;
     const hOld=Math.abs(dy),hNew=((q[3][1]-q[0][1])+(q[2][1]-q[1][1]))/2;
-    if(!(wNew>.6*wOld&&wNew<1.4*wOld&&hNew>.8*hOld&&hNew<1.06*hOld))return Q;return q;}catch(e){console.warn('SCANLY V2.20 affinage',e);return Q;}
+    if(!(wNew>.6*wOld&&wNew<1.4*wOld&&hNew>.8*hOld&&hNew<1.06*hOld))return Q;return q;}catch(e){console.warn('SCANEBOOK V2.20 affinage',e);return Q;}
 }
 
 /* =====================================================================
-   SCANLY V2.20 – fiche ouvrage réorganisée, réglage fin commun (détourage
+   SCANEBOOK V2.20 – fiche ouvrage réorganisée, réglage fin commun (détourage
    et couverture), localisation du livre dans la pièce, étagères, types.
    ===================================================================== */
 const FICHE_SEC20 = (() => { try { return JSON.parse(localStorage.getItem('scanly_fiche_sections') || '{}'); } catch (e) { return {}; } })();
@@ -419,6 +419,6 @@ function coverGuess20(full, auto = false) {
     const meet = (V, Hh) => { /* x = V.o + (y - h/2)·V.t ; y = H.o + (x - w/2)·H.t */ let x = V.o, y = Hh.o; for (let i = 0; i < 6; i++) { y = Hh.o + (x - w / 2) * Hh.t; x = V.o + (y - h / 2) * V.t; } return [clamp(x / k, 0, W), clamp(y / k, 0, H)]; };
     const q = [meet(L, T), meet(R, T), meet(R, B), meet(L, B)], area = Math.abs(q.reduce((s, p, i) => { const n2 = q[(i + 1) % 4]; return s + p[0] * n2[1] - n2[0] * p[1]; }, 0)) / 2;
     return area > W * H * .12 ? q : whole;
-  } catch (e) { console.warn('SCANLY couverture', e); return whole; }
+  } catch (e) { console.warn('SCANEBOOK couverture', e); return whole; }
 }
 

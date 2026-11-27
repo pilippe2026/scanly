@@ -1,4 +1,4 @@
-/* SCANLY V2.16: cached bibliographic requests and conservative BnF supplement. */
+/* SCANEBOOK V2.16: cached bibliographic requests and conservative BnF supplement. */
 (function(){
 'use strict';
 const KEY='scanly_biblio_cache_v1',TTL=30*86400000,NEG=86400000,MAX=150;
@@ -31,6 +31,6 @@ async function lookup(b,options={}){if(!validISBN(b.isbn)&&!String(b.title||'').
 function exact(b,r){return validISBN(b.isbn)&&r.isbns.some(i=>isbn13(i)===isbn13(b.isbn));}
 function fill(b,r){const changed=[];for(const k of ['title','author','publisher','year','pages','isbn'])if((b[k]==null||b[k]==='')&&r[k]){b[k]=r[k];changed.push(k);}if(changed.length){b.bnfRef={url:r.url,checkedAt:new Date().toISOString(),isbn:r.isbn,fields:changed};if(b.title)b.unknown=false;}return changed;}
 async function supplement(b){if(localStorage.getItem('scanly_bnf_auto')==='0'||!validISBN(b.isbn)||b.author&&b.publisher&&b.year&&b.pages)return [];
- try{const rows=await lookup(b),r=rows.find(r=>exact(b,r));return r?fill(b,r):[];}catch(e){console.warn('SCANLY BnF:',e.message);return [];}}
+ try{const rows=await lookup(b),r=rows.find(r=>exact(b,r));return r?fill(b,r):[];}catch(e){console.warn('SCANEBOOK BnF:',e.message);return [];}}
 window.SCANLY_SOURCES={request,lookup,exact,fill,supplement,parseXML,queryURL,validISBN,isbn13,clear:()=>{cache={};failures.clear();localStorage.removeItem(KEY);}};
 })();

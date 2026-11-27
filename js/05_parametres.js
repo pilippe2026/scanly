@@ -1,4 +1,4 @@
-/* SCANLY – 05_parametres.js : Sauvegarde, paramètres, stockage protégé, conversion des images.
+/* SCANEBOOK – 05_parametres.js : Sauvegarde, paramètres, stockage protégé, conversion des images.
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
@@ -8,12 +8,12 @@ async function backupNow() {
   if (!books.length && !cases.length) return toast('Rien à sauvegarder pour l\'instant');
   const data = {app: 'SCANLY', version: VERSION, date: new Date().toISOString(), cases, imports, books: books.map(b => ({...b, shelfId: b.caseId})),
     shelves: cases.map(c => ({id: c.id, name: c.name, photos: [], createdAt: c.createdAt})), seriesMeta: SMETA, types: [...TYPES], readers27: localStorage.getItem('scanly_readers27'), goal27: localStorage.getItem('scanly_goal27')};
-  const n = await saveFile(`scanly_sauvegarde_${today()}.json`, JSON.stringify(data), 'application/json', '.json', 'Sauvegarde SCANLY');
+  const n = await saveFile(`scanebook_sauvegarde_${today()}.json`, JSON.stringify(data), 'application/json', '.json', 'Sauvegarde SCANEBOOK');
   if (n) { localStorage.setItem('scanly_lastsave', new Date().toISOString()); toast('Sauvegarde enregistrée : ' + n); renderDash(); }
 }
 async function openBackup() {
   if (window.showOpenFilePicker) {
-    try { const [h] = await window.showOpenFilePicker({types: [{description: 'Sauvegarde SCANLY / BiblioScan', accept: {'application/json': ['.json']}}]}); return importFile(await h.getFile()); }
+    try { const [h] = await window.showOpenFilePicker({types: [{description: 'Sauvegarde SCANEBOOK / SCANLY / BiblioScan', accept: {'application/json': ['.json']}}]}); return importFile(await h.getFile()); }
     catch (e) { if (e.name === 'AbortError') return; }
   }
   $('#jsonIn').click();
@@ -40,7 +40,7 @@ async function exportCsv() {
   const n = await saveFile(`scanly_catalogue_${today()}.csv`, csv, 'text/csv', '.csv', 'Fichier CSV (Excel)'); if (n) toast('Export enregistré : ' + n);
 }
 /* ---------- V2.25 : stockage protégé (le navigateur ne doit pas effacer la bibliothèque) ----------
-   navigator.storage.persist() demande au navigateur de ne pas vider les données de SCANLY quand
+   navigator.storage.persist() demande au navigateur de ne pas vider les données de SCANEBOOK quand
    l'espace manque (Safari iPhone / iPad, Chrome, Edge, Firefox). Le navigateur peut refuser :
    on vérifie donc le résultat, on l'affiche dans les Paramètres et on redemande au premier geste. */
 const STORE25 = {persisted: null};
@@ -61,21 +61,21 @@ async function renderStore25() {
   const ios = typeof IS_IOS !== 'undefined' && IS_IOS && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
   el.innerHTML = STORE25.persisted
     ? `<b style="color:var(--ok, #2c7a4b)">✔ Stockage protégé</b> : le navigateur ne videra pas la bibliothèque pour libérer de la place.${used}`
-    : `<b style="color:var(--ko)">⚠ Stockage non protégé</b> : le navigateur peut effacer la bibliothèque s'il manque de place.${ios ? ' Sur iPhone / iPad, ajoute SCANLY à l\'écran d\'accueil (Partager › Sur l\'écran d\'accueil) puis ouvre-le depuis l\'icône.' : ''} Garde des sauvegardes récentes.${used}
+    : `<b style="color:var(--ko)">⚠ Stockage non protégé</b> : le navigateur peut effacer la bibliothèque s'il manque de place.${ios ? ' Sur iPhone / iPad, ajoute SCANEBOOK à l\'écran d\'accueil (Partager › Sur l\'écran d\'accueil) puis ouvre-le depuis l\'icône.' : ''} Garde des sauvegardes récentes.${used}
        <br><button class="btn s" id="pPersist25" style="margin-top:6px">Protéger le stockage</button>`;
-  const b = $('#pPersist25'); if (b) b.onclick = async () => { const ok = await askPersist25(true); renderStore25(); toast(ok ? '✔ Stockage protégé' : 'Le navigateur a refusé pour l\'instant : il accepte souvent quand SCANLY est installé et utilisé régulièrement.', 6000); };
+  const b = $('#pPersist25'); if (b) b.onclick = async () => { const ok = await askPersist25(true); renderStore25(); toast(ok ? '✔ Stockage protégé' : 'Le navigateur a refusé pour l\'instant : il accepte souvent quand SCANEBOOK est installé et utilisé régulièrement.', 6000); };
 }
 /* ---------- V2.26 : conversion des images et ménage ---------- */
 async function migrateImgs26() {
   const t = setTimeout(() => toast('Optimisation du stockage des images (une seule fois)…', 60000), 800);
-  try { const n = await DB.migrateImgs(); if (n) console.info('SCANLY : ' + n + ' fiche(s) converties au stockage d\'images V2.26'); }
-  catch (e) { console.warn('SCANLY : conversion des images reportée', e); } // les fiches restent lisibles telles quelles
+  try { const n = await DB.migrateImgs(); if (n) console.info('SCANEBOOK : ' + n + ' fiche(s) converties au stockage d\'images V2.26'); }
+  catch (e) { console.warn('SCANEBOOK : conversion des images reportée', e); } // les fiches restent lisibles telles quelles
   finally { clearTimeout(t); $('#toast')?.classList.remove('on'); }
 }
 async function gcImgs26() {
   try { const db = await safetyDB18(), points = await new Promise((res, rej) => { const r = db.transaction('points').objectStore('points').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
-    const n = await DB.gcImgs(collectRefs(points, new Set())); if (n) console.info('SCANLY : ' + n + ' image(s) inutilisée(s) effacée(s)'); }
-  catch (e) { console.warn('SCANLY : ménage des images reporté', e); } // en cas de doute on ne supprime rien
+    const n = await DB.gcImgs(collectRefs(points, new Set())); if (n) console.info('SCANEBOOK : ' + n + ' image(s) inutilisée(s) effacée(s)'); }
+  catch (e) { console.warn('SCANEBOOK : ménage des images reporté', e); } // en cas de doute on ne supprime rien
 }
 function openSettings() {
   const cur = cfg.model, last = localStorage.getItem('scanly_lastsave');
@@ -160,6 +160,6 @@ function openSettings() {
   $('#pBnfAuto').onchange=e=>localStorage.setItem('scanly_bnf_auto',e.target.checked?'1':'0');
   $('#pBiblioClear').onclick=()=>{SCANLY_SOURCES.clear();toast('Cache des recherches effacé');};
   if (window.bindSyncSettings) bindSyncSettings();
-  navigator.storage?.estimate?.().then(e => { if ($('#pInfo')) $('#pInfo').textContent = `Espace utilisé : ${(e.usage / 1048576).toFixed(1)} Mo · SCANLY V${VERSION}`; });
+  navigator.storage?.estimate?.().then(e => { if ($('#pInfo')) $('#pInfo').textContent = `Espace utilisé : ${(e.usage / 1048576).toFixed(1)} Mo · SCANEBOOK V${VERSION}`; });
 }
 
