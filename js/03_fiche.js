@@ -1,4 +1,4 @@
-/* SCANLY – 03_fiche.js : Fiche livre, reprise sur la photo d'origine, ajout d'un livre.
+/* SCANEBOOK – 03_fiche.js : Fiche livre, reprise sur la photo d'origine, ajout d'un livre.
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
@@ -187,7 +187,7 @@ function openBook(idOrBook, isNew = false, nav = false) {
 }
 /* V2.1 : loupe sur la tranche */
 /* V2.17: shared tool navigation, non-destructive cover crop and zone re-scan. */
-/* SCANLY V2.18: review queue, wishlist, safety points and correction ergonomics. */
+/* SCANEBOOK V2.18: review queue, wishlist, safety points and correction ergonomics. */
 const spineFields18=['spineImg','spineOrig','quad','srcRef','color','wU','hU'];
 function preserveSpine18(b){if(!books.some(o=>o===b)||!b.spineImg)return;const prev={};for(const k of spineFields18)if(k in b)prev[k]=JSON.parse(JSON.stringify(b[k]));b.previousSpine18=prev;}
 let reviewCache18=new Map();

@@ -1,4 +1,4 @@
-/* SCANLY – 09_v227.js : nouveautés V2.27.
+/* SCANEBOOK – 09_v227.js : nouveautés V2.27.
    1. Scan d'ISBN en rafale          5. Étiquettes libres et listes personnelles
    2. Rappels de prêt et relance     6. Liste de souhaits partageable
    3. Import Goodreads/Babelio/CSV   7. Alertes de parution des séries
@@ -127,7 +127,7 @@ async function checkLoans27() {
     if (ok) { b.loanNotified = t; await saveBook(b); } }
 }
 async function askNotif27() {
-  if (!('Notification' in window)) return toast(IS_IOS ? 'Sur iPhone / iPad, ajoute d\'abord SCANLY à l\'écran d\'accueil, puis ouvre-le depuis l\'icône.' : 'Ce navigateur ne gère pas les notifications.', 7000);
+  if (!('Notification' in window)) return toast(IS_IOS ? 'Sur iPhone / iPad, ajoute d\'abord SCANEBOOK à l\'écran d\'accueil, puis ouvre-le depuis l\'icône.' : 'Ce navigateur ne gère pas les notifications.', 7000);
   const p = await Notification.requestPermission(); toast(p === 'granted' ? '✔ Rappels de prêt activés' : 'Notifications refusées (réglages du navigateur)', 5000); if (p === 'granted') { localStorage.setItem('scanly_loan_notif27', '1'); checkLoans27(); }
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && DB.db) checkLoans27(); });
@@ -169,7 +169,7 @@ function rowToBook27(r, m, src) {
 }
 function openImport27() {
   openModal(`<div class="dhead"><h3>Importer une bibliothèque</h3><button class="x" data-close>×</button></div><div class="mbody">
-    <p class="hint" style="margin-top:0">Fichier CSV exporté depuis <b>Goodreads</b> (My Books › Import and export › Export Library), <b>Babelio</b> (Mon profil › Exporter ma bibliothèque), un tableur <b>Excel</b> enregistré en CSV, ou l'export CSV de SCANLY. Les colonnes sont reconnues automatiquement (titre, auteur, ISBN, éditeur, année, pages, note, date de lecture, étagères…).</p>
+    <p class="hint" style="margin-top:0">Fichier CSV exporté depuis <b>Goodreads</b> (My Books › Import and export › Export Library), <b>Babelio</b> (Mon profil › Exporter ma bibliothèque), un tableur <b>Excel</b> enregistré en CSV, ou l'export CSV de SCANEBOOK. Les colonnes sont reconnues automatiquement (titre, auteur, ISBN, éditeur, année, pages, note, date de lecture, étagères…).</p>
     <label class="btn g" style="cursor:pointer">${I('img')} Choisir le fichier CSV<input type="file" id="imFile" accept=".csv,.txt,text/csv" hidden></label>
     <div id="imPrev"></div></div>`, 'sm');
   $('#imFile').onchange = async e => { const f = e.target.files[0]; if (!f) return;
@@ -305,7 +305,7 @@ body{font-family:-apple-system,"Segoe UI",sans-serif;background:#F8F6F0;color:#0
 .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}.c{background:#fff;border-radius:10px;padding:10px;box-shadow:0 1px 4px #0001}
 .c img,.c .ph{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;display:block}.c b{display:block;margin-top:8px;font-size:14px}.c span{color:#64748B;font-size:12px;display:block}.c a{font-size:12px;color:#8a6a35}.h{color:#b8915b;font-size:11px;font-weight:700}
 @media(prefers-color-scheme:dark){body{background:#0B1F44;color:#F8F6F0}.c{background:#142a55}.c span,p.s{color:#c9d3e6}}</style></head><body>
-<h1>Ma liste de souhaits</h1><p class="s">${L.length} livre${L.length > 1 ? 's' : ''} · mise à jour le ${new Date().toLocaleDateString('fr-FR')} · créée avec SCANLY</p><div class="g">
+<h1>Ma liste de souhaits</h1><p class="s">${L.length} livre${L.length > 1 ? 's' : ''} · mise à jour le ${new Date().toLocaleDateString('fr-FR')} · créée avec SCANEBOOK</p><div class="g">
 ${L.map(b => `<div class="c">${cov(b)}${wishPriority18(b) === 'high' ? '<div class="h">★ PRIORITAIRE</div>' : ''}<b>${esc(dispTitle(b))}</b><span>${esc(b.author || '')}</span>${b.isbn ? `<span>ISBN ${esc(b.isbn)}</span>` : ''}${b.wishTarget ? `<span>env. ${esc(Number(b.wishTarget).toLocaleString('fr-FR'))} €</span>` : ''}${safeBuyLink18(b.wishLink || '') ? `<a href="${esc(safeBuyLink18(b.wishLink))}" rel="noopener">Où l'acheter</a>` : ''}</div>`).join('')}
 </div></body></html>`; }
 function openWishShare27() {
@@ -363,7 +363,7 @@ openSettings = function () {
     <div class="step" style="margin-top:22px">Rappels et alertes</div>
     <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pNotif27" ${'Notification' in window && Notification.permission === 'granted' && localStorage.getItem('scanly_loan_notif27') !== '0' ? 'checked' : ''}> Notification quand un prêt arrive à échéance</label>
     <label class="hint" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pRel27" ${localStorage.getItem('scanly_release_auto27') !== '0' ? 'checked' : ''}> Vérifier chaque semaine les nouveaux tomes de mes séries (IA)</label>
-    <p class="hint">Les rappels apparaissent quand SCANLY est ouvert (ou à son ouverture). Sur iPhone / iPad, les notifications demandent que SCANLY soit ajouté à l'écran d'accueil.</p>`;
+    <p class="hint">Les rappels apparaissent quand SCANEBOOK est ouvert (ou à son ouverture). Sur iPhone / iPad, les notifications demandent que SCANEBOOK soit ajouté à l'écran d'accueil.</p>`;
   anchor.after(d);
   $('#pImport27').onclick = () => { closeModal(); openImport27(); };
   $('#pReaders27').onchange = e => { const L = parseTags27(e.target.value); V27.readers = L.length ? L : ['Moi']; e.target.value = V27.readers.join(', '); toast('Lecteurs enregistrés'); };
@@ -375,5 +375,5 @@ openSettings = function () {
 (async () => { if (document.readyState === 'loading') await new Promise(r => document.addEventListener('DOMContentLoaded', r, {once: true}));
   for (let i = 0; i < 40 && !DB.db; i++) await sleep(250);
   setTimeout(() => checkLoans27().catch(() => {}), 4000);
-  setTimeout(() => checkReleases27().catch(e => console.warn('SCANLY parutions :', e.message)), 30000);
+  setTimeout(() => checkReleases27().catch(e => console.warn('SCANEBOOK parutions :', e.message)), 30000);
 })();

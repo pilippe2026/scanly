@@ -1,6 +1,6 @@
 /* =====================================================================
-   SCANLY V2.34 – METTRE À JOUR UNE ÉTAGÈRE PAR PHOTO
-   On rephotographie un meuble (ou quelques étagères) : SCANLY compare la
+   SCANEBOOK V2.34 – METTRE À JOUR UNE ÉTAGÈRE PAR PHOTO
+   On rephotographie un meuble (ou quelques étagères) : SCANEBOOK compare la
    photo à la bibliothèque et propose, à valider :
    - les nouveaux livres, à leur vraie place ;
    - les livres déplacés, remis dans l'ordre de la photo ;
@@ -55,7 +55,7 @@ function openShelfUpdate34(caseId) {
   const cid = caseId && cases.some(c => c.id === caseId) ? caseId : cases.some(c => c.id === curCase) ? curCase : cases[0].id;
   UPD34.shots = []; UPD34.det = []; UPD34.res = null;
   openModal(`<div class="dhead"><h3>Mettre à jour une étagère</h3><button class="x" data-close>×</button></div><div class="mbody upd34">
-    <p class="hint" style="margin-top:0">Rephotographiez un meuble, ou seulement quelques étagères. SCANLY compare la photo à votre bibliothèque : nouveaux livres à leur place, livres déplacés, livres absents. Vous validez avant toute modification.</p>
+    <p class="hint" style="margin-top:0">Rephotographiez un meuble, ou seulement quelques étagères. SCANEBOOK compare la photo à votre bibliothèque : nouveaux livres à leur place, livres déplacés, livres absents. Vous validez avant toute modification.</p>
     <div class="g2"><div><label class="l">Meuble</label><select class="fld" id="u34Case">${cases.map(c => `<option data-no-i18n value="${c.id}" ${c.id === cid ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
       <div><label class="l">La 1re étagère de la photo est l'étagère n°</label><input class="fld" id="u34Row" type="number" min="1" max="15" value="1"></div></div>
     <div class="li33-btns"><label class="btn p" style="cursor:pointer">${I('cam')} Prendre la photo<input type="file" id="u34Cam" accept="image/*" capture="environment" hidden></label>

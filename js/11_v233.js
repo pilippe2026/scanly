@@ -1,5 +1,5 @@
 /* =====================================================================
-   SCANLY V2.33 – IMPORT D'UNE LISTE DE LIVRES
+   SCANEBOOK V2.33 – IMPORT D'UNE LISTE DE LIVRES
    Fichier (Excel, Numbers, Word, Pages, PDF, CSV, texte, OpenDocument, RTF)
    ou photo d'une liste papier (imprimée ou manuscrite).
    - Tableaux avec une colonne « Titre » : lus directement, sans IA.

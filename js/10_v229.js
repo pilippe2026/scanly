@@ -1,5 +1,5 @@
 /* =====================================================================
-   SCANLY V2.29 – design
+   SCANEBOOK V2.29 – design
    1. Barre d'onglets en bas (téléphone) : Bibliothèque, Ajouter, Prêts, Souhaits, Profil
    2. En-tête allégé : la recherche devient une loupe qui s'ouvre
    3. Zoom au pincement : boutons − / + retirés sur écran tactile
@@ -53,7 +53,7 @@ function updateLoanDot29() { const d = $('#tabs29 .dot29'); if (!d) return; cons
 const sheetBtn29 = (id, icon, title, sub) => `<button type="button" class="sheet29-b" id="${id}"><span class="si">${icon}</span><span><b>${title}</b><small>${sub}</small></span></button>`;
 function openAdd29() {
   openModal(`<div class="dhead"><h3>Ajouter</h3><button class="x" data-close>×</button></div><div class="mbody sheet29">
-    ${sheetBtn29('ad29Cam', '📷', 'Photographier une étagère', 'SCANLY reconnaît toutes les tranches')}
+    ${sheetBtn29('ad29Cam', '📷', 'Photographier une étagère', 'SCANEBOOK reconnaît toutes les tranches')}
     ${sheetBtn29('ad29Imp', '🖼', 'Importer des photos', 'Depuis la photothèque')}
     ${sheetBtn29('ad29Rf', '▥', 'Scanner plusieurs livres', 'Codes-barres à la suite')}
     ${sheetBtn29('ad29Man', '✎', 'Ajouter un livre', 'Saisie manuelle, titre ou ISBN')}
@@ -77,7 +77,7 @@ function openLoans29() {
 function openProfile29() {
   const n = books.filter(b => !b.wish).length, read = books.filter(b => !b.wish && b.status === 'Lu').length, last = localStorage.getItem('scanly_lastsave');
   openModal(`<div class="dhead"><h3>Profil</h3><button class="x" data-close>×</button></div><div class="mbody sheet29">
-    <div class="me29"><b>${n}</b><span>ouvrages</span><b>${read}</b><span>lus</span><b>${books.filter(b => b.wish).length}</b><span>souhaits</span></div><p class="hint" style="text-align:center;margin:0 0 4px">SCANLY V${VERSION}</p>
+    <div class="me29"><b>${n}</b><span>ouvrages</span><b>${read}</b><span>lus</span><b>${books.filter(b => b.wish).length}</b><span>souhaits</span></div><p class="hint" style="text-align:center;margin:0 0 4px">SCANEBOOK V${VERSION}</p>
     ${sheetBtn29('me29Dash', '▤', 'Tableau de bord', 'Statistiques, lectures, séries')}
     ${sheetBtn29('me29Rev', '⚑', 'À vérifier', 'Doublons possibles et tranches incertaines')}
     ${sheetBtn29('me29AI', '✦', 'Assistant IA', 'Recommandations et questions sur ta bibliothèque')}
@@ -114,7 +114,7 @@ function initZoom29() {
 }
 
 /* ---------- 4. Paramètres repliables ---------- */
-{ const orig = openSettings; openSettings = function () { orig.apply(this, arguments); try { sections29(); } catch (e) { console.warn('SCANLY 2.29 sections', e); } }; }
+{ const orig = openSettings; openSettings = function () { orig.apply(this, arguments); try { sections29(); } catch (e) { console.warn('SCANEBOOK 2.29 sections', e); } }; }
 function sections29() {
   const body = $('#mbox .mbody'); if (!body || body.dataset.s29) return; body.dataset.s29 = '1';
   // Apparence en tête
@@ -143,7 +143,7 @@ function sections29() {
   try { const b = isNew ? idOrBook : books.find(x => x.id === idOrBook), top = $('#dBody .det-top'); if (!b || !top) return;
     top.classList.add('hero29'); const col = colOf(b);
     top.style.setProperty('--hero29', b.cover && !/["\\)]/.test(b.cover) ? `url("${b.cover}")` : `linear-gradient(135deg,${col},${shade(col, .55)})`);
-  } catch (e) { console.warn('SCANLY 2.29 fiche', e); } }; }
+  } catch (e) { console.warn('SCANEBOOK 2.29 fiche', e); } }; }
 
 /* ---------- 7. Animations ---------- */
 const RM29 = matchMedia('(prefers-reduced-motion: reduce)');

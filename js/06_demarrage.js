@@ -1,4 +1,4 @@
-/* SCANLY – 06_demarrage.js : Boutons, raccourcis, démarrage, code-barres, corbeille, détourage, étagères, reconnaissance V1.9.5.
+/* SCANEBOOK – 06_demarrage.js : Boutons, raccourcis, démarrage, code-barres, corbeille, détourage, étagères, reconnaissance V1.9.5.
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
@@ -45,7 +45,7 @@ window.addEventListener('beforeunload', e => { if (BG.running) { e.preventDefaul
   await DB.open(); await migrateImgs26(); await load(); purgeTrash(); setTimeout(gcImgs26, 15000); rt = activeTheme(); applyTheme(); renderAll(); renderRoom(true); if (window.syncBoot) setTimeout(syncBoot, 600);
   const persisted = await askPersist25(); // V2.25 : demande ET vérifie le stockage protégé
   const late = books.filter(isLate), last = localStorage.getItem('scanly_lastsave');
-  if (!cfg.key) setTimeout(() => toast('Bienvenue dans SCANLY ! Commence par saisir ta clé Gemini (Paramètres).', 5000), 700);
+  if (!cfg.key) setTimeout(() => toast('Bienvenue dans SCANEBOOK ! Commence par saisir ta clé Gemini (Paramètres).', 5000), 700);
   else if (late.length) setTimeout(() => toast(`${late.length} prêt(s) en retard : ${late.slice(0, 3).map(b => `« ${b.title} » (${b.loanTo || '?'})`).join(', ')} – voir le Tableau de bord`, 8000), 900);
   else if (books.length && (!last || Date.now() - new Date(last) > (persisted ? 14 : 7) * 864e5)) setTimeout(() => toast(persisted ? 'Pense à enregistrer une sauvegarde de ta bibliothèque (Ctrl+S)' : 'Stockage non protégé par le navigateur : enregistre une sauvegarde de ta bibliothèque (Paramètres › Sauvegarde et exports)', persisted ? 5000 : 8000), 900);
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) registerSW30();
@@ -203,7 +203,7 @@ function renderListBar() {
 /* =====================================================================
    V1.7 – DÉTOURAGE PRÉCIS ET REDRESSEMENT DES TRANCHES
    1. l'IA donne un cadre approximatif (et si possible les 4 coins) ;
-   2. SCANLY mesure l'inclinaison réelle du livre (bords verticaux) ;
+   2. SCANEBOOK mesure l'inclinaison réelle du livre (bords verticaux) ;
    3. il cherche les vrais bords gauche/droite/haut/bas (contours) ;
    4. il redresse la tranche (correction de perspective) : image verticale.
    ===================================================================== */
@@ -253,7 +253,7 @@ function domColor(d, w, h) {
 }
 const imgW = img => img.naturalWidth || img.videoWidth || img.width, imgH = img => img.naturalHeight || img.videoHeight || img.height;
 /* Cherche le quadrilatère exact de la tranche autour d'un cadre approximatif B {x0,y0,x1,y1} (pixels) */
-function autoQuad(img, B, tHint = null) { try { return autoQuad20(img, B, tHint); } catch (e) { console.warn('SCANLY V2.20 détourage', e); return autoQuadV1(img, B, tHint); } }
+function autoQuad(img, B, tHint = null) { try { return autoQuad20(img, B, tHint); } catch (e) { console.warn('SCANEBOOK V2.20 détourage', e); return autoQuadV1(img, B, tHint); } }
 function autoQuadV1(img, B, tHint = null) {
   const IW = imgW(img), IH = imgH(img), bw = Math.max(2, B.x1 - B.x0), bh = Math.max(4, B.y1 - B.y0);
   const mx = .35 * bw + .06 * bh, my = .08 * bh;
@@ -448,7 +448,7 @@ async function restoreOrigin() {
 }
 
 /* =====================================================================
-   SCANLY V1.9.5 – RECONNAISSANCE « DÉCOUPER PUIS LIRE »
+   SCANEBOOK V1.9.5 – RECONNAISSANCE « DÉCOUPER PUIS LIRE »
    L'IA est bonne pour LIRE une tranche, mauvaise pour la DÉLIMITER.
    1. Lecture d'ensemble (IA) : titres probables + position des étagères.
    2. Découpage par l'application, sans IA : sur chaque étagère, détection
@@ -586,7 +586,7 @@ async function restoreOrigin() {
       return asList(o).filter(d => d && Array.isArray(d.boite) && d.boite.length === 4 && d.boite.every(isFinite) && d.boite[2] > d.boite[0] && d.boite[3] > d.boite[1])
         .filter(d => !/sabre|épée|katana|vase|cadre|décor/i.test(d.titre || ''))
         .map(d => { const [y0, x0, y1, x1] = d.boite.map(Number); return {t: d.illisible ? null : d.titre, a: d.auteur, s: d.serie, v: d.tome, e: d.editeur, ty: d.type, c: +d.confiance || 0, ii, x0: x0 / 1000, x1: x1 / 1000, y0: y0 / 1000, y1: y1 / 1000}; });
-    } catch (e) { console.warn('SCANLY lecture d\'ensemble', e); return []; }
+    } catch (e) { console.warn('SCANEBOOK lecture d\'ensemble', e); return []; }
   }
   function bandsFrom(G, W, H) {
     const L = G.filter(d => (d.x1 - d.x0) * W < (d.y1 - d.y0) * H * 1.3);
@@ -615,7 +615,7 @@ JSON : [{"k":1,"livre":true,"suite":false,"titre":"…","auteur":"…","serie":"
         asList(await gemini(parts, {json: true, think: FAST ? 'off' : 'low', timeout: 180000})).forEach(o => { const s = ch[(+o.k || 0) - 1]; if (!s) return;
           s.ok = true; s.notBook = o.livre === false; s.cont = !!o.suite; s.nb = CL(parseInt(o.nb) || 1, 1, 6); s.more = Array.isArray(o.autres) ? o.autres : [];
           if (o.titre && (+o.confiance || 0) >= .35) Object.assign(s, {t: o.titre, a: o.auteur, se: o.serie, v: o.tome, e: o.editeur, ty: o.type, c: +o.confiance || .6}); });
-        break; } catch (e) { console.warn('SCANLY lecture tranches', e); } }
+        break; } catch (e) { console.warn('SCANEBOOK lecture tranches', e); } }
       n += ch.length; done(n);
     });
   }
@@ -641,11 +641,11 @@ JSON : [{"k":1,"nb":3,"livres":[{"titre":"…","auteur":"…","serie":null,"tome
           let cuts = LV.slice(0, -1).map(x => +x.droite).filter(v => v > .03 && v < .97).sort((a, b) => a - b);
           if (cuts.length !== LV.length - 1) cuts = Array.from({length: LV.length - 1}, (_, i) => (i + 1) / LV.length);
           s.cuts = snapCuts(pc.crop, cuts); s.parts = LV; }); }
-      catch (e) { console.warn('SCANLY tranches larges', e); }
+      catch (e) { console.warn('SCANEBOOK tranches larges', e); }
     });
     // recale chaque coupure sur le bord vertical le plus net à proximité (synchronisé après chargement)
     for (const s of cand) if (s.cuts && s.cuts.then) s.cuts = await s.cuts;
-    console.log(`SCANLY 2.1 : ${cand.length} tranche(s) large(s) contrôlée(s), ${cand.filter(s => s.cuts && s.cuts.length).length} redécoupée(s)`);
+    console.log(`SCANEBOOK 2.1 : ${cand.length} tranche(s) large(s) contrôlée(s), ${cand.filter(s => s.cuts && s.cuts.length).length} redécoupée(s)`);
   }
   async function snapCuts(src, cuts) {
     try { const im = await srcToImg(src), w = im.naturalWidth, h = im.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0);
@@ -674,9 +674,9 @@ JSON : [{"k":1,"un_seul":true,"titre":"…","auteur":"…","serie":"… ou null"
       for (let k = 0; k < ch.length; k++) parts.push({text: `Image k=${k + 1}`}, {inlineData: {mimeType: 'image/jpeg', data: (await pic(ch[k])).split(',')[1]}});
       try { asList(await gemini(parts, {json: true, think: 'low', timeout: 150000})).forEach(o => { const pr = ch[(+o.k || 0) - 1]; if (!pr || o.un_seul !== true) return;
           const [p, q] = pr; q.cont = true; if (o.titre) { const t = {t: o.titre, a: o.auteur || p.a || q.a, se: o.serie || null, v: parseInt(o.tome) || null, e: o.editeur || p.e || q.e, c: +o.confiance || .7}; Object.assign(p, t); Object.assign(q, t); } });
-      } catch (e) { console.warn('SCANLY vérification des paires', e); }
+      } catch (e) { console.warn('SCANEBOOK vérification des paires', e); }
     });
-    console.log(`SCANLY 1.9.9 : ${cand.length} paire(s) voisine(s) vérifiée(s)`);
+    console.log(`SCANEBOOK 1.9.9 : ${cand.length} paire(s) voisine(s) vérifiée(s)`);
   }
   /* ---------- V2.33 : DEUX AVIS INDÉPENDANTS ----------
      La lecture d'ensemble (IA, photo entière) et le découpage (bords verticaux) se contrôlent :
@@ -728,7 +728,7 @@ JSON : [{"k":1,"un_seul":true,"titre":"…","auteur":"…","serie":"… ou null"
         M.push({...gInfo(d), row, Q, Qr: Q, wImg: dw, cx: (x0 + x1) / 2, cand: [], merged: true, added33: true, tilt: 0}); added++;
       }
     }
-    if (split || added) console.log(`SCANLY 2.33 :  ${split} cadre(s) à plusieurs livres coupé(s), ${added} livre(s) oublié(s) ajouté(s)`);
+    if (split || added) console.log(`SCANEBOOK 2.33 :  ${split} cadre(s) à plusieurs livres coupé(s), ${added} livre(s) oublié(s) ajouté(s)`);
     return {split, added};
   }
   /* V2.33 : petits morceaux sans titre contenus dans un autre cadre (bord ou ombre découpé à part) : doublons retirés */
@@ -736,7 +736,7 @@ JSON : [{"k":1,"un_seul":true,"titre":"…","auteur":"…","serie":"… ou null"
     for (const s of [...M]) { if (s.t) continue; const y = (s.Q[0][1] + s.Q[3][1]) / 2, l = xAtY(s.Q[0], s.Q[3], y), rr = xAtY(s.Q[1], s.Q[2], y), w = rr - l; if (w <= 0) continue;
       const inside = M.some(o => o !== s && o.row === s.row && o.t && (Math.min(rr, xAtY(o.Q[1], o.Q[2], y)) - Math.max(l, xAtY(o.Q[0], o.Q[3], y))) > w * .6);
       if (inside) { M.splice(M.indexOf(s), 1); n++; } }
-    if (n) console.log(`SCANLY 2.33 : ${n} morceau(x) en double retiré(s)`); }
+    if (n) console.log(`SCANEBOOK 2.33 : ${n} morceau(x) en double retiré(s)`); }
   /* V2.33 : une étagère entière sans aucun livre repéré par la lecture d'ensemble est quand même découpée et lue */
   function gapBands33(bands, H) {
     if (bands.length < 2) return bands;
@@ -789,7 +789,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
           if (B.reduce((t, j) => t + (sub[j].wImg || 0), 0) > bandH * .85) return;                        // garde-fou : largeur d'un seul livre
           for (let j = 1; j < B.length; j++) union(a + B[0], a + B[j]);
           const t = parseInt(gr.tranche) - 1; if (B.includes(t)) spine[a + B[0]] = a + t; });
-      } catch (e) { console.warn('SCANLY regroupement', e); }
+      } catch (e) { console.warn('SCANEBOOK regroupement', e); }
     });
     const groups = new Map(); L.forEach((s, i) => { const r = find(i); if (!groups.has(r)) groups.set(r, []); groups.get(r).push(i); });
     return [...groups.values()].sort((p, q) => p[0] - q[0]).map(G => {
@@ -816,7 +816,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
           merged.push({...f, Q: [[f.Q[0][0], topY], [l.Q[1][0], topY], l.Q[2], f.Q[3]], Qr: [f.Qr[0], l.Qr[1], l.Qr[2], f.Qr[3]],
             cx: (f.cx + l.cx) / 2, cand: [], spineQ: sp ? sp.Q : null, parts: A.length}); });
         RAW[r] = merged;
-        console.log(`SCANLY 1.9.6 : étagère ${r + 1} : ${L.length} bandes -> ${merged.length} livres après regroupement`);
+        console.log(`SCANEBOOK 1.9.6 : étagère ${r + 1} : ${L.length} bandes -> ${merged.length} livres après regroupement`);
       }
       bands.forEach((B, r) => RAW[r].forEach(s => {
         const x0 = Math.min(s.Q[0][0], s.Q[3][0]) / W, x1 = Math.max(s.Q[1][0], s.Q[2][0]) / W;
@@ -866,7 +866,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         pos[s.row] = (pos[s.row] || 0) + 1;
         out.push({titre: s.t || null, illisible: !s.t, auteur: s.a || null, serie: s.se || null, tome: parseInt(s.v) || null, editeur: s.e || null, type: s.ty, rangee: rowMap[s.row], position: pos[s.row],
           confiance: s.t ? (s.c || .7) : 0, image: ii, boite: box, alternatives: []}); });
-      console.log(`SCANLY ${VER} : ${S.length} tranches découpées, ${M.length} livres après recollage`);
+      console.log(`SCANEBOOK ${VER} : ${S.length} tranches découpées, ${M.length} livres après recollage`);
     }
     return {list: out};
   };

@@ -1,5 +1,5 @@
 /* =====================================================================
-   SCANLY V2.36 – REDRESSEMENT AUTOMATIQUE DES PHOTOS
+   SCANEBOOK V2.36 – REDRESSEMENT AUTOMATIQUE DES PHOTOS
    Avant la reconnaissance, chaque photo est redressée :
    - inclinaison (téléphone penché) : mesurée sur les bords verticaux des livres,
      contrôlée par les bords horizontaux des étagères ;
@@ -81,7 +81,7 @@ async function autoLevel36(url) {
     const c = levelCanvas36(img, doRoll ? m.roll : 0, doKey ? m.keystone : 0);
     if (c.width < (img.naturalWidth || img.width) * .6) return {src: url, roll: m.roll, spread: m.spread, changed: false};   // trop de recadrage : on garde l'original
     return {src: c.toDataURL('image/jpeg', .92), roll: doRoll ? m.roll : 0, spread: doKey ? m.spread : 0, changed: true};
-  } catch (e) { console.warn('SCANLY redressement', e); return {src: url, roll: 0, spread: 0, changed: false}; }
+  } catch (e) { console.warn('SCANEBOOK redressement', e); return {src: url, roll: 0, spread: 0, changed: false}; }
 }
 async function levelAll36(list, say) {
   const done = []; for (let i = 0; i < list.length; i++) { say && say(i, list.length); const r = await autoLevel36(list[i]); list[i] = r.src; if (r.changed) done.push(r); }

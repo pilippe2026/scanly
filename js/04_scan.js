@@ -1,4 +1,4 @@
-/* SCANLY – 04_scan.js : Scanner, historique des imports, voix, assistant IA.
+/* SCANEBOOK – 04_scan.js : Scanner, historique des imports, voix, assistant IA.
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
@@ -343,7 +343,7 @@ $('#qMic').onclick = () => listen($('#qMic'), t => {
    ASSISTANT IA
    ===================================================================== */
 const SUGG = ['Quels tomes me manquent dans mes séries ?', 'Que devrais-je lire ensuite ?', 'Recommande-moi 5 ouvrages à acheter selon mes goûts', 'Montre-moi mes livres de science-fiction', 'Analyse ma bibliothèque (genres, auteurs, époques)', 'Ai-je des doublons ?', 'Propose un rangement plus logique', 'Quelle est la valeur estimée de ma collection ?'];
-let chatHist = [], chatHTML = `<div class="msg a">Bonjour, je suis l'assistant SCANLY. Je connais tout ton catalogue : recommandations, tomes manquants, statistiques, emplacement d'un livre… Pose ta question au clavier ou à la voix. Quand je cite tes livres, je peux les faire ressortir dans la pièce.</div>`;
+let chatHist = [], chatHTML = `<div class="msg a">Bonjour, je suis l'assistant SCANEBOOK. Je connais tout ton catalogue : recommandations, tomes manquants, statistiques, emplacement d'un livre… Pose ta question au clavier ou à la voix. Quand je cite tes livres, je peux les faire ressortir dans la pièce.</div>`;
 function md(t) {
   let h = esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>').replace(/^#{1,4} (.+)$/gm, '<b>$1</b>');
   h = h.replace(/(^|\n)((?:\s*[-•*] .+(?:\n|$))+)/g, (m, p, l) => p + '<ul>' + l.trim().split('\n').map(x => '<li>' + x.replace(/^\s*[-•*] /, '') + '</li>').join('') + '</ul>');
@@ -374,7 +374,7 @@ function catalog() {
 async function ask(voice = false) {
   const q = $('#aiQ').value.trim(); if (!q) return; $('#aiQ').value = '';
   $('#chat').insertAdjacentHTML('beforeend', `<div class="msg u">${esc(q)}</div><div class="msg a" id="pend"><span class="spin"></span> Réflexion…</div>`); $('#dBody').scrollTop = 1e6;
-  const system = `Tu es l'assistant de SCANLY, bibliothécaire personnel passionné (livres, BD, mangas, comics). Ton : clair, calme, cultivé et utile. Réponds en français, de façon concise et structurée.
+  const system = `Tu es l'assistant de SCANEBOOK, bibliothécaire personnel passionné (livres, BD, mangas, comics). Ton : clair, calme, cultivé et utile. Réponds en français, de façon concise et structurée.
 Appuie-toi sur le catalogue ci-dessous ; chaque ligne commence par l'identifiant entre crochets puis : titre | auteur | type | genre | série tome | année | éditeur | statut | note | prix | emplacement. Quand tu cites un ouvrage possédé, donne son emplacement. Distingue clairement ce qu'il possède de tes suggestions d'achat. N'affiche jamais les identifiants dans le texte.
 Si ta réponse cite des ouvrages du catalogue, termine OBLIGATOIREMENT par une dernière ligne au format exact : SCANLY_IDS: id1,id2 (12 maximum, uniquement des identifiants du catalogue). Date : ${new Date().toLocaleDateString('fr-FR')}.
 CATALOGUE (${books.length} ouvrages) :

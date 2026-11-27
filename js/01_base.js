@@ -1,13 +1,13 @@
-/* SCANLY – 01_base.js : Configuration, utilitaires, stockage IndexedDB, IA Gemini, images, reconnaissance, enrichissement.
+/* SCANEBOOK – 01_base.js : Configuration, utilitaires, stockage IndexedDB, IA Gemini, images, reconnaissance, enrichissement.
    Les fichiers js/ sont chargés dans l'ordre par index.html et partagent les mêmes variables globales. */
 'use strict';
 /* =====================================================================
-   SCANLY – Bibliothèque virtuelle 3D (PC, Mac, iPhone, iPad) – version : voir VERSION ci-dessous
+   SCANEBOOK – Bibliothèque virtuelle 3D (PC, Mac, iPhone, iPad) – version : voir VERSION ci-dessous
    Stockage local IndexedDB • IA Google Gemini (clé perso)
    Métadonnées Google Books + Open Library
    ===================================================================== */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const VERSION = '2.38';
+const VERSION = '2.39';
 const TYPES = ['Roman','BD','Manga','Comics','Essai','Jeunesse','Beau livre','Pratique','Revue','Autre'];
 function loadTypes20() { try { const saved = JSON.parse(localStorage.getItem('scanly_types') || 'null'); if (Array.isArray(saved) && saved.length) TYPES.splice(0, TYPES.length, ...[...new Set(saved.filter(s => typeof s === 'string' && s.trim()).map(s => s.trim()))]); } catch (e) {} if (!TYPES.includes('Autre')) TYPES.push('Autre'); }
 loadTypes20(); // V2.20 : types renommés / ajoutés par l'utilisateur
@@ -132,8 +132,8 @@ const DB = {
   /* lit les images manquantes du cache, en une transaction */
   async loadImgs(hs) { const need = [...hs].filter(h => !IMGCACHE.has(h)); if (!need.length) return IMGCACHE;
     const recs = []; await this.tx('imgs', 'readonly', t => { const s = t.objectStore('imgs'); need.forEach(h => { const q = s.get(h); q.onsuccess = () => q.result && recs.push(q.result); }); });
-    for (const r of recs) { try { IMGCACHE.set(r.h, await blobToDataURL(r)); } catch (e) { console.warn('SCANLY image illisible', r.h, e); } }
-    need.filter(h => !IMGCACHE.has(h)).forEach(h => console.warn('SCANLY : image introuvable', h)); return IMGCACHE; },
+    for (const r of recs) { try { IMGCACHE.set(r.h, await blobToDataURL(r)); } catch (e) { console.warn('SCANEBOOK image illisible', r.h, e); } }
+    need.filter(h => !IMGCACHE.has(h)).forEach(h => console.warn('SCANEBOOK : image introuvable', h)); return IMGCACHE; },
   async resolve(list) { const hs = collectRefs(list, new Set()); if (!hs.size) return list; const map = await this.loadImgs(hs); return internImgs(list, map); },
   allRaw(st) { return this.run(st, 'readonly', s => s.getAll()); },
   async all(st) { const L = await this.allRaw(st); return IMG_STORES.includes(st) ? this.resolve(L) : L; },
@@ -261,7 +261,7 @@ async function gemini(parts, {json = false, system = null, history = null, think
       if (r.status === 400 && /thinking/i.test(msg) && tc) { noThink.add(model); a--; continue; }
       if (r.status === 404 || (r.status === 400 && /model/i.test(msg) && !/API key/i.test(msg))) { lastErr = msg; break; }
       if (!r.ok) throw new Error(msg || ('Erreur IA ' + r.status));
-      if (model !== cfg.model) { const was = cfg.model; localStorage.setItem('scanly_model', model); toast(`Modèle IA « ${was} » indisponible : SCANLY utilise désormais « ${model} » (modifiable dans Paramètres).`, 7000); } // V2.26 : plus de changement silencieux
+      if (model !== cfg.model) { const was = cfg.model; localStorage.setItem('scanly_model', model); toast(`Modèle IA « ${was} » indisponible : SCANEBOOK utilise désormais « ${model} » (modifiable dans Paramètres).`, 7000); } // V2.26 : plus de changement silencieux
       const txt = (d.candidates?.[0]?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join('');
       if (!txt) throw new Error('Réponse IA vide');
       return json ? parseJSON(txt) : txt;
@@ -501,6 +501,6 @@ function registerSW30() {
   }).catch(() => {});
   sw.addEventListener('controllerchange', () => { if (!hadCtrl || reloaded) return; reloaded = true;
     const busy = document.querySelector('#modal.on, #drawer.on') || document.activeElement?.matches?.('input,textarea,select');
-    if (busy) { toast('Nouvelle version de SCANLY prête : ferme et rouvre l\'app pour l\'utiliser', 8000); return; }
+    if (busy) { toast('Nouvelle version de SCANEBOOK prête : ferme et rouvre l\'app pour l\'utiliser', 8000); return; }
     location.reload(); });
 }
