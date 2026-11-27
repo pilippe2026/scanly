@@ -1,0 +1,16 @@
+SCANEBOOK V2.41 - GUIDE INTÉGRÉ
+Base exclusive : SCANEBOOK V2.40.
+
+Un guide pas à pas présente l'application directement sur l'écran (10 étapes) :
+la pièce 3D, les numéros d'étagère, les meubles, le décor, l'ajout de livres, la recherche,
+les vues, annuler et ranger, le profil et les paramètres, puis le bouton « ? ».
+- Chaque étape met l'élément en lumière et zoome dessus : la pièce 3D zoome vraiment sur une
+  étagère et sur son rond numéroté, les boutons sont grossis dans le halo.
+- Proposé à l'ouverture de l'application (« Commencer la visite » ou « Plus tard »), tant
+  qu'il n'a pas été terminé.
+- Case « Ne plus proposer ce guide à l'ouverture », présente à chaque étape.
+- Bouton « ? » dans l'en-tête pour le relancer à tout moment.
+- Précédent / Suivant, × pour fermer ; au clavier : flèches, Entrée, Échap.
+- Le guide remet la vue et l'angle exactement comme avant. S'adapte à l'écran (iPhone, iPad,
+  Mac, PC, portrait et paysage) et à la langue choisie.
+
