@@ -1,0 +1,10 @@
+SCANLY V2.37 - NUMÉROS D'ÉTAGÈRE DANS LA PIÈCE 3D
+Base exclusive : SCANLY V2.36.
+
+Pour se repérer plus facilement, chaque étagère affiche maintenant son numéro (1 = en haut) :
+- Sur la vue 3D : une plaquette « Étagère 1 », « Étagère 2 »… est posée sur le bord de chaque
+  tablette, à gauche. Elle suit le décor choisi et apparaît aussi dans la « Vue d'ensemble ».
+- Dans le rond doré de chaque étagère (celui qui sert à ouvrir le menu de l'étagère ou à la
+  déplacer) : le numéro de l'étagère remplace le symbole ⇕ (les petites flèches restent).
+Plaquettes traduites dans toutes les langues. iPhone, iPad, Mac et PC.
+

@@ -931,4 +931,5 @@ window.SCANLY_I18N_EXTRA={"Univers inspiré de la Bibliothèque nationale Franç
 "perspective":["perspective","perspectiva","원근","Perspektive"],
 "Redressement des photos {0}/{1}…":["Straightening photos {0}/{1}…","Enderezando fotos {0}/{1}…","사진 보정 중 {0}/{1}…","Fotos werden begradigt {0}/{1}…"],
 "Redresser automatiquement les photos (inclinaison et perspective)":["Automatically straighten photos (tilt and perspective)","Enderezar automáticamente las fotos (inclinación y perspectiva)","사진 자동 보정(기울기와 원근)","Fotos automatisch begradigen (Neigung und Perspektive)"],
-"↻ {0} photo(s) redressée(s)":["↻ {0} photo(s) straightened","↻ {0} foto(s) enderezada(s)","↻ 사진 {0}장 보정됨","↻ {0} Foto(s) begradigt"]};
+"↻ {0} photo(s) redressée(s)":["↻ {0} photo(s) straightened","↻ {0} foto(s) enderezada(s)","↻ 사진 {0}장 보정됨","↻ {0} Foto(s) begradigt"],
+"Étagère {0}":["Shelf {0}","Estante {0}","선반 {0}","Regalbrett {0}"]};

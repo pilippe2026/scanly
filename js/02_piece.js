@@ -252,6 +252,8 @@ function decor3D(kind, xEnd, yB, s) {
     return `<div class="decor" style="left:${xEnd - w - 10 * s}px;top:${yB - h}px;width:${w}px;height:${h}px;${Z(55)}">${leaves}<i class="vase" style="inset:0"></i></div>`; }
   return stackFlat(xEnd - 130 * s, yB, s, ['#0B1F44', '#D4AF7C', '#64748B'], ball('sphere'));
 }
+/* V2.37 : numéro d'étagère sur le chant de la tablette (vue 3D) */
+function rowTag37(n, x, y) { return `<div class="rowtag37" style="left:${x}px;top:${y + 1}px;transform:translateZ(${U.D + 2}px)"><span>${T28('Étagère')}</span> <b data-no-i18n>${n}</b></div>`; }
 function shelf3D(y, x, w) {
   const D = U.D, T = U.T;
   return `<div class="shelf" style="top:${y}px;left:${x}px;width:${w}px;height:${T}px;--D:${D}px">
@@ -305,11 +307,11 @@ function renderRoom(resetView) {
     else if (books.length) html += `<div class="plaque" data-ren="${g.id}" title="Renommer" style="left:${Math.min(W * .72, W - 160)}px;top:4px">${nm28(g)}<small>${g.bs.filter(b => !b.wish).length} ouvrage${g.bs.filter(b => !b.wish).length > 1 ? 's' : ''}</small></div>`;
     rowsOf(g, rowsN).forEach((r, i) => {
       const y = Math.round(TOP + (i + 1) * rowH - U.T); let x = zx + 20;
-      if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Cliquer : menu de l'étagère (sélectionner, supprimer). Maintenir puis glisser : déplacer l'étagère">⇕</div>` : ''}`;
+      if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Cliquer : menu de l'étagère (sélectionner, supprimer). Maintenir puis glisser : déplacer l'étagère" aria-label="Étagère ${i + 1}"><b class="g37n" data-no-i18n>${i + 1}</b></div>` : ''}`;
       html += dz(g.id, i + 1, zx, TOP + i * rowH, zw, rowH);
       if (CAM.sel) { const ids = r.filter(b => !b.wish).map(b => b.id), all = ids.length && ids.every(id => SEL.has(id));
         html += `<button class="rowsel${all ? ' on' : ''}" data-rs="${g.id}|${i + 1}" style="left:${zx + 6}px;top:${TOP + i * rowH + 6}px">${all ? '☑' : '☐'} Étagère ${i + 1}${ids.length ? ` (${ids.length})` : ''}</button>`; }
-      if (!isAll) html += `<span class="rowlbl" style="left:${zx - 22}px;top:${y - 14}px">${i + 1}</span>`;
+      if (!isAll || zi === 0) html += rowTag37(i + 1, zx + (isAll ? 10 : 24), y);
       r.forEach(b => { html += book3D(b, x, y, s, dimmed(b)); x += (bookDims(b).w + 1) * s; });
       if (r.length && x + 14 * s < zx + zw - 6) html += bookend3D(x + 3, y, s);
       if (!isAll && zx + zw - x > 190 * s) html += decor3D((i + hash(g.id)) % 3, zx + zw - 30, y, s);
