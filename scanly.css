@@ -117,6 +117,13 @@ table.list input[type=checkbox],.lbar input[type=checkbox]{width:17px;height:17p
 #camBar button.orig{background:var(--gold);color:var(--navy);font-weight:600}
 #camBar button.orig:hover{background:#e0bf90;color:var(--navy)}
 .rowlbl{position:absolute;font:600 10px var(--fB);color:rgba(255,255,255,.45);pointer-events:none}
+/* V2.37 : numéros d'étagère (plaquette sur le chant + numéro dans le rond ⇕) */
+.rowtag37{position:absolute;height:22px;padding:0 10px;display:flex;align-items:center;gap:4px;background:var(--plBg,linear-gradient(#e9cf9f,#b88d52));color:var(--plCol,#1b2333);border-radius:3px;font:700 13px/1 var(--fB);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;pointer-events:none;box-shadow:0 3px 6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.35)}
+.rowtag37 b{font-size:17px;letter-spacing:0}
+.shgrip .g37n{display:block;font:800 19px/40px var(--fB);pointer-events:none}
+.shgrip::before,.shgrip::after{position:absolute;left:0;right:0;font-size:9px;line-height:1;opacity:.75;pointer-events:none}
+.shgrip::before{content:'▲';top:1px}.shgrip::after{content:'▼';bottom:1px}
+.touch .shgrip .g37n{line-height:48px;font-size:22px}
 
 /* livres 3D */
 .book{position:absolute;transform-style:preserve-3d;cursor:pointer;transition:transform .28s cubic-bezier(.2,.7,.2,1),opacity .3s;transform:translateZ(6px)}
