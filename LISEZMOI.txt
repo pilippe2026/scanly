@@ -1,3 +1,19 @@
+SCANLY V2.35 - ANNULER UNE MISE A JOUR D'ETAGERE, CORRIGER L'ETAGERE CHOISIE
+Base exclusive : SCANLY V2.34.
+
+- ↶ annule maintenant une mise à jour d'étagère en entier : les livres reprennent leur place
+  et ceux ajoutés par la mise à jour sont retirés. ↷ la rétablit.
+  (En V2.34, ↶ ne connaissait pas cette opération : seul le point de restauration
+  « Avant mise à jour d'une étagère » permettait de revenir en arrière.)
+- Résultat de la comparaison : une ligne « Appliquer sur [meuble] étagères N à M » en tête.
+  Mauvais meuble ou mauvaise étagère ? On les change là, la comparaison se refait aussitôt,
+  sans relire la photo.
+- Une confirmation rappelle le meuble, les étagères et le nombre de changements avant d'appliquer.
+- Déplacement groupé : Outils › ☑ Sélection propose « Dernière mise à jour (n) », qui
+  sélectionne d'un geste les livres ajoutés ou déplacés par la dernière mise à jour.
+  Puis « Déplacer vers » meuble et étagère.
+- Les noms de meubles ne sont plus traduits par erreur dans les listes de choix.
+
 SCANLY V2.34 - METTRE A JOUR UNE ETAGERE D'APRES UNE PHOTO
 Base exclusive : SCANLY V2.33.
 
