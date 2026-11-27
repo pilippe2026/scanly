@@ -1,0 +1,20 @@
+SCANLY V2.38 - MÊME NUMÉRO D'ÉTAGÈRE PARTOUT
+Base exclusive : SCANLY V2.37.
+
+Correction : après l'import d'une photo, des livres pouvaient arriver une étagère trop bas
+(par exemple sur l'étagère 3 alors que l'étagère 2 avait été choisie). Cela arrivait quand le
+haut de la photo montrait un bout de l'étagère du dessus : l'IA la comptait comme la rangée 1,
+et cette rangée vide s'ajoutait à l'étagère choisie.
+
+Désormais une seule numérotation, celle de la pièce 3D (1 = étagère du haut) :
+- Dans le tableau de vérification du scan, la colonne « Étagère » montre l'étagère réelle où
+  chaque livre sera rangé, et c'est exactement celle-là qui est utilisée.
+- « La rangée du haut de la photo va sur l'étagère n » : la plus haute rangée où un livre a été
+  lu prend ce numéro, la colonne se met à jour aussitôt. Une rangée entièrement décochée
+  ne compte plus.
+- Un numéro saisi à la main dans la colonne est conservé.
+- « Mettre à jour une étagère » suit la même règle.
+Les livres déjà rangés ne sont pas déplacés. Pour un import déjà fait sur la mauvaise étagère :
+sélectionner les livres (ou « Dernière mise à jour »), puis les envoyer sur la bonne étagère
+avec la barre bleue, ou utiliser ↶ juste après l'import.
+
