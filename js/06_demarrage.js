@@ -563,7 +563,7 @@ async function restoreOrigin() {
       const a = cuts[i], b = cuts[i + 1], wS = b - a; if (wS < minW || wS > hk * 1.2) continue;
       const tA = tanX[a], tB = tanX[b], xAt = (c, tn, y) => c + (y - ym) * tn;
       let e = 0, n = 0; for (let y = ya; y < yb; y += 2) for (let x = Math.round(a + wS * .2); x < b - wS * .2; x++) { const xs = Math.round(x + (y - ym) * (tA + tB) / 2); if (xs < 1 || xs >= wk - 1) continue; const j = y * wk + xs; e += Math.abs(gx[j]) + Math.abs(gy[j]); n++; }
-      if (!n || e / n < 18) continue;
+      if (!n || e / n < 13) continue;   // V2.33 : 18 -> 13, les dos unis (peu de texte) ne sont plus écartés
       let top = 0, bv = -1; const mid = (a + b) / 2, half = Math.max(1, wS * .3);
       const rowMean = y => { let s = 0, c = 0; for (let x = Math.round(mid - half); x <= mid + half; x++) { const xs = Math.round(x + (y - ym) * (tA + tB) / 2); if (xs >= 0 && xs < wk) { s += g[y * wk + xs]; c++; } } return c ? s / c : 0; };
       const RM = []; for (let y = 0; y < hk; y++) RM.push(rowMean(y));
@@ -606,7 +606,7 @@ async function restoreOrigin() {
       const parts = [{text: `Voici ${ch.length} tranches de livres découpées dans une photo d'étagère, redressées et agrandies, dans l'ordre de gauche à droite (le texte est souvent vertical, parfois à l'envers).
 Pour chaque tranche k, lis le titre, l'auteur, l'éditeur et le tome (édition française en priorité). Un « titre probable » issu d'une lecture d'ensemble de la photo est indiqué quand il existe : vérifie-le sur l'image, corrige-le si besoin. Les voisins d'une même série se ressemblent : sers-t'en.
 Indique "livre": false si l'image n'est pas un livre (mur, planche, objet), et "suite": true si l'image est un morceau du MÊME livre que la tranche précédente (k-1).
-Si l'image contient PLUSIEURS livres côte à côte (souvent des poches très fins), indique "nb" (nombre de livres) et décris le 1er dans les champs normaux, les suivants (de gauche à droite) dans "autres".
+Regarde bien les bords : une ligne verticale nette, un changement de couleur, de typographie ou deux titres différents signalent DEUX livres. Si l'image contient PLUSIEURS livres côte à côte (souvent des poches très fins), indique "nb" (nombre de livres) et décris le 1er dans les champs normaux, les suivants (de gauche à droite) dans "autres".
 N'invente rien : "titre": null si illisible. Le numéro de "tome" doit être LU sur l'image (chiffre ou mention imprimée) : ne le déduis JAMAIS des voisins ; s'il n'est pas visible, "tome": null.
 JSON : [{"k":1,"livre":true,"suite":false,"titre":"…","auteur":"…","serie":"… ou null","tome":nombre ou null,"editeur":"…","type":"un parmi ${TYPES.join(', ')}","confiance":0-1,"nb":1,"autres":[{"titre":"…","auteur":"…","serie":null,"tome":null,"editeur":"…"}]}]`}];
       ch.forEach((s, k) => { parts.push({text: `Tranche k=${k + 1}${s.hint ? ` – titre probable : « ${s.hint} »` : ''}${s.prev ? ` – voisin de gauche : « ${s.prev} »` : ''}`},
@@ -627,7 +627,7 @@ JSON : [{"k":1,"livre":true,"suite":false,"titre":"…","auteur":"…","serie":"
     const L = S.filter(s => !s.notBook && !(s.nb > 1) && s.sp && s.sp.hpx > 20), ratio = s => s.sp.wpx / s.sp.hpx;
     if (!L.length) return;
     const rs = L.map(ratio).sort((a, b) => a - b), mr = rs[rs.length >> 1] || .1;
-    const cand = L.filter(s => ratio(s) > Math.max(.17, mr * 1.9) && ratio(s) < 1.1);
+    const cand = L.filter(s => ratio(s) > Math.max(.15, mr * 1.7) && ratio(s) < 1.1);   // V2.33 : 1.9 -> 1.7
     if (!cand.length) return;
     const pics = cand.map(s => warp(img, s.Qr, 560));
     const chunks = []; for (let i = 0; i < cand.length; i += 6) chunks.push(cand.map((s, k) => [s, pics[k]]).slice(i, i + 6));
@@ -677,6 +677,74 @@ JSON : [{"k":1,"un_seul":true,"titre":"…","auteur":"…","serie":"… ou null"
       } catch (e) { console.warn('SCANLY vérification des paires', e); }
     });
     console.log(`SCANLY 1.9.9 : ${cand.length} paire(s) voisine(s) vérifiée(s)`);
+  }
+  /* ---------- V2.33 : DEUX AVIS INDÉPENDANTS ----------
+     La lecture d'ensemble (IA, photo entière) et le découpage (bords verticaux) se contrôlent :
+     - un cadre qui contient deux livres distincts vus par la lecture d'ensemble est coupé en deux,
+       sur le bord vertical le plus net entre les deux ;
+     - un livre vu par la lecture d'ensemble mais absent du découpage (dos uni, livre très fin,
+       livre de biais) est ajouté avec son cadre. */
+  const xAtY = (a, b, y) => b[1] === a[1] ? (a[0] + b[0]) / 2 : a[0] + (b[0] - a[0]) * CL((y - a[1]) / (b[1] - a[1]), 0, 1);
+  const lerp33 = (p, q, f) => [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f];
+  const gInfo = d => ({t: d.t || null, a: d.a || null, se: d.s || null, v: parseInt(d.v) || null, e: d.e || null, ty: d.ty, c: d.t ? Math.min(.75, d.c || .6) : 0});
+  const distinctG = (p, q) => !p.t || !q.t || norm(p.t) !== norm(q.t) || (parseInt(p.v) || 0) !== (parseInt(q.v) || 0);
+  async function reconcile33(img, M, bands, W, H) {
+    let split = 0, added = 0;
+    for (let r = 0; r < bands.length; r++) {
+      const B = bands[r], G = (B.G || []).filter(d => d.c >= .3 || d.t), row = r + 1, bh = B.y1 - B.y0, minPiece = Math.max(4, bh * .03);
+      if (!G.length) continue;
+      const fr = () => M.filter(s => s.row === row);
+      const span = (s, y) => [xAtY(s.Q[0], s.Q[3], y), xAtY(s.Q[1], s.Q[2], y)];
+      const ws = fr().map(s => s.wImg || (span(s, (s.Q[0][1] + s.Q[3][1]) / 2)[1] - span(s, (s.Q[0][1] + s.Q[3][1]) / 2)[0])).filter(v => v > 0), mw = med(ws) || bh * .08;
+      // 1. cadres contenant plusieurs livres
+      for (const s of fr()) {
+        const y = (Math.max(s.Q[0][1], s.Q[1][1]) + Math.min(s.Q[2][1], s.Q[3][1])) / 2, [l, rr] = span(s, y), w = rr - l; if (w < minPiece * 2) continue;
+        const D = G.filter(d => { const cx = (d.x0 + d.x1) / 2 * W; return cx > l && cx < rr; }).sort((p, q) => (p.x0 + p.x1) - (q.x0 + q.x1));
+        if (D.length < 2) continue;
+        const cuts = [];
+        for (let i = 0; i < D.length - 1; i++) { const p = D[i], q = D[i + 1], pw = (p.x1 - p.x0) * W, qw = (q.x1 - q.x0) * W, ov = Math.max(0, p.x1 * W - q.x0 * W);
+          if (ov > Math.min(pw, qw) * .35) continue;                                   // deux cadres qui se recouvrent : sans doute le même livre
+          if (!distinctG(p, q) && w < mw * 1.4) continue;                               // même titre, même tome, cadre de largeur normale : un seul livre
+          const c = ((p.x1 + q.x0) / 2 * W - l) / w; if (c * w < minPiece || (1 - c) * w < minPiece) continue;
+          if (cuts.length && (c - cuts[cuts.length - 1]) * w < minPiece) continue; cuts.push(c); }
+        if (!cuts.length) continue;
+        const crop = (!s.merged && s.sp && s.sp.crop) || warp(img, s.Q).crop, snapped = await snapCuts(crop, cuts), F = [0, ...snapped.map((v, i) => Math.abs(v - cuts[i]) * w < Math.max(minPiece, w * .12) ? v : cuts[i]), 1];
+        const info = D.map(gInfo), keep = s.t ? info.findIndex(o => o.t && (norm(o.t) === norm(s.t) || sim(o.t, s.t) >= .6)) : -1;
+        const pieces = [];
+        for (let j = 0; j < F.length - 1; j++) { const f0 = F[j], f1 = F[j + 1], cx = l + (f0 + f1) / 2 * w;
+          const d = D.map((o, k) => [k, Math.abs((o.x0 + o.x1) / 2 * W - cx)]).sort((p, q) => p[1] - q[1])[0][0];
+          const inf = d === keep ? {t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c} : info[d];
+          pieces.push({...s, ...inf, Q: [lerp33(s.Q[0], s.Q[1], f0), lerp33(s.Q[0], s.Q[1], f1), lerp33(s.Q[3], s.Q[2], f1), lerp33(s.Q[3], s.Q[2], f0)],
+            Qr: [lerp33(s.Qr[0], s.Qr[1], f0), lerp33(s.Qr[0], s.Qr[1], f1), lerp33(s.Qr[3], s.Qr[2], f1), lerp33(s.Qr[3], s.Qr[2], f0)], wImg: w * (f1 - f0), merged: true, spineQ: null}); }
+        M.splice(M.indexOf(s), 1, ...pieces); split += pieces.length - 1;
+      }
+      // 2. livres oubliés par le découpage
+      for (const d of G) {
+        const x0 = d.x0 * W, x1 = d.x1 * W, y0 = d.y0 * H, y1 = d.y1 * H, dw = x1 - x0, cy = (y0 + y1) / 2;
+        if (dw < minPiece || (!d.t && dw > (y1 - y0) * .3)) continue;
+        const hit = fr().some(s => { const [l, rr] = span(s, cy), ov = Math.min(rr, x1) - Math.max(l, x0); return ov > dw * .35 || ((x0 + x1) / 2 > l && (x0 + x1) / 2 < rr); });
+        if (hit) continue;
+        const Q = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+        M.push({...gInfo(d), row, Q, Qr: Q, wImg: dw, cx: (x0 + x1) / 2, cand: [], merged: true, added33: true, tilt: 0}); added++;
+      }
+    }
+    if (split || added) console.log(`SCANLY 2.33 :  ${split} cadre(s) à plusieurs livres coupé(s), ${added} livre(s) oublié(s) ajouté(s)`);
+    return {split, added};
+  }
+  /* V2.33 : petits morceaux sans titre contenus dans un autre cadre (bord ou ombre découpé à part) : doublons retirés */
+  function dedupe33(M) { let n = 0;
+    for (const s of [...M]) { if (s.t) continue; const y = (s.Q[0][1] + s.Q[3][1]) / 2, l = xAtY(s.Q[0], s.Q[3], y), rr = xAtY(s.Q[1], s.Q[2], y), w = rr - l; if (w <= 0) continue;
+      const inside = M.some(o => o !== s && o.row === s.row && o.t && (Math.min(rr, xAtY(o.Q[1], o.Q[2], y)) - Math.max(l, xAtY(o.Q[0], o.Q[3], y))) > w * .6);
+      if (inside) { M.splice(M.indexOf(s), 1); n++; } }
+    if (n) console.log(`SCANLY 2.33 : ${n} morceau(x) en double retiré(s)`); }
+  /* V2.33 : une étagère entière sans aucun livre repéré par la lecture d'ensemble est quand même découpée et lue */
+  function gapBands33(bands, H) {
+    if (bands.length < 2) return bands;
+    const hs = bands.map(b => b.y1 - b.y0), mh = med(hs), out = [bands[0]];
+    for (let i = 1; i < bands.length; i++) { const a = out[out.length - 1], b = bands[i], gap = b.y0 - a.y1;
+      if (gap > mh * .8) out.push({x0: a.x0, x1: a.x1, y0: a.y1 + gap * .04, y1: b.y0 - gap * .02, G: [], gap33: true});
+      out.push(b); }
+    return out;
   }
   const sameBook = (p, q) => p.t && q.t && norm(p.t) === norm(q.t) && (p.v || 0) === (q.v || 0);
   const CACHE = new Map();
@@ -735,7 +803,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
     for (let ii = 0; ii < urls.length; ii++) {
       const img = await srcToImg(urls[ii]), W = img.naturalWidth, H = img.naturalHeight;
       setMsg(`Photo ${ii + 1}/${urls.length} : lecture d'ensemble…`);
-      const G = await globalPass(urls[ii], ii), bands = bandsFrom(G, W, H);
+      const G = await globalPass(urls[ii], ii), bands = gapBands33(bandsFrom(G, W, H), H);
       setMsg(`Photo ${ii + 1}/${urls.length} : découpage des tranches…`); await sleep(20);
       const S = [], RAW = bands.map(B => segmentBand(img, B));
       for (let r = 0; r < bands.length; r++) {
@@ -761,8 +829,9 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
       S.forEach((s, i) => { if (i && S[i - 1].row === s.row && S[i - 1].hint) s.prev = S[i - 1].hint; });
       await readSlices(S, n => setMsg(`Photo ${ii + 1}/${urls.length} : lecture des tranches ${n}/${S.length}…`));
       S.forEach(s => { if (!s.ok && s.g && s.g.t) Object.assign(s, {t: s.g.t, a: s.g.a, se: s.g.s, v: s.g.v, e: s.g.e, ty: s.g.ty, c: Math.min(.6, s.g.c || .6)}); });
+      for (const s of S) if (s.nb > 1 && !s.notBook && s.read) s.nbCuts = await snapCuts(s.read, Array.from({length: s.nb - 1}, (_, j) => (j + 1) / s.nb));   // V2.33
       setMsg(`Photo ${ii + 1}/${urls.length} : contrôle des tranches larges…`);
-      if (scanMode() === 'precise') await splitWide(img, S);
+      await splitWide(img, S);   // V2.33 : aussi en mode rapide (un appel seulement s'il y a des tranches larges)
       const S2 = [];
       S.forEach(s => { if (s.cuts && s.cuts.length) { const lerp = (p, q, f) => [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f], fr = [0, ...s.cuts, 1];
           for (let j = 0; j < fr.length - 1; j++) { const f0 = fr[j], f1 = fr[j + 1], inf = s.parts[j] || {};
@@ -773,21 +842,29 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
           return; }
         if (!(s.nb > 1) || s.notBook) return S2.push(s);
         const lerp = (p, q, f) => [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f], info = [{t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c}, ...s.more.map(o => ({t: o.titre, a: o.auteur, se: o.serie, v: o.tome, e: o.editeur, ty: s.ty, c: .6}))];
-        for (let j = 0; j < s.nb; j++) { const f0 = j / s.nb, f1 = (j + 1) / s.nb, Q = [lerp(s.Q[0], s.Q[1], f0), lerp(s.Q[0], s.Q[1], f1), lerp(s.Q[3], s.Q[2], f1), lerp(s.Q[3], s.Q[2], f0)];
-          S2.push({...s, ...(info[j] || {t: null}), Q, cont: j ? false : s.cont, merged: true, nb: 1}); } });
+        const fr = s.nbCuts && s.nbCuts.length === s.nb - 1 ? [0, ...s.nbCuts, 1] : null;   // V2.33 : coupures sur les bords nets
+        for (let j = 0; j < s.nb; j++) { const f0 = fr ? fr[j] : j / s.nb, f1 = fr ? fr[j + 1] : (j + 1) / s.nb, Q = [lerp(s.Q[0], s.Q[1], f0), lerp(s.Q[0], s.Q[1], f1), lerp(s.Q[3], s.Q[2], f1), lerp(s.Q[3], s.Q[2], f0)];
+          S2.push({...s, ...(info[j] || {t: null}), Q, Qr: [lerp(s.Qr[0], s.Qr[1], f0), lerp(s.Qr[0], s.Qr[1], f1), lerp(s.Qr[3], s.Qr[2], f1), lerp(s.Qr[3], s.Qr[2], f0)], wImg: (s.wImg || 0) * (f1 - f0), cont: j ? false : s.cont, merged: true, nb: 1}); } });
       setMsg(`Photo ${ii + 1}/${urls.length} : vérification des livres coupés en deux…`);
       if (scanMode() === 'precise') await verifyPairs(img, S2);
-      const M = [];
+      const M = [], mwRow = {};
+      S2.filter(s => !s.notBook).forEach(s => { (mwRow[s.row] = mwRow[s.row] || []).push(s.wImg || 0); });
+      Object.keys(mwRow).forEach(r => { mwRow[r] = med(mwRow[r].filter(Boolean)); });
+      const thinPair = (p, s) => { const m = mwRow[s.row]; return !m || ((p.wImg || 0) + (s.wImg || 0)) <= m * 1.35; };   // V2.33
       S2.filter(s => !s.notBook).forEach(s => { const p = M[M.length - 1];
-        if (p && p.row === s.row && (s.cont || sameBook(p, s))) { const ty = Math.min(p.Q[0][1], s.Q[1][1]); p.Q = [[p.Q[0][0], ty], [s.Q[1][0], ty], s.Q[2], p.Q[3]]; if (!p.t && s.t) Object.assign(p, {t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c}); p.Qr = [p.Qr[0], s.Qr[1], s.Qr[2], p.Qr[3]]; p.wImg = (p.wImg || 0) + (s.wImg || 0); p.merged = true; }
+        if (p && p.row === s.row && ((s.cont && thinPair(p, s)) || (sameBook(p, s) && thinPair(p, s)))) { const ty = Math.min(p.Q[0][1], s.Q[1][1]); p.Q = [[p.Q[0][0], ty], [s.Q[1][0], ty], s.Q[2], p.Q[3]]; if (!p.t && s.t) Object.assign(p, {t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c}); p.Qr = [p.Qr[0], s.Qr[1], s.Qr[2], p.Qr[3]]; p.wImg = (p.wImg || 0) + (s.wImg || 0); p.merged = true; }
         else M.push({...s}); });
-      const pos = {};
+      await reconcile33(img, M, bands, W, H);
+      M.sort((p, q) => p.row - q.row || ((p.Q[0][0] + p.Q[1][0]) - (q.Q[0][0] + q.Q[1][0])));
+      const pos = {}, rowMap = {}; [...new Set(M.map(s => s.row))].sort((p, q) => p - q).forEach((r, i) => { rowMap[r] = i + 1; });   // V2.33 : pas d'étagère vide
       setMsg(`Photo ${ii + 1}/${urls.length} : affinage du détourage…`); await sleep(10);
-      M.forEach(s => { const Qf = s.spineQ ? s.Q : refineScanQuad20(img, s.Q), refined = Qf !== s.Q; s.Q = Qf; const sp = s.merged || refined ? warp(img, s.Q) : s.sp, xs = s.Q.map(p => p[0]), ys = s.Q.map(p => p[1]);
+      M.forEach(s => { s.Q0 = s.Q; if (!s.spineQ) s.Q = refineScanQuad20(img, s.Q); });
+      dedupe33(M);
+      M.forEach(s => { const Qf = s.Q, refined = s.Q0 !== s.Q; const sp = s.merged || refined ? warp(img, s.Q) : s.sp, xs = s.Q.map(p => p[0]), ys = s.Q.map(p => p[1]);
         const box = [Math.min(...ys) / H, Math.min(...xs) / W, Math.max(...ys) / H, Math.max(...xs) / W].map(v => Math.round(CL(v * 1000, 0, 1000)));
         CACHE.set(box.join(','), {crop: sp.crop, color: sp.color, wpx: sp.wpx, hpx: sp.hpx, quad: s.Q.map(p => [+(p[0] / W).toFixed(5), +(p[1] / H).toFixed(5)]), tilt: s.tilt});
         pos[s.row] = (pos[s.row] || 0) + 1;
-        out.push({titre: s.t || null, illisible: !s.t, auteur: s.a || null, serie: s.se || null, tome: parseInt(s.v) || null, editeur: s.e || null, type: s.ty, rangee: s.row, position: pos[s.row],
+        out.push({titre: s.t || null, illisible: !s.t, auteur: s.a || null, serie: s.se || null, tome: parseInt(s.v) || null, editeur: s.e || null, type: s.ty, rangee: rowMap[s.row], position: pos[s.row],
           confiance: s.t ? (s.c || .7) : 0, image: ii, boite: box, alternatives: []}); });
       console.log(`SCANLY ${VER} : ${S.length} tranches découpées, ${M.length} livres après recollage`);
     }

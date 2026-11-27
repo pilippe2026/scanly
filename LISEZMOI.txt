@@ -1,3 +1,32 @@
+SCANLY V2.33 - TRANCHES PLUS FIABLES ET IMPORT D'UNE LISTE DE LIVRES
+Base exclusive : SCANLY V2.32.
+
+1. Reconnaissance des tranches (photo d'étagère)
+   - Deux avis se contrôlent : la lecture d'ensemble de la photo par l'IA et le découpage
+     des tranches. Un cadre qui contient deux livres distincts est coupé en deux, sur le bord
+     le plus net entre les deux. Un livre vu par l'IA mais oublié par le découpage est ajouté.
+   - Les dos unis (peu de texte, couleur pleine) ne sont plus écartés.
+   - Deux livres de largeur normale ne sont plus fusionnés parce qu'ils portent le même titre
+     (séries dont le numéro de tome est illisible).
+   - Les tranches anormalement larges sont recontrôlées aussi en mode Rapide.
+   - Quand la tranche contient plusieurs poches, les coupures suivent les vrais bords
+     au lieu de parts égales.
+   - Une étagère entière oubliée par la lecture d'ensemble est quand même découpée et lue.
+   - Les petits morceaux en double (bord, ombre) sont retirés.
+
+2. Importer une liste de livres (Ajouter › Importer une liste)
+   - Fichiers : Excel (.xlsx), Numbers et Pages (aperçu intégré), Word (.docx), PDF, CSV
+     (Goodreads, Babelio…), texte, RTF, OpenDocument (.ods, .odt).
+   - Ou une photo d'une liste papier, imprimée ou manuscrite (plusieurs photos possibles).
+   - Les tableaux avec une colonne « Titre » sont lus directement, sans IA. Le reste est lu
+     par l'IA (clé Gemini nécessaire) : séries « 1 à 5 » développées tome par tome,
+     livres « à acheter » proposés en souhaits.
+   - La liste est montrée avant l'import : livres déjà présents décochés, titres douteux
+     soulignés, choix du meuble, recherche des couvertures.
+   - Anciens formats .xls et .doc : un message explique comment les enregistrer.
+
+Aucune modification des données existantes.
+
 SCANLY V2.32 - BARRE D'ONGLETS ENTIERE SUR TOUS LES ECRANS
 Base exclusive : SCANLY V2.31.
 
