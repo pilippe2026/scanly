@@ -924,4 +924,11 @@ window.SCANLY_I18N_EXTRA={"Univers inspiré de la Bibliothèque nationale Franç
 "Appliquer sur « {0} », {1} ?":["Apply to “{0}”, {1}?","¿Aplicar en «{0}», {1}?","“{0}”, {1}에 적용할까요?","Auf „{0}“, {1} anwenden?"],
 "étagères {0} à {1}":["shelves {0} to {1}","estanterías {0} a {1}","{0}~{1}번 선반","Regale {0} bis {1}"],
 "{0} ajout(s), {1} déplacement(s), {2} retrait(s).":["{0} addition(s), {1} move(s), {2} removal(s).","{0} adición(es), {1} movimiento(s), {2} retirada(s).","추가 {0}, 이동 {1}, 제거 {2}.","{0} Hinzufügung(en), {1} Verschiebung(en), {2} Entfernung(en)."],
-"Vous pourrez annuler avec ↶.":["You can undo with ↶.","Podrá deshacer con ↶.","↶로 되돌릴 수 있습니다.","Sie können mit ↶ rückgängig machen."]};
+"Vous pourrez annuler avec ↶.":["You can undo with ↶.","Podrá deshacer con ↶.","↶로 되돌릴 수 있습니다.","Sie können mit ↶ rückgängig machen."],
+"↻ {0} photo(s) redressée(s) : {1}":["↻ {0} photo(s) straightened: {1}","↻ {0} foto(s) enderezada(s): {1}","↻ 사진 {0}장 보정됨: {1}","↻ {0} Foto(s) begradigt: {1}"],
+"inclinaison {0}°":["tilt {0}°","inclinación {0}°","기울기 {0}°","Neigung {0}°"],
+"inclinaison {0}° + perspective":["tilt {0}° + perspective","inclinación {0}° + perspectiva","기울기 {0}° + 원근","Neigung {0}° + Perspektive"],
+"perspective":["perspective","perspectiva","원근","Perspektive"],
+"Redressement des photos {0}/{1}…":["Straightening photos {0}/{1}…","Enderezando fotos {0}/{1}…","사진 보정 중 {0}/{1}…","Fotos werden begradigt {0}/{1}…"],
+"Redresser automatiquement les photos (inclinaison et perspective)":["Automatically straighten photos (tilt and perspective)","Enderezar automáticamente las fotos (inclinación y perspectiva)","사진 자동 보정(기울기와 원근)","Fotos automatisch begradigen (Neigung und Perspektive)"],
+"↻ {0} photo(s) redressée(s)":["↻ {0} photo(s) straightened","↻ {0} foto(s) enderezada(s)","↻ 사진 {0}장 보정됨","↻ {0} Foto(s) begradigt"]};
