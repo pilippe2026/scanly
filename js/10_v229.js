@@ -57,7 +57,7 @@ function openAdd29() {
     ${sheetBtn29('ad29Imp', '🖼', 'Importer des photos', 'Depuis la photothèque')}
     ${sheetBtn29('ad29Rf', '▥', 'Scanner plusieurs livres', 'Codes-barres à la suite')}
     ${sheetBtn29('ad29Man', '✎', 'Ajouter un livre', 'Saisie manuelle, titre ou ISBN')}
-    ${sheetBtn29('ad29Csv', '⇪', 'Importer un fichier', 'Goodreads, Babelio, tableur CSV')}
+    ${sheetBtn29('ad29Csv', '⇪', 'Importer une liste', 'Excel, Word, Pages, PDF, CSV ou photo d\'une liste')}
   </div>`, 'sm');
   const go = f => () => { closeModal(); f(); };
   $('#ad29Cam').onclick = go(() => $('#fabCam').click()); $('#ad29Imp').onclick = go(() => $('#fabImp').click());
