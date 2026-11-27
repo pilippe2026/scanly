@@ -1,0 +1,19 @@
+SCANEBOOK V2.44 - DÉCOUPAGE DES TRANCHES BEAUCOUP PLUS PRÉCIS
+Base exclusive : SCANEBOOK V2.43.
+
+La reconnaissance par photo découpait souvent deux tranches dans un même cadre (BD fines,
+séries de la même couleur) ou décalait le cadre d'un demi-livre vers le voisin. Corrigé :
+- Découpage deux fois plus fin, qui repère le léger sillon entre deux BD d'une même série
+  (bord présent sur toute la hauteur, même faible), et ignore les bords du texte du titre.
+- L'affinage du détourage ne peut plus déplacer un bord vers la tranche voisine.
+- Un titre vu sur la photo entière ne sert d'indice qu'à une seule tranche : deux livres
+  voisins ne sont plus recollés parce qu'ils avaient reçu le même titre.
+- Deux livres fins voisins ne sont plus recollés quand leurs voisins sont des livres larges.
+- Une tranche deux fois plus large que ses voisines est revérifiée par l'IA et coupée s'il y
+  a deux livres.
+
+Mesuré sur des étagères simulées (IA simulée) :
+- BD aux tranches fines : 99 % des livres seuls et bien cadrés, au lieu de 71 % ;
+- étagère mélangée (BD, romans, poches) : 96 %, au lieu de 52 %.
+Même durée de traitement. Vos livres déjà rangés ne sont pas modifiés.
+
