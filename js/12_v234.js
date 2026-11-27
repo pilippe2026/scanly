@@ -56,7 +56,7 @@ function openShelfUpdate34(caseId) {
   UPD34.shots = []; UPD34.det = []; UPD34.res = null;
   openModal(`<div class="dhead"><h3>Mettre à jour une étagère</h3><button class="x" data-close>×</button></div><div class="mbody upd34">
     <p class="hint" style="margin-top:0">Rephotographiez un meuble, ou seulement quelques étagères. SCANLY compare la photo à votre bibliothèque : nouveaux livres à leur place, livres déplacés, livres absents. Vous validez avant toute modification.</p>
-    <div class="g2"><div><label class="l">Meuble</label><select class="fld" id="u34Case">${cases.map(c => `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
+    <div class="g2"><div><label class="l">Meuble</label><select class="fld" id="u34Case">${cases.map(c => `<option data-no-i18n value="${c.id}" ${c.id === cid ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
       <div><label class="l">La 1re étagère de la photo est l'étagère n°</label><input class="fld" id="u34Row" type="number" min="1" max="15" value="1"></div></div>
     <div class="li33-btns"><label class="btn p" style="cursor:pointer">${I('cam')} Prendre la photo<input type="file" id="u34Cam" accept="image/*" capture="environment" hidden></label>
       <label class="btn g" style="cursor:pointer">${I('img')} Choisir des photos<input type="file" id="u34File" accept="image/*" multiple hidden></label></div>
@@ -90,7 +90,7 @@ async function analyse34() {
         if (box && box[2] - box[0] > 8 && box[3] - box[1] > 2) { try { sp = spineFromDetection(img, box, d.coins); } catch (e) { try { sp = spineData(img, box); } catch (e2) {} } }
         const title = d.titre && !d.illisible ? String(d.titre).trim() : '';
         det.push({title, author: title ? d.auteur || '' : '', series: d.serie || '', volume: parseInt(d.tome) || null, publisher: d.editeur || '', type: TYPES.includes(d.type) ? d.type : 'Autre',
-          isbn: d.isbn || '', conf: title ? +d.confiance || .6 : 0, row: base + (parseInt(d.rangee) || 1) - 1, shot: si, pos: parseInt(d.position) || 999, sp, box}); });
+          isbn: d.isbn || '', conf: title ? +d.confiance || .6 : 0, rang: parseInt(d.rangee) || 1, row: base + (parseInt(d.rangee) || 1) - 1, shot: si, pos: parseInt(d.position) || 999, sp, box}); });
     }
   } catch (e) { $('#sMsg').textContent = 'Analyse interrompue : ' + e.message; $('#u34Go').disabled = false; modalLeaveGuard = null; return; }
   finally { if (prev == null) localStorage.removeItem('scanly_mode'); else localStorage.setItem('scanly_mode', prev); }
@@ -98,15 +98,19 @@ async function analyse34() {
   det.sort((a, b) => a.row - b.row || a.shot - b.shot || a.pos - b.pos);
   // plusieurs photos qui se chevauchent : un même livre vu deux fois n'est gardé qu'une fois
   const seen = new Set(); UPD34.det = det.filter(d => { if (!d.title) return true; const k = d.row + '|' + norm(d.title) + '|' + (d.volume || ''); if (seen.has(k)) return false; seen.add(k); return true; });
-  UPD34.res = compare34(caseId, base, UPD34.det); UPD34.caseId = caseId;
+  UPD34.res = compare34(caseId, base, UPD34.det); UPD34.caseId = caseId; UPD34.base = base;
   $('#sMsg').textContent = ''; $('#u34Go').disabled = false; render34();
 }
 const thumb34 = (sp, b) => sp && sp.crop ? `<img class="u34-sp" src="${sp.crop}" alt="">` : b && b.spineImg ? `<img class="u34-sp" src="${spineURL(b)}" alt="">` : `<span class="u34-sp sw" style="background:${b ? colOf(b) : '#ccc'}"></span>`;
 const where34 = b => { const c = cases.find(x => x.id === b.caseId); return c ? `<span data-no-i18n>${esc(c.name)}</span> <span>· ét. ${b.row || 1}, pos. ${b.position || '?'}</span>` : '<span>non rangé</span>'; };
 function render34() {
   const R = UPD34.res, box = $('#u34Res'); if (!R || !box) return;
+  const nRang = Math.max(1, ...UPD34.det.map(d => d.rang || 1)), last = UPD34.base + nRang - 1;
+  const target = `<div class="u34-target"><b>Appliquer sur</b><select class="fld" id="u34Case2">${cases.map(c => `<option data-no-i18n value="${c.id}" ${c.id === UPD34.caseId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
+    <span>${nRang > 1 ? 'étagères' : 'étagère'}</span><input class="fld" id="u34Row2" type="number" min="1" max="15" value="${UPD34.base}"><span>${nRang > 1 ? `à ${last}` : ''}</span>
+    <small class="hint">Mauvais meuble ou mauvaise étagère ? Changez-les ici : la comparaison se refait sans relire la photo.</small></div>`;
   const nNew = R.fresh.filter(d => d.title).length, nUnk = R.fresh.length - nNew;
-  box.innerHTML = `<div class="u34-sum"><b>${UPD34.det.length} livre(s) sur la photo</b> · <span class="ok">${R.ok.length} à leur place</span> · <span class="mv">${R.moved.length} déplacé(s)</span> · <span class="nw">${nNew} nouveau(x)</span>${nUnk ? ` · <span>${nUnk} non reconnu(s)</span>` : ''} · <span class="ab">${R.absent.length} absent(s)</span></div>
+  box.innerHTML = target + `<div class="u34-sum"><b>${UPD34.det.length} livre(s) sur la photo</b> · <span class="ok">${R.ok.length} à leur place</span> · <span class="mv">${R.moved.length} déplacé(s)</span> · <span class="nw">${nNew} nouveau(x)</span>${nUnk ? ` · <span>${nUnk} non reconnu(s)</span>` : ''} · <span class="ab">${R.absent.length} absent(s)</span></div>
     ${R.moved.length ? `<details class="u34-sec" open><summary>Livres déplacés <span class="badge">${R.moved.length}</span></summary>
       <label class="hint u34-opt"><input type="checkbox" id="u34Order" checked> Ranger ces livres comme sur la photo</label>
       ${R.moved.map(d => `<div class="u34-row">${thumb34(d.sp, d.match)}<span><b data-no-i18n>${esc(dispTitle(d.match))}</b><small>${where34(d.match)} <span>→ étagère ${d.row}</span></small></span></div>`).join('')}</details>` : ''}
@@ -120,7 +124,13 @@ function render34() {
     <div class="btns"><button class="btn p" id="u34Apply">Appliquer</button></div><p class="hint" id="u34Msg"></p>`}`;
   box.querySelectorAll('[data-u34t]').forEach(inp => inp.oninput = () => { const d = R.fresh[+inp.dataset.u34t]; d.title = inp.value.trim(); const c = box.querySelector(`[data-u34new="${inp.dataset.u34t}"]`); if (c && d.title) c.checked = true; });
   if ($('#u34Apply')) $('#u34Apply').onclick = apply34;
+  $('#u34Case2').onchange = $('#u34Row2').onchange = () => retarget34($('#u34Case2').value, clamp(parseInt($('#u34Row2').value) || 1, 1, 15));
   box.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+function retarget34(caseId, base) {   // V2.35 : changer de meuble ou d'étagère sans relancer l'analyse
+  UPD34.det.forEach(d => { d.row = base + (d.rang || 1) - 1; delete d.match; });
+  UPD34.res = compare34(caseId, base, UPD34.det); UPD34.caseId = caseId; UPD34.base = base;
+  const c = $('#u34Case'), r = $('#u34Row'); if (c) c.value = caseId; if (r) r.value = base; render34();
 }
 async function apply34() {
   const R = UPD34.res, caseId = UPD34.caseId, box = $('#u34Res');
@@ -128,8 +138,11 @@ async function apply34() {
   const newSel = R.fresh.filter((d, i) => box.querySelector(`[data-u34new="${i}"]`)?.checked);
   const remove = new Set(R.absent.filter((b, i) => box.querySelector(`[data-u34abs="${i}"]`)?.checked).map(b => b.id));
   if (!newSel.length && !(order && R.moved.length) && !remove.size) { $('#u34Msg').textContent = 'Rien de sélectionné.'; return; }
+  const cName = cases.find(c => c.id === caseId)?.name || '?', r0 = Math.min(...R.rows), r1 = Math.max(...R.rows), nMv0 = order ? R.moved.length : 0;
+  if (!confirm(T28('Appliquer sur') + ` « ${cName} », ` + T28(r1 > r0 ? `étagères ${r0} à ${r1}` : `étagère ${r0}`) + ' ?' + '\n' + T28(`${newSel.length} ajout(s), ${nMv0} déplacement(s), ${remove.size} retrait(s).`) + '\n' + T28('Vous pourrez annuler avec ↶.'))) return;
   $('#u34Apply').disabled = true;
   if (!await safetyPoint18('Avant mise à jour d\'une étagère')) { $('#u34Apply').disabled = false; return; }
+  const snap = snapPos();   // V2.35 : pour ↶
   // 1. photos enregistrées comme un import (pour la tranche et le détourage des nouveaux livres)
   const imp = {id: 'imp_' + uid(), date: new Date().toISOString(), caseId, count: newSel.length, photos: [], hd: [], update34: true};
   const used = [...new Set(newSel.map(d => d.shot))];
@@ -164,7 +177,9 @@ async function apply34() {
   const comp = $('#u34Comp')?.checked;
   closeModal(); setView('lib'); curCase = caseId; localStorage.setItem('scanly_case', curCase); renderRoom(true); renderAll();
   const nMv = order ? R.moved.length : 0;
-  toast(`✔ Étagère mise à jour : ${made.length} ajouté(s), ${nMv} déplacé(s), ${remove.size} retiré(s)`, 6000);
+  UNDO.stack.push({label: 'Mise à jour de l\'étagère', at: Date.now(), s: snap, added: made.map(b => b.id)}); if (UNDO.stack.length > 25) UNDO.stack.shift(); UNDO.redo = []; persistUndo();
+  try { localStorage.setItem('scanly_upd34_last', JSON.stringify([...changed].map(b => b.id))); } catch (e) {}
+  showUndo(`✔ Étagère mise à jour : ${made.length} ajouté(s), ${nMv} déplacé(s), ${remove.size} retiré(s)`);
   if (comp && made.some(b => b.title)) bgComplete(made, true, !!cfg.key);
 }
 
@@ -178,3 +193,20 @@ function boot34() {
     $('#upd34Btn').onclick = e => { e.stopPropagation(); $$('#camBar .ddw.open').forEach(x => x.classList.remove('open')); openShelfUpdate34(curCase); }; }
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(boot34, 0)); else setTimeout(boot34, 0);
+
+/* ---------- V2.35 : ↶ annule aussi une mise à jour d'étagère (y compris les livres ajoutés) ---------- */
+{ const o = undo; undo = async function () {
+    const u = UNDO.stack[UNDO.stack.length - 1]; if (!u || !u.added || !u.added.length) return o.apply(this, arguments);
+    const ids = new Set(u.added), gone = books.filter(b => ids.has(b.id));
+    for (const b of gone) await DB.del('books', b.id); books = books.filter(b => !ids.has(b.id));
+    await o.apply(this, arguments); const r = UNDO.redo[UNDO.redo.length - 1]; if (r) r.addedBooks = gone; }; }
+{ const o = redo; redo = async function () {
+    const r = UNDO.redo[UNDO.redo.length - 1]; if (!r || !r.addedBooks) return o.apply(this, arguments);
+    const add = r.addedBooks.filter(b => !books.some(x => x.id === b.id)); if (add.length) { await DB.putMany('books', add); books.push(...add); }
+    await o.apply(this, arguments); const u = UNDO.stack[UNDO.stack.length - 1]; if (u) { u.added = r.addedBooks.map(b => b.id); persistUndo(); } }; }
+/* ---------- V2.35 : sélection en un geste des livres de la dernière mise à jour (pour les changer d'étagère ensemble) ---------- */
+function lastUpd35() { try { const ids = JSON.parse(localStorage.getItem('scanly_upd34_last') || '[]'); return ids.filter(id => books.some(b => b.id === id)); } catch (e) { return []; } }
+{ const o = renderSelBar; renderSelBar = function () { o.apply(this, arguments); const bar = $('#selBar'), ids = lastUpd35();
+    if (!bar || !bar.classList.contains('on') || !ids.length || $('#selUpd35')) return;
+    bar.insertAdjacentHTML('beforeend', `<button class="btn s sm" id="selUpd35" title="Sélectionner les livres ajoutés ou déplacés par la dernière mise à jour d'étagère">Dernière mise à jour (${ids.length})</button>`);
+    $('#selUpd35').onclick = () => { ids.forEach(id => SEL.add(id)); renderRoom(); if (typeof renderList === 'function') renderList(); }; }; }

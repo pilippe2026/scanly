@@ -178,7 +178,7 @@ function showList33(L0, notes, src, direct) {
     <div class="li33-all"><button class="lnk" id="li33All">Tout cocher</button> · <button class="lnk" id="li33None">Tout décocher</button></div>
     <div class="li33-list">${L.map((b, i) => `<label class="li33-row${b.dup33 ? ' dup' : ''}${b.conf33 != null && b.conf33 < .5 ? ' low' : ''}"><input type="checkbox" data-li33="${i}" ${b.dup33 ? '' : 'checked'}>
       <span data-no-i18n><b>${esc(b.title)}</b>${b.volume ? ` <i>t.${esc(b.volume)}</i>` : ''}${b.author ? `<br><small>${esc(b.author)}${b.publisher ? ' · ' + esc(b.publisher) : ''}</small>` : ''}</span>${b.dup33 ? '<em class="li33-tag">déjà là</em>' : b.toRead ? '<em class="li33-tag w">souhait</em>' : ''}</label>`).join('')}</div>
-    <label class="l">Ranger dans</label><select class="fld" id="li33Case"><option value="">Non rangé (catalogue)</option>${cases.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>
+    <label class="l">Ranger dans</label><select class="fld" id="li33Case"><option value="">Non rangé (catalogue)</option>${cases.map(c => `<option data-no-i18n value="${c.id}">${esc(c.name)}</option>`).join('')}</select>
     ${wishN ? `<label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="li33Wish" checked> Mettre les ${wishN} livre(s) marqué(s) « souhait » dans la liste de souhaits</label>` : ''}
     <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="li33Cov" checked> Chercher ensuite les couvertures</label>
     <div class="btns"><button class="btn p" id="li33Go"></button></div></div>`;
