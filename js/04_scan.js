@@ -363,7 +363,8 @@ function openAI() {
   $('.sugg').onclick = e => { if (e.target.id === 'aiTts') { const on = !ttsOn(); localStorage.setItem('scanly_tts', on ? '1' : '0'); e.target.textContent = on ? 'Lecture vocale : oui' : 'Lecture vocale : non'; if (!on && window.speechSynthesis) speechSynthesis.cancel(); return; }
     const c = e.target.closest('.chip'); if (c) { $('#aiQ').value = c.textContent; ask(); } };
   $('#aiMic').onclick = () => listen($('#aiMic'), t => { $('#aiQ').value = t; ask(true); });
-  $('#dBody').onclick = e => { const h = e.target.closest('[data-hl]'); if (h) highlightIds(h.dataset.hl.split(',')); };
+  $('#dBody').onclick = e => { const h = e.target.closest('[data-hl]'); if (h) highlightIds(h.dataset.hl.split(','));
+    const rt = e.target.closest('[data-retry42]'); if (rt) { $('#aiQ').value = rt.dataset.retry42; rt.disabled = true; ask(); } };
   $('#aiSend').onclick = () => ask(); $('#aiQ').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } };
   $('#aiQ').focus(); $('#dBody').scrollTop = 1e6;
 }
@@ -386,7 +387,7 @@ ${catalog() || '(vide)'}`;
     ids = m ? [...new Set(m[1].split(/[\s,;]+/).map(s => s.replace(/[\[\]]/g, '')).filter(id => books.some(b => b.id === id)))] : [];
     text = a.replace(/\n?\s*SCANLY_IDS\s*:[^\n]*\s*$/i, '').trim();
     html = md(text) + (ids.length ? `<button class="btn g sm" data-hl="${ids.join(',')}" style="margin-top:8px">Voir dans la pièce (${ids.length})</button>` : '');
-  } catch (e) { html = esc(e.message); }
+  } catch (e) { html = `<b>${T28('L’assistant n’a pas pu répondre')}</b> : ${esc(e.message)}<br><button type="button" class="btn s sm" data-retry42="${esc(q)}" style="margin-top:8px">↻ ${T28('Réessayer')}</button>`; } // V2.42
   const p = $('#pend'); if (p) { p.innerHTML = html; p.removeAttribute('id'); }
   chatHTML = $('#chat') ? $('#chat').innerHTML : chatHTML; if ($('#dBody')) $('#dBody').scrollTop = 1e6;
   if (text && (voice || ttsOn())) speak(text);

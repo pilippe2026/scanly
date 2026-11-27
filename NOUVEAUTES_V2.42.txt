@@ -1,0 +1,19 @@
+SCANEBOOK V2.42 - STABILITÉ SUR iPHONE ET ASSISTANT IA
+Base exclusive : SCANEBOOK V2.41.
+
+Correction du message Safari « Un problème récurrent est survenu » sur iPhone :
+- Le voile sombre du guide utilisait une ombre géante qui demandait énormément de mémoire à
+  Safari. Il est remplacé par quatre panneaux légers autour de l'élément mis en lumière.
+- Le zoom de la pièce 3D est limité pendant le guide (moins de mémoire avec une grande
+  bibliothèque).
+- Garde-fou : si la page se ferme pendant le guide, il n'est plus proposé automatiquement à
+  l'ouverture suivante (il reste accessible avec le bouton « ? »).
+- Vos livres, meubles et réglages ne sont pas touchés.
+
+Assistant IA :
+- Bouton Assistant IA bien visible, juste à droite de la loupe, sur tous les écrans
+  (iPhone, iPad, Mac, PC).
+- En cas d'erreur, un message clair indique la raison et un bouton « Réessayer » relance la
+  question.
+- Le guide présente maintenant l'assistant IA.
+

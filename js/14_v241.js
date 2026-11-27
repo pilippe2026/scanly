@@ -27,6 +27,7 @@ function steps41() {
     {t: 'Le décor', x: 'Changez l’ambiance de la pièce : salon, loft, grande bibliothèque…', sel: '#themeBar'},
     {t: 'Ajouter des livres', x: 'Photographiez une étagère : SCANEBOOK reconnaît les tranches. Vous pouvez aussi importer des photos, scanner des codes-barres, saisir un livre ou importer une liste.', sel: ['#tabs29 [data-tab="add"]', '#hScan', '#fabCam', '.fab']},
     {t: 'Rechercher', x: 'Un titre, un auteur, une série… La pièce montre aussitôt où se trouve le livre.', sel: '.hsearch'},
+    {t: 'Assistant IA', x: 'Posez une question sur votre bibliothèque : recommandations, tomes manquants, où se trouve un livre… L’assistant peut ensuite montrer les livres dans la pièce.', sel: '#hAI'},
     {t: 'Les vues', x: 'Passez de la pièce 3D au catalogue, à la liste, aux séries ou au tableau de bord.', sel: ['#viewCompact19', '#viewSeg']},
     {t: 'Annuler, zoomer, ranger', x: '↶ annule, ↷ rétablit. « Comme sur les photos » remet chaque livre à sa place d’origine.', sel: '#camBar'},
     {t: 'Profil et paramètres', x: 'Langue, clé IA, synchronisation entre appareils et sauvegardes.', sel: ['#tabs29 [data-tab="me"]', '#hSet', '#hMenu']},
@@ -36,7 +37,7 @@ function steps41() {
 function ui41() {
   let o = $('#tuto41'); if (o) return o;
   o = document.createElement('div'); o.id = 'tuto41'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true');
-  o.innerHTML = `<div class="t41-hole"></div><div class="t41-card" tabindex="-1"><div class="t41-top"><span class="t41-n"></span><button type="button" class="t41-x" data-act41="close" aria-label="${T28('Fermer le guide')}">×</button></div>
+  o.innerHTML = `<div class="t41-sh" data-s="t"></div><div class="t41-sh" data-s="b"></div><div class="t41-sh" data-s="l"></div><div class="t41-sh" data-s="r"></div><div class="t41-hole"></div><div class="t41-card" tabindex="-1"><div class="t41-top"><span class="t41-n"></span><button type="button" class="t41-x" data-act41="close" aria-label="${T28('Fermer le guide')}">×</button></div>
     <h3 class="t41-t"></h3><p class="t41-x2"></p>
     <div class="t41-btns"><button type="button" class="btn s sm" id="t41A"></button><button type="button" class="btn g sm" id="t41B"></button></div>
     <label class="t41-off"><input type="checkbox" id="t41Off"> <span>${T28('Ne plus proposer ce guide à l’ouverture')}</span></label></div>`;
@@ -54,10 +55,12 @@ function restoreView41() { const v = TUTO41.view; if (!v) return; TUTO41.view = 
   try { applyView(); applyCam(); } catch (e) {} }
 function place41(rect, pad) {
   const o = $('#tuto41'), hole = o.querySelector('.t41-hole'), card = o.querySelector('.t41-card'), W = innerWidth, H = innerHeight, m = 12;
-  if (!rect) { hole.style.cssText = `left:${W / 2}px;top:${H / 2}px;width:0;height:0;border-radius:50%`; o.classList.add('t41-center'); card.style.left = card.style.top = ''; return; }
+  const sh = (k, l, t, w, h) => { const e = o.querySelector(`.t41-sh[data-s="${k}"]`); if (e) e.style.cssText = `left:${l}px;top:${t}px;width:${Math.max(0, w)}px;height:${Math.max(0, h)}px`; };
+  if (!rect) { hole.style.cssText = 'display:none'; sh('t', 0, 0, W, H); sh('b', 0, H, W, 0); sh('l', 0, 0, 0, 0); sh('r', 0, 0, 0, 0); o.classList.add('t41-center'); card.style.left = card.style.top = ''; return; }
   o.classList.remove('t41-center');
   const x = Math.max(4, rect.left - pad), y = Math.max(4, rect.top - pad), w = Math.min(W - 8, rect.right + pad) - x, h = Math.min(H - 8, rect.bottom + pad) - y;
   hole.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${Math.min(18, h / 2)}px`;
+  sh('t', 0, 0, W, y); sh('b', 0, y + h, W, H - y - h); sh('l', 0, y, x, h); sh('r', x + w, y, W - x - w, h);
   const cw = Math.min(360, W - 2 * m); card.style.width = cw + 'px'; const ch = card.offsetHeight || 200;
   let top = y + h + m >= H - ch - m ? y - ch - m : y + h + m; if (top < m) top = Math.max(m, Math.min(H - ch - m, y + h + m));
   if (top + ch > H - m && y - ch - m < m) top = Math.max(m, (H - ch) / 2); // élément très grand : carte centrée
@@ -78,7 +81,7 @@ async function go41(i) {
     // zoom réel de la pièce sur le détail (premiers livres de l'étagère 1, ou le rond et sa plaquette)
     if (!TUTO41.view) TUTO41.view = {...VIEW, cam: CAM.view, camLS: localStorage.getItem('scanly_cam')};
     try { const g = $('#unit .rowgrp'), els = s.grip ? [...(g ? g.querySelectorAll('.book') : [])].slice(0, 3) : [...$$('#unit .book')].slice(0, 6);
-      const box = stageBox(els); if (s.grip) { box.x0 -= 90; box.y1 += 40; } zoomToBox(box, .8, s.grip ? .45 : .5); applyCam(); } catch (e) { console.warn('SCANEBOOK guide', e); }
+      const box = stageBox(els); if (s.grip) { box.x0 -= 90; box.y1 += 40; } zoomToBox(box, .8, s.grip ? .45 : .5); if (VIEW.z > 3) { VIEW.z = 3; const sc = VIEW.k * 3; VIEW.px = -((box.x0 + box.x1) / 2 - 768 * VIEW.R) * sc; VIEW.py = -((box.y0 + box.y1) / 2 - 512 * VIEW.R) * sc; applyView(); } applyCam(); } catch (e) { console.warn('SCANEBOOK guide', e); }
     await new Promise(r => setTimeout(r, 420)); el = vis41(s.sel);
     // petit écran : on dézoome par paliers jusqu'à voir le rond en entier
     for (let k = 0; s.grip && k < 6; k++) { const gr = el && el.getBoundingClientRect(); if (gr && gr.left >= 4 && gr.right <= innerWidth - 4) break;
@@ -99,18 +102,24 @@ async function go41(i) {
   }
   o.classList.add('on'); card.focus({preventScroll: true});
 }
-function startTuto41() {
+function running41(on) { try { if (on) sessionStorage.setItem('scanly_tuto41_run', '1'); else sessionStorage.removeItem('scanly_tuto41_run'); localStorage.setItem('scanly_tuto41_run', on ? String(Date.now()) : ''); } catch (e) {} }
+function startTuto41() { running41(true);
   if ($('#modal')?.classList.contains('on')) try { closeModal(); } catch (e) {}
   if (document.body.classList.contains('search29')) $('#qClose29')?.click();
   if (!$('#v-lib')?.classList.contains('on')) try { setView('lib'); } catch (e) {}
   TUTO41.steps = steps41(); TUTO41.done = tutoPref41() === 'done'; go41(1);
 }
-function proposeTuto41() { TUTO41.steps = steps41(); TUTO41.done = false; go41(0); }
-function endTuto41(finished) {
+function proposeTuto41() { running41(true); TUTO41.steps = steps41(); TUTO41.done = false; go41(0); }
+function endTuto41(finished) { running41(false);
   unscale41(); restoreView41(); const o = $('#tuto41'); if (o) o.classList.remove('on');
   if (finished && tutoPref41() !== 'off') { tutoSet41('done'); TUTO41.done = true; }
 }
-function initTuto41() {
+function initAI42() {
+  const ai = $('#hAI'), hs = $('header .hsearch'); if (!ai || !hs) return;
+  if (hs.nextElementSibling !== ai) hs.after(ai); // juste à droite de la loupe / de la barre de recherche
+  ai.classList.add('ai42'); ai.title = 'Assistant IA'; ai.setAttribute('aria-label', 'Assistant IA');
+}
+function initTuto41() { try { initAI42(); } catch (e) { console.warn('SCANEBOOK assistant', e); }
   if (!$('#hHelp41')) { const b = document.createElement('button'); b.type = 'button'; b.id = 'hHelp41'; b.className = 'hbtn help41'; b.title = 'Guide de SCANEBOOK'; b.setAttribute('aria-label', 'Guide de SCANEBOOK'); b.textContent = '?';
     const r = $('header .hright'); if (r) r.insertBefore(b, $('#hSync') || r.firstChild); b.onclick = e => { e.stopPropagation(); startTuto41(); }; }
   document.addEventListener('keydown', e => { const o = $('#tuto41'); if (!o || !o.classList.contains('on')) return;
@@ -118,6 +127,7 @@ function initTuto41() {
     else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); go41(TUTO41.i + 1); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); go41(TUTO41.i - 1); } }, true);
   addEventListener('resize', () => { const o = $('#tuto41'); if (o && o.classList.contains('on')) { const i = TUTO41.i; setTimeout(() => go41(i), 250); } });
-  if (!tutoPref41()) setTimeout(() => { if (tutoPref41() || $('#modal')?.classList.contains('on') || $('#tuto41')?.classList.contains('on')) return; proposeTuto41(); }, 1600);
+  try { if (localStorage.getItem('scanly_tuto41_run')) { localStorage.setItem('scanly_tuto41_run', ''); if (!tutoPref41()) tutoSet41('done'); } } catch (e) {} // fermé pendant le guide : on ne le repropose pas
+  if (!tutoPref41()) setTimeout(() => { if (tutoPref41() || $('#modal')?.classList.contains('on') || $('#tuto41')?.classList.contains('on')) return; proposeTuto41(); }, 2500);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initTuto41, 300)); else setTimeout(initTuto41, 300);
