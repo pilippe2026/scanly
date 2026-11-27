@@ -799,3 +799,26 @@ html[data-mode29=dark] .li33-row small{color:#a3b2cc}
 .u34-sp{flex:none;width:22px;height:64px;object-fit:cover;border-radius:3px;display:inline-block;background:#ccc}
 html[data-mode29=dark] .u34-row small{color:#a3b2cc}
 html[data-mode29=dark] .u34-sum .ok{color:#7fd08c}html[data-mode29=dark] .u34-sum .mv{color:#f0b35a}html[data-mode29=dark] .u34-sum .nw{color:#8fb6f0}html[data-mode29=dark] .u34-sum .ab{color:#f08c9a}
+
+/* V2.41 : didacticiel intégré (halo + zoom sur le détail) et bouton « ? » */
+.hbtn.help41{display:flex!important;justify-content:center;min-width:40px;font:700 18px/1 var(--fB);padding:8px 0;border-radius:50%;width:40px;height:40px;border-color:var(--gold);color:var(--gold)}
+.hbtn.help41:hover{background:var(--gold);color:var(--navy)}
+#tuto41{position:fixed;inset:0;z-index:1000;display:none}
+#tuto41.on{display:block}
+.t41-hole{position:fixed;border-radius:14px;box-shadow:0 0 0 200vmax rgba(5,12,30,.72),0 0 0 3px var(--gold),0 0 26px 6px rgba(212,175,124,.55);transition:all .38s cubic-bezier(.2,.8,.3,1);pointer-events:none}
+#tuto41.t41-center .t41-hole{box-shadow:0 0 0 200vmax rgba(5,12,30,.78)}
+.t41-card{position:fixed;width:min(360px,calc(100vw - 24px));box-sizing:border-box;background:var(--cream);color:var(--navy);border-radius:16px;padding:14px 16px 12px;box-shadow:0 18px 48px rgba(0,0,0,.45);transition:top .38s cubic-bezier(.2,.8,.3,1),left .38s cubic-bezier(.2,.8,.3,1);outline:none}
+#tuto41.t41-center .t41-card{left:50%!important;top:50%!important;transform:translate(-50%,-50%)}
+.t41-top{display:flex;justify-content:space-between;align-items:center;min-height:20px}
+.t41-n{font:600 12px var(--fB);color:var(--gold2,#a8854f);letter-spacing:.5px}
+.t41-x{background:none;border:0;font-size:24px;line-height:1;color:var(--navy);cursor:pointer;padding:0 4px;opacity:.7}
+.t41-t{margin:2px 0 6px;font:600 19px/1.2 "Outfit",var(--fT)}
+.t41-x2{margin:0 0 12px;font:14px/1.5 var(--fB)}
+.t41-btns{display:flex;justify-content:space-between;gap:10px}
+.t41-btns .btn{flex:1;min-height:40px}
+.t41-off{display:flex;align-items:center;gap:8px;margin-top:10px;font:13px var(--fB);color:#55627a;cursor:pointer}
+.t41-off input{accent-color:var(--navy);width:18px;height:18px}
+.t41-zoom{position:relative}
+html[data-mode29="dark"] .t41-card{background:#16233d;color:#eef1f6}
+html[data-mode29="dark"] .t41-x{color:#eef1f6}html[data-mode29="dark"] .t41-off{color:#aab4c6}
+@media (prefers-reduced-motion:reduce){.t41-hole,.t41-card,.t41-zoom{transition:none!important}}
