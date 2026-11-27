@@ -528,8 +528,9 @@ async function restoreOrigin() {
   }
 
   /* ---------- 2. découpage d'une étagère (bande) ---------- */
+  const HK44 = 420, MW44 = .018, SEG44 = true, TF44 = .08, TP44 = .4, EDGE44 = .18, SPL44 = 1.5;
   function segmentBand(img, B) {
-    const hb = B.y1 - B.y0, k = 260 / hb, wk = Math.max(8, Math.round((B.x1 - B.x0) * k)), hk = 260;
+    const hb = B.y1 - B.y0, k = HK44 / hb, wk = Math.max(8, Math.round((B.x1 - B.x0) * k)), hk = HK44;
     const cv = document.createElement('canvas'); cv.width = wk; cv.height = hk; const cx = cv.getContext('2d'); cx.imageSmoothingQuality = 'high';
     cx.drawImage(img, B.x0, B.y0, B.x1 - B.x0, hb, 0, 0, wk, hk);
     const {g, gx, gy} = sobelOf(cv), ya = Math.round(hk * .45), yb = Math.round(hk * .93), ym = (ya + yb) / 2;
@@ -549,13 +550,21 @@ async function restoreOrigin() {
       for (let y = ya; y < yb; y += 2) { const xs = Math.round(x + (y - ym) * tn); if (xs < 1 || xs >= wk - 1) continue; n++; const i = y * wk + xs, v = Math.abs(gx[i]);
         if (v > T && v > 1.2 * Math.abs(gy[i])) c++; }
       P[x] = n ? c / n : 0; }
+    if (SEG44) { // V2.44 : bord présent à (presque) toutes les hauteurs, même faible (sillon entre deux BD d'une même série)
+      const V = new Float64Array(wk), D = new Float64Array(wk), buf = [], bufD = [];
+      for (let x = 2; x < wk - 2; x++) { const tn = tanX[x]; buf.length = 0; bufD.length = 0;
+        for (let y = ya; y < yb; y += 2) { const xs = Math.round(x + (y - ym) * tn); if (xs < 3 || xs >= wk - 3) continue; const o = y * wk;
+          let v = 0; for (let j = -1; j <= 1; j++) { const i = o + xs + j, a = Math.abs(gx[i]); if (a > 1.2 * Math.abs(gy[i]) && a > v) v = a; } buf.push(v);
+          bufD.push(Math.max(0, (g[o + xs - 2] + g[o + xs + 2]) / 2 - g[o + xs])); }
+        if (buf.length) { buf.sort((p, q) => p - q); bufD.sort((p, q) => p - q); V[x] = buf[Math.floor(buf.length * .35)]; D[x] = bufD[Math.floor(bufD.length * .35)]; } }
+      const nv = pct(V, .97) || 1, nd = pct(D, .97) || 1; for (let x = 0; x < wk; x++) P[x] = Math.min(1.2, V[x] / nv) * .75 + Math.min(1.2, D[x] / nd) * .25; }
     const Ps = new Float64Array(wk); for (let x = 1; x < wk - 1; x++) Ps[x] = (P[x - 1] + 2 * P[x] + P[x + 1]) / 4;
-    const minW = Math.max(3, Math.round(hk * .03)), thr = Math.max(.2, pct(Ps, .6)), cuts = [];
+    const minW = Math.max(3, Math.round(hk * MW44)), thr = SEG44 ? Math.max(TF44, pct(Ps, TP44)) : Math.max(.2, pct(Ps, .6)), cuts = [];
     for (let x = 2; x < wk - 2; x++) { if (Ps[x] <= thr) continue; let mx = 0; for (let j = Math.max(0, x - (minW >> 1)); j <= Math.min(wk - 1, x + (minW >> 1)); j++) mx = Math.max(mx, Ps[j]);
       if (Ps[x] < mx) continue; if (!cuts.length || x - cuts[cuts.length - 1] >= minW) cuts.push(x); else if (Ps[x] > Ps[cuts[cuts.length - 1]]) cuts[cuts.length - 1] = x; }
     for (let pass = 0; pass < 3; pass++) { const ws = cuts.slice(1).map((c, i) => c - cuts[i]), add = [];
       for (let i = 0; i < ws.length; i++) { const loc = med(ws.slice(Math.max(0, i - 4), i + 5));
-        if (ws[i] > loc * 1.75 && ws[i] > minW * 2.4) { let bx = -1, bv = .1; for (let x = cuts[i] + Math.round(minW * 1.1); x <= cuts[i + 1] - Math.round(minW * 1.1); x++) if (Ps[x] > bv && Ps[x] >= Ps[x - 1] && Ps[x] >= Ps[x + 1]) { bv = Ps[x]; bx = x; }
+        if (ws[i] > loc * (SEG44 ? SPL44 : 1.75) && ws[i] > minW * 2.4) { let bx = -1, bv = .1; for (let x = cuts[i] + Math.round(minW * 1.1); x <= cuts[i + 1] - Math.round(minW * 1.1); x++) if (Ps[x] > bv && Ps[x] >= Ps[x - 1] && Ps[x] >= Ps[x + 1]) { bv = Ps[x]; bx = x; }
           if (bx > 0) add.push(bx); } }
       if (!add.length) break; cuts.push(...add); cuts.sort((p, q) => p - q); }
     const out = [], toImg = (x, y) => [B.x0 + x / k, B.y0 + y / k];
@@ -627,7 +636,8 @@ JSON : [{"k":1,"livre":true,"suite":false,"titre":"…","auteur":"…","serie":"
     const L = S.filter(s => !s.notBook && !(s.nb > 1) && s.sp && s.sp.hpx > 20), ratio = s => s.sp.wpx / s.sp.hpx;
     if (!L.length) return;
     const rs = L.map(ratio).sort((a, b) => a - b), mr = rs[rs.length >> 1] || .1;
-    const cand = L.filter(s => ratio(s) > Math.max(.15, mr * 1.7) && ratio(s) < 1.1);   // V2.33 : 1.9 -> 1.7
+    const locW = s => { const i = S.indexOf(s), W = S.slice(Math.max(0, i - 6), i + 7).filter(o => o !== s && o.row === s.row && !o.notBook && o.sp).map(o => o.sp.wpx); return W.length >= 3 ? med(W) : 0; };
+    const cand = L.filter(s => ratio(s) < 1.1 && (ratio(s) > Math.max(.15, mr * 1.7) || (ratio(s) > .045 && locW(s) && s.sp.wpx > locW(s) * 1.65)));   // V2.33 : 1.9 -> 1.7 ; V2.44 : aussi deux BD fines collées (largeur double de ses voisines)
     if (!cand.length) return;
     const pics = cand.map(s => warp(img, s.Qr, 560));
     const chunks = []; for (let i = 0; i < cand.length; i += 6) chunks.push(cand.map((s, k) => [s, pics[k]]).slice(i, i + 6));
@@ -818,9 +828,12 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         RAW[r] = merged;
         console.log(`SCANEBOOK 1.9.6 : étagère ${r + 1} : ${L.length} bandes -> ${merged.length} livres après regroupement`);
       }
+      const GM44 = new Map();   // V2.44 : un titre de la lecture d'ensemble ne sert d'indice qu'à UNE tranche (la plus proche), sinon deux livres voisins reçoivent le même titre et sont recollés
+      bands.forEach((B, r) => { const pairs = []; RAW[r].forEach(s => { const x0 = Math.min(s.Q[0][0], s.Q[3][0]) / W, x1 = Math.max(s.Q[1][0], s.Q[2][0]) / W;
+        (B.G || []).filter(d => d.t).forEach(d => { const dist = Math.abs((d.x0 + d.x1) / 2 - s.cx / W); if (dist < (x1 - x0) * .9 + .004) pairs.push({s, d, dist}); }); });
+        const us = new Set(), ud = new Set(); pairs.sort((p, q) => p.dist - q.dist).forEach(o => { if (us.has(o.s) || ud.has(o.d)) return; us.add(o.s); ud.add(o.d); GM44.set(o.s, o); }); });
       bands.forEach((B, r) => RAW[r].forEach(s => {
-        const x0 = Math.min(s.Q[0][0], s.Q[3][0]) / W, x1 = Math.max(s.Q[1][0], s.Q[2][0]) / W;
-        const gm = (B.G || []).filter(d => d.t).map(d => ({d, dist: Math.abs((d.x0 + d.x1) / 2 - s.cx / W)})).filter(o => o.dist < (x1 - x0) * .9 + .004).sort((p, q) => p.dist - q.dist)[0];
+        const gm = GM44.get(s);
         if (gm && s.cand.length) { const gy = gm.d.y0 * H, c = s.cand.reduce((p, q) => Math.abs(q.y - gy) < Math.abs(p.y - gy) ? q : p); if (Math.abs(c.y - gy) < (B.y1 - B.y0) * .25) s.Q = s.topAt(c.y); }
         if (s.spineQ) s.Q = s.spineQ;   // livre vu de biais : on garde la tranche (dos) pour l'étagère
         const sp = warp(img, s.Q), rd = warp(img, s.Qr, scanMode() === 'fast' ? Math.min(460, Math.max(300, sp.hpx * 1.2)) : Math.min(700, Math.max(380, sp.hpx * 1.6)));
@@ -850,7 +863,8 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
       const M = [], mwRow = {};
       S2.filter(s => !s.notBook).forEach(s => { (mwRow[s.row] = mwRow[s.row] || []).push(s.wImg || 0); });
       Object.keys(mwRow).forEach(r => { mwRow[r] = med(mwRow[r].filter(Boolean)); });
-      const thinPair = (p, s) => { const m = mwRow[s.row]; return !m || ((p.wImg || 0) + (s.wImg || 0)) <= m * 1.35; };   // V2.33
+      const NB44 = S2.filter(s => !s.notBook), locM44 = s => { const i = NB44.indexOf(s), L = NB44.slice(Math.max(0, i - 5), i + 6).filter(o => o.row === s.row && o.wImg).map(o => o.wImg); return L.length >= 4 ? med(L) : 0; };
+      const thinPair = (p, s) => { const m = Math.min(mwRow[s.row] || Infinity, locM44(s) || Infinity); return !isFinite(m) || ((p.wImg || 0) + (s.wImg || 0)) <= m * 1.35; };   // V2.33 ; V2.44 : largeur des voisins proches (BD fines à côté de romans larges)
       S2.filter(s => !s.notBook).forEach(s => { const p = M[M.length - 1];
         if (p && p.row === s.row && ((s.cont && thinPair(p, s)) || (sameBook(p, s) && thinPair(p, s)))) { const ty = Math.min(p.Q[0][1], s.Q[1][1]); p.Q = [[p.Q[0][0], ty], [s.Q[1][0], ty], s.Q[2], p.Q[3]]; if (!p.t && s.t) Object.assign(p, {t: s.t, a: s.a, se: s.se, v: s.v, e: s.e, ty: s.ty, c: s.c}); p.Qr = [p.Qr[0], s.Qr[1], s.Qr[2], p.Qr[3]]; p.wImg = (p.wImg || 0) + (s.wImg || 0); p.merged = true; }
         else M.push({...s}); });
@@ -858,7 +872,11 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
       M.sort((p, q) => p.row - q.row || ((p.Q[0][0] + p.Q[1][0]) - (q.Q[0][0] + q.Q[1][0])));
       const pos = {}, rowMap = {}; [...new Set(M.map(s => s.row))].sort((p, q) => p - q).forEach((r, i) => { rowMap[r] = i + 1; });   // V2.33 : pas d'étagère vide
       setMsg(`Photo ${ii + 1}/${urls.length} : affinage du détourage…`); await sleep(10);
-      M.forEach(s => { s.Q0 = s.Q; if (!s.spineQ) s.Q = refineScanQuad20(img, s.Q); });
+      M.forEach(s => { s.Q0 = s.Q; if (s.spineQ) return; const q = refineScanQuad20(img, s.Q); if (q === s.Q) return;
+        // V2.44 : l'affinage ne doit pas déplacer un bord vers la tranche voisine (cadre décalé d'un demi-livre)
+        const w = Math.max(1, ((s.Q[1][0] - s.Q[0][0]) + (s.Q[2][0] - s.Q[3][0])) / 2), lim = w * EDGE44;
+        if ([0, 1, 2, 3].every(i => Math.abs(q[i][0] - s.Q[i][0]) <= lim)) s.Q = q;
+        else s.Q = s.Q.map((p, i) => [p[0], Math.abs(q[i][1] - p[1]) < w * 3 ? q[i][1] : p[1]]); });
       dedupe33(M);
       M.forEach(s => { const Qf = s.Q, refined = s.Q0 !== s.Q; const sp = s.merged || refined ? warp(img, s.Q) : s.sp, xs = s.Q.map(p => p[0]), ys = s.Q.map(p => p[1]);
         const box = [Math.min(...ys) / H, Math.min(...xs) / W, Math.max(...ys) / H, Math.max(...xs) / W].map(v => Math.round(CL(v * 1000, 0, 1000)));
