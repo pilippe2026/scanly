@@ -1,3 +1,15 @@
+SCANEBOOK V2.43 - ASSISTANT IA SANS PLANTAGE SUR iPHONE
+Base exclusive : SCANEBOOK V2.42.
+
+Correction du message Safari « Un problème récurrent est survenu » à l'ouverture de l'assistant IA :
+- Sur iPhone (et iPad en portrait), l'assistant s'ouvre en plein écran. La pièce 3D, cachée
+  derrière, est maintenant mise en pause pendant ce temps : Safari libère sa mémoire.
+  Elle revient intacte à la fermeture ou avec « Voir dans la pièce ».
+- Le clavier ne s'ouvre plus tout seul à l'ouverture de l'assistant sur écran tactile :
+  touchez la zone de saisie pour écrire, ou choisissez une suggestion.
+- Sur Mac et PC, rien ne change : la pièce reste visible à côté de l'assistant.
+- Vos livres, meubles et réglages ne sont pas touchés.
+
 SCANEBOOK V2.42 - STABILITÉ SUR iPHONE ET ASSISTANT IA
 Base exclusive : SCANEBOOK V2.41.
 
