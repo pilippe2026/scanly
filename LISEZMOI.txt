@@ -1,3 +1,18 @@
+SCANLY V2.34 - METTRE A JOUR UNE ETAGERE D'APRES UNE PHOTO
+Base exclusive : SCANLY V2.33.
+
+Ajouter › Mettre à jour une étagère (ou, dans la pièce, Outils › ⟳ Mettre à jour).
+Rephotographiez un meuble, ou seulement quelques étagères (1 à 4 photos, de gauche à droite).
+SCANLY compare la photo à votre bibliothèque et propose, à valider :
+- Livres déplacés : remis dans l'ordre de la photo. Seuls les livres qui ont vraiment bougé
+  sont listés, y compris ceux venus d'un autre meuble. Option « Ranger comme sur la photo ».
+- Nouveaux livres : ajoutés à leur vraie place, avec leur tranche et la photo d'origine.
+  Un dos illisible est proposé décoché, avec un champ pour saisir son titre.
+- Absents de la photo : laissés à leur place par défaut (prêtés, en lecture…).
+  Cochez ceux à retirer du meuble : ils restent dans la bibliothèque, « non rangés ».
+Seules les étagères photographiées sont concernées. Aucun livre n'est supprimé et un point
+de restauration est créé avant d'appliquer. Une photo identique affiche « Tout est déjà à jour ».
+
 SCANLY V2.33 - TRANCHES PLUS FIABLES ET IMPORT D'UNE LISTE DE LIVRES
 Base exclusive : SCANLY V2.32.
 
