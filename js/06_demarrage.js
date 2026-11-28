@@ -595,7 +595,7 @@ async function restoreOrigin() {
     // V2.47 : DÉCOUPAGE GUIDÉ PAR LA LECTURE D'ENSEMBLE. L'IA compte bien les livres mais place mal les bords ;
     // le découpage voit bien les bords mais se trompe sur le nombre (dessin continu, dos de même couleur, couverture vue de biais).
     // Quand l'IA a vu la plupart des livres de l'étagère : un cadre par livre de l'IA, chaque bord recalé sur le bord net le plus proche.
-    const segG = new Map(), gapEnd = new Set(), KX = v => CL(Math.round(v), 1, wk - 2); let gw46 = 0;
+    const segG = new Map(), gapEnd = new Map(), KX = v => CL(Math.round(v), 1, wk - 2); let gw46 = 0;
     if (SEG44 && GUIDE46) { const IW = img.naturalWidth, IH = img.naturalHeight;
       // boîtes de l'IA « redressées » : pour une tranche penchée, l'IA donne la boîte droite qui l'englobe (trop large) ;
       // on en déduit la vraie tranche à la hauteur de mesure ym
@@ -627,7 +627,7 @@ async function restoreOrigin() {
           let bj = -1, bv = NEG; for (let j = 0; j < nC; j++) if (F[j] > bv) { bv = F[j]; bj = j; }
           if (bj < 0) { pr.forEach(x => nc.push(Math.round(x))); return; }
           const sel = [bj]; for (let i = N - 1; i >= 0; i--) sel.unshift(BK[i][sel[0]]);
-          sel.forEach(j => nc.push(C[j].x)); for (let i = 0; i < N; i++) segG.set(KX(C[sel[i]].x), gr[i].d); gapEnd.add(KX(C[sel[N]].x)); });
+          sel.forEach(j => nc.push(C[j].x)); for (let i = 0; i < N; i++) segG.set(KX(C[sel[i]].x), gr[i].d); gapEnd.set(KX(C[sel[N]].x), Math.min(gr[N - 1].b - gr[N - 1].a, gi < groups.length - 1 ? groups[gi + 1][0].b - groups[gi + 1][0].a : Infinity)); });
         // un bord très net vu par le découpage entre deux bords choisis = un livre que l'IA a fusionné ou oublié : on le garde
         const SC = (window.W46 && window.W46.strong) || .25, srt = [...new Set(nc.map(KX))].sort((p, q) => p - q);
         for (let i = 0; i < srt.length - 1; i++) { const l = srt[i], r = srt[i + 1], ww = r - l;
@@ -650,8 +650,8 @@ async function restoreOrigin() {
     for (let i = 0; i < cuts.length - 1; i++) {
       const a = cuts[i], b = cuts[i + 1], wS = b - a; if (wS < (B.guided46 ? Math.max(3, minW * .6) : minW) || wS > hk * 1.2) continue;
       // V2.47 : interstice entre deux livres de l'IA (côté de couverture vu de biais, fond) : écarté s'il est étroit ;
-      // s'il a la largeur d'un livre, il est gardé à condition que la lecture des tranches y trouve un titre (livre oublié par l'IA)
-      const gap46 = B.guided46 && gapEnd.has(a) && !segG.has(a); if (gap46 && wS < gw46 * .7) continue;
+      // s'il a la largeur d'un livre, il est gardé sauf si la lecture des tranches n'y trouve aucun titre
+      const gap46 = B.guided46 && gapEnd.has(a) && !segG.has(a), gwl = gap46 ? Math.min(gw46, gapEnd.get(a)) : gw46; if (gap46 && wS < gwl * .7) continue;
       const tA = cutT.has(a) ? cutT.get(a) : tanX[a], tB = cutT.has(b) ? cutT.get(b) : tanX[b], xAt = (c, tn, y) => c + (y - ym) * tn;
       let e = 0, n = 0; for (let y = ya; y < yb; y += 2) for (let x = Math.round(a + wS * .2); x < b - wS * .2; x++) { const xs = Math.round(x + (y - ym) * (tA + tB) / 2); if (xs < 1 || xs >= wk - 1) continue; const j = y * wk + xs; e += Math.abs(gx[j]) + Math.abs(gy[j]); n++; }
       if (!n || e / n < 13) continue;   // V2.33 : 18 -> 13, les dos unis (peu de texte) ne sont plus écartés
@@ -672,7 +672,7 @@ async function restoreOrigin() {
           if (v < 6) continue; const r = mE(y - 14, y - 3) / (mE(y + 3, y + 14) + 3); if (r > 1.4) cb.push({y, v, sc: Math.min(4, r) * Math.sqrt(v)}); }
         // maxima locaux seulement
         for (let q = cb.length - 1; q >= 0; q--) if (cb.some(o => o !== cb[q] && Math.abs(o.y - cb[q].y) <= 3 && o.sc > cb[q].sc)) cb.splice(q, 1); }
-      pend.push({a, b, tA, tB, top, cand, mid, wS, cb, g: segG.get(a), gap46: gap46 && wS < gw46 * ((window.W46 && window.W46.gap) || 1.3)});
+      pend.push({a, b, tA, tB, top, cand, mid, wS, cb, g: segG.get(a), gap46: gap46 && wS < gwl * 1.3});
     }
     // V2.47 : bas de chaque livre = meilleur candidat, rendu cohérent avec les voisins (même planche, livres plus ou moins enfoncés)
     if (SEG44) { pend.forEach(o => { o.cb.sort((p, q) => q.sc - p.sc); o.b0 = o.cb.length ? o.cb[0].y : null; });
@@ -948,7 +948,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
       }));
       S.forEach((s, i) => { if (i && S[i - 1].row === s.row && S[i - 1].hint) s.prev = S[i - 1].hint; });
       await readSlices(S, n => setMsg(`Photo ${ii + 1}/${urls.length} : lecture des tranches ${n}/${S.length}…`));
-      S.forEach(s => { if (s.gap46 && !(s.ok && s.t && !s.notBook) && !(window.W46 && window.W46.keepgap)) s.notBook = true; });   // V2.47
+      S.forEach(s => { if (s.gap46 && s.ok && !s.t) s.notBook = true; });   // lue sans titre : côté de couverture ou fond (si la lecture a échoué, on garde le cadre)   // V2.47
       S.forEach(s => { if (!s.ok && s.g && s.g.t) Object.assign(s, {t: s.g.t, a: s.g.a, se: s.g.s, v: s.g.v, e: s.g.e, ty: s.g.ty, c: Math.min(.6, s.g.c || .6)}); });
       for (const s of S) if (s.nb > 1 && !s.notBook && s.read) s.nbCuts = await snapCuts(s.read, Array.from({length: s.nb - 1}, (_, j) => (j + 1) / s.nb));   // V2.33
       setMsg(`Photo ${ii + 1}/${urls.length} : contrôle des tranches larges…`);
