@@ -3,8 +3,8 @@ Base exclusive : SCANEBOOK V2.46.
 
 Testé sur votre photo d'étagère (48 BD annotées une à une à la main) :
 - Avec la V2.45, 72 % des cadres étaient à reprendre (décalés, trop hauts, deux livres dans un cadre, livre oublié).
-- Avec la V2.47 : 2 % quand l'IA situe bien les livres, 11 % en moyenne quand elle les situe mal
-  (10 essais où l'on décale volontairement ses boîtes de plus ou moins un tiers de largeur).
+- Avec la V2.47 : 4 % quand l'IA situe bien les livres, 11 à 15 % en moyenne quand elle les situe mal
+  (essais où l'on décale volontairement ses boîtes de plus ou moins un tiers de largeur).
 
 Ce qui change :
 - Optimisation automatique de la photo avant le découpage (sans rien faire de votre côté) :
@@ -19,8 +19,8 @@ Ce qui change :
 - La boîte de l'IA autour d'une tranche penchée est « redressée » (elle est plus large que le livre).
 - Haut et bas de chaque cadre : repris de l'IA quand la photo n'y montre aucun bord net
   (fini les cadres qui prennent le haut ou le bas de l'étagère).
-- Le côté d'une couverture vu de biais n'est plus pris pour un livre : un cadre entre deux
-  livres n'est gardé que si l'IA y lit un titre.
+- Le côté d'une couverture vu de biais n'est plus pris pour un livre : un cadre étroit entre
+  deux livres est écarté, et un cadre plus large n'est gardé que si l'IA y lit un titre.
 - Un bord très net vu sur la photo est toujours respecté, même si l'IA a fusionné deux livres.
 
 Limite honnête : l'IA réelle (Gemini) ne peut pas être appelée depuis mes tests ; elle est
