@@ -398,14 +398,14 @@ $('#unit').addEventListener('mousedown', e => {
   e.preventDefault(); e.stopPropagation();
   const i = g.dataset.grip.lastIndexOf('|'), cid = g.dataset.grip.slice(0, i), r = +g.dataset.grip.slice(i + 1);
   const grps = $$('#unit .rowgrp');
-  document.body.classList.add('dnd');
+  // V2.46 : le menu des meubles (dépôt vers un autre meuble) ne s'ouvre qu'une fois le glisser commencé
   sdrag = {cid, r, n: grps.length, y0: e.clientY, rowH: +$('#unit').dataset.rowh || 200, target: r, toCase: null, moved: false, grps};
   grps.forEach(x => x.classList.add('anim')); grps[r - 1].classList.remove('anim'); grps[r - 1].classList.add('lift');
   document.body.style.cursor = 'grabbing'; $('#tip').style.display = 'none';
 });
 window.addEventListener('mousemove', e => {
   if (!sdrag) return; const S = sdrag, dy = (e.clientY - S.y0) / (VIEW.k * VIEW.z);
-  if (Math.abs(dy) > 4) S.moved = true;
+  if (Math.abs(dy) > 4 && !S.moved) { S.moved = true; document.body.classList.add('dnd'); }
   S.target = clamp(S.r + Math.round(dy / S.rowH), 1, S.n);
   S.grps[S.r - 1].style.transform = `translateY(${dy}px) translateZ(30px)`;
   S.grps.forEach((g, k) => { const row = k + 1; if (row === S.r) return; let sh = 0;
@@ -419,7 +419,8 @@ window.addEventListener('mouseup', async () => {
   if (!sdrag) return; const S = sdrag; sdrag = null; document.body.style.cursor = ''; document.body.classList.remove('dnd');
   $$('#caseBar .dropok').forEach(x => x.classList.remove('dropok'));
   S.grps.forEach(g => { g.style.transform = ''; g.classList.remove('lift', 'anim'); });
-  if (!S.moved && !S.toCase) return; // V2.20 : un simple clic ouvre le menu de l'étagère
+  if (!S.moved && !S.toCase) { // V2.46 : un simple clic ouvre le menu de l'étagère ici même (le « click » n'arrivait pas, Mac)
+    justDragged = true; setTimeout(() => justDragged = false, 120); return openShelfMenu20(S.cid + '|' + S.r); }
   justDragged = true; setTimeout(() => justDragged = false, 80);
   const inRow = books.filter(b => caseOf(b) === S.cid && (b.row || 1) === S.r);
   if (S.toCase) {
