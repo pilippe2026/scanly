@@ -580,7 +580,11 @@ async function restoreOrigin() {
       V.forEach(([y, v]) => { if (v > bv) { bv = v; top = y; } });
       const cand = V.filter(([y, v], j) => v >= Math.max(12, bv * .4) && (!V[j - 1] || v >= V[j - 1][1]) && (!V[j + 1] || v >= V[j + 1][1])).map(([y, v]) => ({y: B.y0 + y / k, v}));
       if (bv < 12) top = 0;
-      const bot = hk - 1;
+      let bot = hk - 1;
+      if (SEG44) { // V2.45 : bas du livre (sinon la planche ou le sol clair entrent dans la vignette) : dernière marche nette de luminosité
+        const VB = []; for (let y = Math.round(hk * .62); y < hk - 6; y++) { let up = 0, dn = 0; for (let j = 1; j <= 5; j++) { up += RM[y - j]; dn += RM[y + j]; } VB.push([y, Math.abs(dn - up) / 5]); }
+        const mB = Math.max(0, ...VB.map(v => v[1]));
+        if (mB >= 10) { const L = VB.filter(([y, v], j) => v >= mB * .6 && (!VB[j - 1] || v >= VB[j - 1][1]) && (!VB[j + 1] || v >= VB[j + 1][1])); if (L.length) bot = Math.min(hk - 1, L[L.length - 1][0] + 1); } }
       const Q = [toImg(xAt(a, tA, top), top), toImg(xAt(b, tB, top), top), toImg(xAt(b, tB, bot), bot), toImg(xAt(a, tA, bot), bot)];
       const Qr = [toImg(xAt(a, tA, 0), 0), toImg(xAt(b, tB, 0), 0), Q[2], Q[3]];
       const topAt = yImg => { const y = CL((yImg - B.y0) * k, 0, hk * .6); return [toImg(xAt(a, tA, y), y), toImg(xAt(b, tB, y), y), Q[2], Q[3]]; };
@@ -604,7 +608,7 @@ async function restoreOrigin() {
     let cur = null; S.forEach(d => { const c = (d.y0 + d.y1) / 2; if (!cur || c - cur.c > mh * .6) { cur = {c, L: []}; rows.push(cur); } cur.L.push(d); cur.c = c; });
     return rows.map(r => { const y0 = pct(r.L.map(d => d.y0), .1), y1 = pct(r.L.map(d => d.y1), .85), hh = y1 - y0;
       return {x0: W * .005, x1: W * .995,   // V1.9.7 : toujours toute la largeur de la photo
-        y0: CL((y0 - hh * .12) * H, 0, H), y1: CL((y1 + hh * .04) * H, 0, H), G: r.L}; });
+        y0: CL((y0 - hh * .12) * H, 0, H), y1: CL((y1 + hh * (SEG44 ? .1 : .04)) * H, 0, H), G: r.L}; });
   }
 
   /* ---------- 3. lecture des tranches par lots ---------- */
@@ -636,8 +640,9 @@ JSON : [{"k":1,"livre":true,"suite":false,"titre":"…","auteur":"…","serie":"
     const L = S.filter(s => !s.notBook && !(s.nb > 1) && s.sp && s.sp.hpx > 20), ratio = s => s.sp.wpx / s.sp.hpx;
     if (!L.length) return;
     const rs = L.map(ratio).sort((a, b) => a - b), mr = rs[rs.length >> 1] || .1;
+    const p25r = {}; [...new Set(L.map(s => s.row))].forEach(r => { const R = L.filter(s => s.row === r).map(ratio).sort((a, b) => a - b); if (R.length >= 6) p25r[r] = R[Math.floor(R.length * .25)]; });
     const locW = s => { const i = S.indexOf(s), W = S.slice(Math.max(0, i - 6), i + 7).filter(o => o !== s && o.row === s.row && !o.notBook && o.sp).map(o => o.sp.wpx); return W.length >= 3 ? med(W) : 0; };
-    const cand = L.filter(s => ratio(s) < 1.1 && (ratio(s) > Math.max(.15, mr * 1.7) || (ratio(s) > .045 && locW(s) && s.sp.wpx > locW(s) * 1.65)));   // V2.33 : 1.9 -> 1.7 ; V2.44 : aussi deux BD fines collées (largeur double de ses voisines)
+    const cand = L.filter(s => ratio(s) < 1.1 && (ratio(s) > Math.max(.15, mr * 1.7) || (ratio(s) > .045 && locW(s) && s.sp.wpx > locW(s) * 1.65) || (ratio(s) > .05 && ratio(s) > (p25r[s.row] || 1) * 1.8)));   // V2.45 : deux fois plus large que les tranches fines de la même étagère   // V2.33 : 1.9 -> 1.7 ; V2.44 : aussi deux BD fines collées (largeur double de ses voisines)
     if (!cand.length) return;
     const pics = cand.map(s => warp(img, s.Qr, 560));
     const chunks = []; for (let i = 0; i < cand.length; i += 6) chunks.push(cand.map((s, k) => [s, pics[k]]).slice(i, i + 6));

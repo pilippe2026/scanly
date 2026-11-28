@@ -843,3 +843,11 @@ html[data-mode29="dark"] .t41-x{color:#eef1f6}html[data-mode29="dark"] .t41-off{
 
 /* V2.43 : pièce 3D en pause pendant l'assistant IA plein écran (mémoire Safari iPhone) */
 body.ai43 #stage{display:none!important}
+
+/* V2.45 : cadres de la vérification au contour réel de la tranche */
+.bbox:has(> svg.q45){border-color:transparent;box-shadow:none}
+.bbox svg.q45{position:absolute;inset:-2px;width:calc(100% + 4px);height:calc(100% + 4px);overflow:visible;pointer-events:none}
+.bbox svg.q45 polygon{fill:none;stroke:var(--gold);stroke-width:2px;vector-effect:non-scaling-stroke;paint-order:stroke}
+.bbox.unk svg.q45 polygon{stroke:#ff9b8a;stroke-dasharray:5 3}
+.bbox.off svg.q45 polygon{stroke:#c0503f}
+.bbox.hl svg.q45 polygon{stroke:#2ab8ee;stroke-width:3px}

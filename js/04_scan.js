@@ -171,13 +171,19 @@ function rows38() {
     L.forEach(d => { if (!d._rowMan) d.row = clamp(REV38.base + d._prow - top, 1, 15); }); });
 }
 function showRows38() { $$('#review tr[data-i]').forEach(tr => { const d = detected[+tr.dataset.i], inp = tr.querySelector('[data-k=row]'); if (d && inp && document.activeElement !== inp) inp.value = d.row; }); }
+/* V2.45 : cadre dessiné selon le vrai contour (livre penché) au lieu d'un rectangle qui déborde sur les voisins */
+function quadSvg45(d) {
+  const q = d.quad, B = d._box; if (!Array.isArray(q) || q.length !== 4 || !B) return '';
+  const w = Math.max(1, B[3] - B[1]), h = Math.max(1, B[2] - B[0]), pts = q.map(p => `${((p[0] * 1000 - B[1]) / w * 100).toFixed(1)},${((p[1] * 1000 - B[0]) / h * 100).toFixed(1)}`).join(' ');
+  return `<svg class="q45" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon points="${pts}"/></svg>`;
+}
 function renderReview(scroll = false) {
   const dups = detected.filter(d => d._dup).length, unk = detected.filter(d => d.unknown).length, used = [...new Set(detected.map(d => d._shot).filter(v => v != null && shots[v]))];
   const s1 = $('#sCase').value, nm = $('#sNew').value;
   $('#review').innerHTML = !detected.length ? `<p class="hint" style="margin-top:14px">Aucun ouvrage repéré. Essaie une photo plus nette, plus proche et bien éclairée (✎ pour recadrer).</p>` : `
     <div class="step" style="margin-top:20px"><i>3</i>Vérifier et ranger</div>
     <div class="hint"><b style="color:var(--navy)">${detected.length}</b> livre(s) repéré(s)${unk ? ` · <span style="color:var(--ko)">${unk} non reconnu(s) : ajoutés avec des champs vides à compléter</span>` : ''}${dups ? ` · ${dups} déjà présent(s) (décochés)` : ''}.</div>
-    ${detected.some(d => d._box) ? `<div class="shots">${used.map(si => `<div class="shotv"><img src="${shots[si]}" alt="">${detected.map((d, i) => d._shot === si && d._box ? `<div class="bbox${d.unknown ? ' unk' : ''}${d._sel ? '' : ' off'}" data-bi="${i}" style="top:${d._box[0] / 10}%;left:${d._box[1] / 10}%;height:${Math.max(1, d._box[2] - d._box[0]) / 10}%;width:${Math.max(1, d._box[3] - d._box[1]) / 10}%"><span>${i + 1}</span></div>` : '').join('')}</div>`).join('')}</div>
+    ${detected.some(d => d._box) ? `<div class="shots">${used.map(si => `<div class="shotv"><img src="${shots[si]}" alt="">${detected.map((d, i) => d._shot === si && d._box ? `<div class="bbox${d.unknown ? ' unk' : ''}${d._sel ? '' : ' off'}" data-bi="${i}" style="top:${d._box[0] / 10}%;left:${d._box[1] / 10}%;height:${Math.max(1, d._box[2] - d._box[0]) / 10}%;width:${Math.max(1, d._box[3] - d._box[1]) / 10}%">${quadSvg45(d)}<span>${i + 1}</span></div>` : '').join('')}</div>`).join('')}</div>
       <p class="hint">Chaque cadre numéroté = une ligne du tableau (pointillés rouges = non reconnu). Survole une ligne pour la repérer, clique sur un cadre pour aller à la ligne.</p>` : ''}
     <table class="rev"><tr><th>#</th><th><input type="checkbox" id="rAll" ${detected.every(d => d._sel) ? 'checked' : ''}></th><th>Tranche</th><th>Titre</th><th>Auteur</th><th>Série / T.</th><th>Type</th><th title="Étagère du meuble (1 = en haut)">Étagère</th><th>Pos.</th><th>Conf.</th></tr>
     ${detected.map((d, i) => `<tr data-i="${i}" class="${d.unknown ? 'unk' : ''}"><td class="hint" style="padding-top:10px"><b>${i + 1}</b></td><td><input type="checkbox" data-k="_sel" ${d._sel ? 'checked' : ''}></td><td style="white-space:nowrap">${d.spineImg ? `<img class="crop" src="${d.spineImg}" alt="" style="display:inline-block;vertical-align:top">` : `<div class="sw" style="background:${colOf(d)};display:inline-block"></div>`}${d._box ? ` <button type="button" class="btn s sm" data-qe="${i}" title="Ajuster le détourage de ce livre (4 coins)" style="padding:3px 7px;vertical-align:top">✎</button>` : ''}</td>
