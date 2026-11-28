@@ -398,7 +398,7 @@ $('#unit').addEventListener('mousedown', e => {
   e.preventDefault(); e.stopPropagation();
   const i = g.dataset.grip.lastIndexOf('|'), cid = g.dataset.grip.slice(0, i), r = +g.dataset.grip.slice(i + 1);
   const grps = $$('#unit .rowgrp');
-  // V2.46 : le menu des meubles (dépôt vers un autre meuble) ne s'ouvre qu'une fois le glisser commencé
+  // V2.47 : le menu des meubles (dépôt vers un autre meuble) ne s'ouvre qu'une fois le glisser commencé
   sdrag = {cid, r, n: grps.length, y0: e.clientY, rowH: +$('#unit').dataset.rowh || 200, target: r, toCase: null, moved: false, grps};
   grps.forEach(x => x.classList.add('anim')); grps[r - 1].classList.remove('anim'); grps[r - 1].classList.add('lift');
   document.body.style.cursor = 'grabbing'; $('#tip').style.display = 'none';
@@ -419,7 +419,7 @@ window.addEventListener('mouseup', async () => {
   if (!sdrag) return; const S = sdrag; sdrag = null; document.body.style.cursor = ''; document.body.classList.remove('dnd');
   $$('#caseBar .dropok').forEach(x => x.classList.remove('dropok'));
   S.grps.forEach(g => { g.style.transform = ''; g.classList.remove('lift', 'anim'); });
-  if (!S.moved && !S.toCase) { // V2.46 : un simple clic ouvre le menu de l'étagère ici même (le « click » n'arrivait pas, Mac)
+  if (!S.moved && !S.toCase) { // V2.47 : un simple clic ouvre le menu de l'étagère ici même (le « click » n'arrivait pas, Mac)
     justDragged = true; setTimeout(() => justDragged = false, 120); return openShelfMenu20(S.cid + '|' + S.r); }
   justDragged = true; setTimeout(() => justDragged = false, 80);
   const inRow = books.filter(b => caseOf(b) === S.cid && (b.row || 1) === S.r);
@@ -489,7 +489,7 @@ async function restoreOrigin() {
     const w = cv.width, h = cv.height, d = cv.getContext('2d', {willReadFrequently: true}).getImageData(0, 0, w, h).data, g = new Float32Array(w * h);
     for (let i = 0, j = 0; i < d.length; i += 4, j++) g[j] = .299 * d[i] + .587 * d[i + 1] + .114 * d[i + 2];
     const O = Object.assign({lv: true, ch: true}, window.W46 || {});
-    // V2.46 : optimisation automatique de la photo pour le découpage : niveaux étirés et zones sombres éclaircies
+    // V2.47 : optimisation automatique de la photo pour le découpage : niveaux étirés et zones sombres éclaircies
     // (tranches noires côte à côte), puis bords de couleur en plus des bords de luminosité (rouge contre bleu de même clarté)
     if (enh && O.lv) { const H = new Uint32Array(256); for (let j = 0; j < g.length; j += 3) H[g[j] | 0]++; const n = Math.ceil(g.length / 3), at = q => { let c = 0; for (let v = 0; v < 256; v++) { c += H[v]; if (c >= n * q) return v; } return 255; };
       const lo = at(.01), hi = Math.max(lo + 20, at(.99)), m = CL((at(.5) - lo) / (hi - lo), .05, .95), ga = CL(Math.log(.45) / Math.log(m), .5, 1.1), LUT = new Float32Array(256);
@@ -549,7 +549,7 @@ async function restoreOrigin() {
     cx.drawImage(img, B.x0, B.y0, B.x1 - B.x0, hb, 0, 0, wk, hk);
     const {g, gx, gy} = sobelOf(cv, SEG44), ya = Math.round(hk * .45), yb = Math.round(hk * .93), ym = (ya + yb) / 2;
     const win = Math.round(hk * (SEG44 ? ((window.W46 && window.W46.win) || .15) : .5)), cent = [], tl = [];
-    // V2.46 : inclinaison au quart de degré (au degré près, les tranches fines penchées étaient décalées de 5 à 10 px en haut)
+    // V2.47 : inclinaison au quart de degré (au degré près, les tranches fines penchées étaient décalées de 5 à 10 px en haut)
     const RS = SEG44 ? 4 : 1, NB = 40 * RS + 1, ya2 = SEG44 ? Math.round(hk * .3) : ya;
     for (let x0 = 0; x0 < wk - win / 2; x0 += Math.round(win / 2)) {
       const Hh = new Float64Array(NB); let tot = 0;
@@ -557,7 +557,7 @@ async function restoreOrigin() {
         if (ax < 60 || ax < 2 * ay) continue; const t = Math.atan(-gy[i] / gx[i]) * 180 / Math.PI; if (t < -20 || t > 20) continue; Hh[Math.round((t + 20) * RS)] += ax; tot += ax; }
       let bi = 20 * RS, bv = -1; for (let i = 0; i < NB; i++) { let v = 0; for (let j = -2 * RS; j <= 2 * RS; j++) v += (Hh[i + j] || 0) * (2 * RS + 1 - Math.abs(j)); if (v > bv) { bv = v; bi = i; } }
       let tt = tot > 1500 * win / Math.round(hk * .5) ? bi / RS - 20 : null;
-      // V2.46 : angle confirmé par projection : seules les longues lignes droites (bords des tranches) donnent des pics nets,
+      // V2.47 : angle confirmé par projection : seules les longues lignes droites (bords des tranches) donnent des pics nets,
       // pas les grosses lettres penchées d'un titre
       if (SEG44 && tt != null) { const xa = Math.max(1, x0), xb = Math.min(wk - 1, x0 + win), cs = new Float64Array(xb - xa); let bs = -1, ba = tt;
         for (let d = -4; d <= 4; d += .25) { const tn = Math.tan((tt + d) * Math.PI / 180); cs.fill(0);
@@ -592,7 +592,7 @@ async function restoreOrigin() {
         if (ws[i] > loc * (SEG44 ? SPL44 : 1.75) && ws[i] > minW * 2.4) { let bx = -1, bv = .1; for (let x = cuts[i] + Math.round(minW * 1.1); x <= cuts[i + 1] - Math.round(minW * 1.1); x++) if (Ps[x] > bv && Ps[x] >= Ps[x - 1] && Ps[x] >= Ps[x + 1]) { bv = Ps[x]; bx = x; }
           if (bx > 0) add.push(bx); } }
       if (!add.length) break; cuts.push(...add); cuts.sort((p, q) => p - q); }
-    // V2.46 : DÉCOUPAGE GUIDÉ PAR LA LECTURE D'ENSEMBLE. L'IA compte bien les livres mais place mal les bords ;
+    // V2.47 : DÉCOUPAGE GUIDÉ PAR LA LECTURE D'ENSEMBLE. L'IA compte bien les livres mais place mal les bords ;
     // le découpage voit bien les bords mais se trompe sur le nombre (dessin continu, dos de même couleur, couverture vue de biais).
     // Quand l'IA a vu la plupart des livres de l'étagère : un cadre par livre de l'IA, chaque bord recalé sur le bord net le plus proche.
     const segG = new Map(), gapEnd = new Set(), KX = v => CL(Math.round(v), 1, wk - 2); let gw46 = 0;
@@ -635,7 +635,7 @@ async function restoreOrigin() {
         const sorted = [...new Set(nc.map(v => CL(Math.round(v), 1, wk - 2)))].sort((p, q) => p - q), fin = [];
         sorted.forEach(c => { if (!fin.length || c - fin[fin.length - 1] >= 3) fin.push(c); });
         cuts.length = 0; cuts.push(...fin); B.guided46 = true; gw46 = gw; } }
-    // V2.46 : chaque bord est ajusté seul (position et inclinaison) sur la ligne de contraste la plus nette
+    // V2.47 : chaque bord est ajusté seul (position et inclinaison) sur la ligne de contraste la plus nette
     const cutT = new Map();
     if (SEG44 && FIT46) { const yF = Math.round(hk * .25), r0 = Math.max(2, Math.round(minW * .3));
       const LB = []; // bord présent à presque toutes les hauteurs (le texte du dos ne donne des bords que par endroits)
@@ -649,7 +649,7 @@ async function restoreOrigin() {
     const out = [], pend = [], toImg = (x, y) => [B.x0 + x / k, B.y0 + y / k];
     for (let i = 0; i < cuts.length - 1; i++) {
       const a = cuts[i], b = cuts[i + 1], wS = b - a; if (wS < (B.guided46 ? Math.max(3, minW * .6) : minW) || wS > hk * 1.2) continue;
-      // V2.46 : interstice entre deux livres de l'IA (côté de couverture vu de biais, fond) : écarté s'il est étroit ;
+      // V2.47 : interstice entre deux livres de l'IA (côté de couverture vu de biais, fond) : écarté s'il est étroit ;
       // s'il a la largeur d'un livre, il est gardé à condition que la lecture des tranches y trouve un titre (livre oublié par l'IA)
       const gap46 = B.guided46 && gapEnd.has(a) && !segG.has(a); if (gap46 && wS < gw46 * .7) continue;
       const tA = cutT.has(a) ? cutT.get(a) : tanX[a], tB = cutT.has(b) ? cutT.get(b) : tanX[b], xAt = (c, tn, y) => c + (y - ym) * tn;
@@ -662,7 +662,7 @@ async function restoreOrigin() {
       V.forEach(([y, v]) => { if (v > bv) { bv = v; top = y; } });
       const cand = V.filter(([y, v], j) => v >= Math.max(12, bv * .4) && (!V[j - 1] || v >= V[j - 1][1]) && (!V[j + 1] || v >= V[j + 1][1])).map(([y, v]) => ({y: B.y0 + y / k, v}));
       if (bv < 12) top = 0;
-      // V2.46 : bas du livre. Candidats = marches de luminosité dans le bas de la bande ; on garde celles qui ont des
+      // V2.47 : bas du livre. Candidats = marches de luminosité dans le bas de la bande ; on garde celles qui ont des
       // tranches au-dessus (bords verticaux) et la planche unie en dessous (peu de bords verticaux).
       const cb = [];
       if (SEG44) { const x0w = Math.max(1, Math.round(a - 2)), x1w = Math.min(wk - 2, Math.round(b + 2)), Ev = new Float64Array(hk);
@@ -674,14 +674,14 @@ async function restoreOrigin() {
         for (let q = cb.length - 1; q >= 0; q--) if (cb.some(o => o !== cb[q] && Math.abs(o.y - cb[q].y) <= 3 && o.sc > cb[q].sc)) cb.splice(q, 1); }
       pend.push({a, b, tA, tB, top, cand, mid, wS, cb, g: segG.get(a), gap46: gap46 && wS < gw46 * ((window.W46 && window.W46.gap) || 1.3)});
     }
-    // V2.46 : bas de chaque livre = meilleur candidat, rendu cohérent avec les voisins (même planche, livres plus ou moins enfoncés)
+    // V2.47 : bas de chaque livre = meilleur candidat, rendu cohérent avec les voisins (même planche, livres plus ou moins enfoncés)
     if (SEG44) { pend.forEach(o => { o.cb.sort((p, q) => q.sc - p.sc); o.b0 = o.cb.length ? o.cb[0].y : null; });
       const tol = Math.max(3, hk * .02);
       pend.forEach((o, i) => { const nb = pend.slice(Math.max(0, i - 3), i + 4).filter(p => p !== o && p.b0 != null).map(p => p.b0); const m = nb.length >= 2 ? med(nb) : null;
         if (m == null) { o.bot = o.b0; return; }
         const c = o.cb.filter(c => Math.abs(c.y - m) <= tol && c.sc >= (o.cb[0] ? o.cb[0].sc * .35 : 0))[0];
         o.bot = c ? c.y : (o.b0 != null && o.cb[0].sc > 3 * Math.sqrt(12) ? o.b0 : Math.round(m)); });
-      // V2.46 : bas donné par l'IA pour ce livre = repère (livres plus ou moins enfoncés sur la même planche)
+      // V2.47 : bas donné par l'IA pour ce livre = repère (livres plus ou moins enfoncés sur la même planche)
       pend.forEach(o => { if (!o.g) return; const py = (o.g.y1 * img.naturalHeight - B.y0) * k; if (py < hk * .5 || py > hk + 2) return;
         const near = o.cb.filter(c => Math.abs(c.y - py) <= hk * .04).sort((p, q) => q.sc * (1 - Math.abs(q.y - py) / (hk * .045)) - p.sc * (1 - Math.abs(p.y - py) / (hk * .045))); if (near.length) o.bot = near[0].y; else if (o.bot == null || Math.abs(o.bot - py) > hk * .07) o.bot = CL(py, hk * .5, hk - 1); }); }
     for (const o of pend) { const {a, b, tA, tB, top, cand, mid, wS} = o; let bot = hk - 1;
@@ -813,7 +813,7 @@ JSON : [{"k":1,"un_seul":true,"titre":"…","auteur":"…","serie":"… ou null"
       const fr = () => M.filter(s => s.row === row);
       const span = (s, y) => [xAtY(s.Q[0], s.Q[3], y), xAtY(s.Q[1], s.Q[2], y)];
       const ws = fr().map(s => s.wImg || (span(s, (s.Q[0][1] + s.Q[3][1]) / 2)[1] - span(s, (s.Q[0][1] + s.Q[3][1]) / 2)[0])).filter(v => v > 0), mw = med(ws) || bh * .08;
-      // 1. cadres contenant plusieurs livres (V2.46 : inutile si le découpage a déjà suivi la lecture d'ensemble, un cadre par livre)
+      // 1. cadres contenant plusieurs livres (V2.47 : inutile si le découpage a déjà suivi la lecture d'ensemble, un cadre par livre)
       for (const s of B.guided46 ? [] : fr()) {
         const y = (Math.max(s.Q[0][1], s.Q[1][1]) + Math.min(s.Q[2][1], s.Q[3][1])) / 2, [l, rr] = span(s, y), w = rr - l; if (w < minPiece * 2) continue;
         const D = G.filter(d => { const cx = (d.x0 + d.x1) / 2 * W; return cx > l && cx < rr; }).sort((p, q) => (p.x0 + p.x1) - (q.x0 + q.x1));
@@ -941,14 +941,14 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         const us = new Set(), ud = new Set(); pairs.sort((p, q) => p.dist - q.dist).forEach(o => { if (us.has(o.s) || ud.has(o.d)) return; us.add(o.s); ud.add(o.d); GM44.set(o.s, o); }); });
       bands.forEach((B, r) => RAW[r].forEach(s => {
         const gm = GM44.get(s);
-        if (gm && s.cand.length) { const gy = gm.d.y0 * H, c = s.cand.reduce((p, q) => Math.abs(q.y - gy) < Math.abs(p.y - gy) ? q : p); if (Math.abs(c.y - gy) < (B.y1 - B.y0) * (SEG44 ? .04 : .25)) s.Q = s.topAt(c.y); else if (SEG44) s.Q = s.topAt(gy); }   // V2.46 : loin de tout bord net, on garde le haut donné par l'IA
+        if (gm && s.cand.length) { const gy = gm.d.y0 * H, c = s.cand.reduce((p, q) => Math.abs(q.y - gy) < Math.abs(p.y - gy) ? q : p); if (Math.abs(c.y - gy) < (B.y1 - B.y0) * (SEG44 ? .04 : .25)) s.Q = s.topAt(c.y); else if (SEG44) s.Q = s.topAt(gy); }   // V2.47 : loin de tout bord net, on garde le haut donné par l'IA
         if (s.spineQ) s.Q = s.spineQ;   // livre vu de biais : on garde la tranche (dos) pour l'étagère
         const sp = warp(img, s.Q), rd = warp(img, s.Qr, scanMode() === 'fast' ? Math.min(460, Math.max(300, sp.hpx * 1.2)) : Math.min(700, Math.max(380, sp.hpx * 1.6)));
         S.push({...s, row: r + 1, sp, read: rd.crop, hint: gm ? gm.d.t + (gm.d.v ? ' (tome ' + gm.d.v + ')' : '') : '', g: gm && gm.d});
       }));
       S.forEach((s, i) => { if (i && S[i - 1].row === s.row && S[i - 1].hint) s.prev = S[i - 1].hint; });
       await readSlices(S, n => setMsg(`Photo ${ii + 1}/${urls.length} : lecture des tranches ${n}/${S.length}…`));
-      S.forEach(s => { if (s.gap46 && !(s.ok && s.t && !s.notBook) && !(window.W46 && window.W46.keepgap)) s.notBook = true; });   // V2.46
+      S.forEach(s => { if (s.gap46 && !(s.ok && s.t && !s.notBook) && !(window.W46 && window.W46.keepgap)) s.notBook = true; });   // V2.47
       S.forEach(s => { if (!s.ok && s.g && s.g.t) Object.assign(s, {t: s.g.t, a: s.g.a, se: s.g.s, v: s.g.v, e: s.g.e, ty: s.g.ty, c: Math.min(.6, s.g.c || .6)}); });
       for (const s of S) if (s.nb > 1 && !s.notBook && s.read) s.nbCuts = await snapCuts(s.read, Array.from({length: s.nb - 1}, (_, j) => (j + 1) / s.nb));   // V2.33
       setMsg(`Photo ${ii + 1}/${urls.length} : contrôle des tranches larges…`);
@@ -985,7 +985,7 @@ JSON : {"regroupements":[{"bandes":[8,9,10],"tranche":10}],"vides":[]}  (listes 
         const w = Math.max(1, ((s.Q[1][0] - s.Q[0][0]) + (s.Q[2][0] - s.Q[3][0])) / 2), lim = w * EDGE44;
         if ([0, 1, 2, 3].every(i => Math.abs(q[i][0] - s.Q[i][0]) <= lim)) s.Q = q;
         else s.Q = s.Q.map((p, i) => [p[0], Math.abs(q[i][1] - p[1]) < w * 3 ? q[i][1] : p[1]]);
-        if (SEG44) { const h = Math.abs(s.Q0[3][1] - s.Q0[0][1]) || 1; s.Q = s.Q.map((p, i) => Math.abs(p[1] - s.Q0[i][1]) > h * .025 ? [p[0], s.Q0[i][1]] : p); } });   // V2.46 : le haut et le bas viennent du découpage
+        if (SEG44) { const h = Math.abs(s.Q0[3][1] - s.Q0[0][1]) || 1; s.Q = s.Q.map((p, i) => Math.abs(p[1] - s.Q0[i][1]) > h * .025 ? [p[0], s.Q0[i][1]] : p); } });   // V2.47 : le haut et le bas viennent du découpage
       dedupe33(M);
       M.forEach(s => { const Qf = s.Q, refined = s.Q0 !== s.Q; const sp = s.merged || refined ? warp(img, s.Q) : s.sp, xs = s.Q.map(p => p[0]), ys = s.Q.map(p => p[1]);
         const box = [Math.min(...ys) / H, Math.min(...xs) / W, Math.max(...ys) / H, Math.max(...xs) / W].map(v => Math.round(CL(v * 1000, 0, 1000)));

@@ -1,3 +1,33 @@
+SCANEBOOK V2.47 - DÉTOURAGE DES TRANCHES : PRÉCISION FORTEMENT AMÉLIORÉE
+Base exclusive : SCANEBOOK V2.46.
+
+Testé sur votre photo d'étagère (48 BD annotées une à une à la main) :
+- Avec la V2.45, 72 % des cadres étaient à reprendre (décalés, trop hauts, deux livres dans un cadre, livre oublié).
+- Avec la V2.47 : 2 % quand l'IA situe bien les livres, 11 % en moyenne quand elle les situe mal
+  (10 essais où l'on décale volontairement ses boîtes de plus ou moins un tiers de largeur).
+
+Ce qui change :
+- Optimisation automatique de la photo avant le découpage (sans rien faire de votre côté) :
+  niveaux étirés, zones sombres éclaircies, et prise en compte des changements de couleur
+  (une tranche rouge contre une tranche bleue de même clarté se sépare maintenant).
+- Inclinaison mesurée au quart de degré, sur les longues lignes droites des bords des livres
+  (les grosses lettres penchées d'un titre ne trompent plus la mesure) : les cadres suivent
+  les tranches penchées de haut en bas, au lieu de déborder en haut sur le livre voisin.
+- Le découpage s'aligne sur la lecture d'ensemble de l'IA : un cadre par livre vu par l'IA,
+  chaque bord posé sur le bord net le plus proche ; quand deux tranches noires se touchent
+  sans bord visible, le partage se fait d'après l'IA et la largeur des voisins.
+- La boîte de l'IA autour d'une tranche penchée est « redressée » (elle est plus large que le livre).
+- Haut et bas de chaque cadre : repris de l'IA quand la photo n'y montre aucun bord net
+  (fini les cadres qui prennent le haut ou le bas de l'étagère).
+- Le côté d'une couverture vu de biais n'est plus pris pour un livre : un cadre entre deux
+  livres n'est gardé que si l'IA y lit un titre.
+- Un bord très net vu sur la photo est toujours respecté, même si l'IA a fusionné deux livres.
+
+Limite honnête : l'IA réelle (Gemini) ne peut pas être appelée depuis mes tests ; elle est
+simulée. Le résultat sur vos prochaines photos dépendra aussi de sa lecture.
+
+----------------------------------------
+
 SCANEBOOK V2.45 - DÉTOURAGE : BAS DES LIVRES ET CADRES AU VRAI CONTOUR
 Base exclusive : SCANEBOOK V2.44.
 
