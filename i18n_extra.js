@@ -967,4 +967,6 @@ window.SCANLY_I18N_EXTRA={"Univers inspiré de la Bibliothèque nationale Franç
 "Guide de SCANEBOOK":["SCANEBOOK guide","Guía de SCANEBOOK","SCANEBOOK 안내","SCANEBOOK-Anleitung"],
 "Posez une question sur votre bibliothèque : recommandations, tomes manquants, où se trouve un livre… L’assistant peut ensuite montrer les livres dans la pièce.":["Ask a question about your library: recommendations, missing volumes, where a book is… The assistant can then show the books in the room.","Haz una pregunta sobre tu biblioteca: recomendaciones, tomos que faltan, dónde está un libro… El asistente puede luego mostrar los libros en la sala.","서재에 대해 질문해 보세요: 추천, 빠진 권, 책의 위치… 도우미가 방에서 해당 책을 보여 줄 수도 있습니다.","Stellen Sie eine Frage zu Ihrer Bibliothek: Empfehlungen, fehlende Bände, wo ein Buch steht… Der Assistent kann die Bücher dann im Raum zeigen."],
 "L’assistant n’a pas pu répondre":["The assistant could not answer","El asistente no pudo responder","도우미가 답변하지 못했습니다","Der Assistent konnte nicht antworten"],
+"Version installée":["Installed version","Versión instalada","설치된 버전","Installierte Version"],
+"Menu de l'étagère":["Shelf menu","Menú del estante","선반 메뉴","Regalbrett-Menü"],
 "Réessayer":["Try again","Reintentar","다시 시도","Erneut versuchen"]};

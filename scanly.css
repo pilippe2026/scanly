@@ -851,3 +851,13 @@ body.ai43 #stage{display:none!important}
 .bbox.unk svg.q45 polygon{stroke:#ff9b8a;stroke-dasharray:5 3}
 .bbox.off svg.q45 polygon{stroke:#c0503f}
 .bbox.hl svg.q45 polygon{stroke:#2ab8ee;stroke-width:3px}
+
+/* ===== V2.46 : version visible, étagère cliquable (planche, étiquette, poignée élargie au toucher) ===== */
+.tag .ver46{letter-spacing:1px;opacity:.85}
+.ver46p{margin:0 0 12px;padding:8px 12px;border-radius:10px;background:rgba(212,175,124,.16);border:1px solid rgba(212,175,124,.45);font-size:13px}
+.ver46p b{font-weight:800}
+#unit .sh-front.tap46{pointer-events:auto;cursor:pointer}
+#unit .rowtag37.tap46{pointer-events:auto;cursor:pointer}
+#unit .rowtag37.tap46:hover{filter:brightness(1.12)}
+.shgrip .ghit46{position:absolute;left:-10px;right:-4px;top:-10px;bottom:-10px;border-radius:50%}
+.touch .shgrip .ghit46{left:-44px;right:-2px;top:-34px;bottom:-34px;border-radius:30%}

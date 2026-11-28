@@ -1,0 +1,14 @@
+SCANEBOOK V2.46 - VERSION VISIBLE PARTOUT ET MENU DES ÉTAGÈRES
+Base exclusive : SCANEBOOK V2.45.
+
+- Numéro de version visible sur tous les appareils :
+  sur Mac / PC / iPad, sous le logo en haut à gauche (« SCAN. SAVE. COLLECT. · V2.46 »),
+  et tout en haut des Paramètres (iPhone, iPad, Mac, PC). Il reste aussi dans Profil sur iPhone.
+- Mac / PC : un clic sur la pastille numérotée d'une étagère ouvre maintenant le menu de l'étagère,
+  qui reste ouvert après avoir relâché le bouton. Le menu des meubles n'apparaît plus pendant le clic :
+  il ne s'affiche que si l'on glisse vraiment l'étagère (pour la déposer dans un autre meuble).
+- Le menu de l'étagère s'ouvre aussi en cliquant (ou touchant) la planche ou l'étiquette « ÉTAGÈRE n ».
+- iPhone / iPad : la zone tactile de la pastille numérotée est beaucoup plus grande ; un toucher court
+  ouvre le menu de l'étagère avec « Sélectionner ces livres », « Supprimer les livres de l'étagère »
+  et « Supprimer l'étagère » (livres en corbeille, restaurables 30 jours).
+- Glisser une étagère (maintenir puis glisser) fonctionne comme avant.

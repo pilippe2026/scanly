@@ -253,14 +253,14 @@ function decor3D(kind, xEnd, yB, s) {
   return stackFlat(xEnd - 130 * s, yB, s, ['#0B1F44', '#D4AF7C', '#64748B'], ball('sphere'));
 }
 /* V2.37 : numéro d'étagère sur le chant de la tablette (vue 3D) */
-function rowTag37(n, x, y) { return `<div class="rowtag37" style="left:${x}px;top:${y + 1}px;transform:translateZ(${U.D + 2}px)"><span>${T28('Étagère')}</span> <b data-no-i18n>${n}</b></div>`; }
-function shelf3D(y, x, w) {
-  const D = U.D, T = U.T;
+function rowTag37(n, x, y, key) { return `<div class="rowtag37${key ? ' tap46' : ''}"${key ? ` data-shelfkey="${key}" title="Menu de l'étagère"` : ''} style="left:${x}px;top:${y + 1}px;transform:translateZ(${U.D + 2}px)"><span>${T28('Étagère')}</span> <b data-no-i18n>${n}</b></div>`; }
+function shelf3D(y, x, w, key) {
+  const D = U.D, T = U.T, k46 = key ? ` data-shelfkey="${key}" title="Menu de l'étagère"` : '';
   return `<div class="shelf" style="top:${y}px;left:${x}px;width:${w}px;height:${T}px;--D:${D}px">
     <div class="sh-shadow" style="top:${T}px"></div><div class="sh-glow" style="top:${T}px"></div>
     <div class="sh-top" style="top:0;transform:translateZ(${D}px) rotateX(-90deg)"></div>
     <div class="sh-bot" style="top:${T}px;transform:translateZ(${D}px) rotateX(-90deg)"></div>
-    <div class="sh-front" style="top:0;transform:translateZ(${D}px)"></div></div>`;
+    <div class="sh-front${key ? ' tap46' : ''}"${k46} style="top:0;transform:translateZ(${D}px)"></div></div>`;
 }
 function divider3D(x, top, h) {
   const w = 10, D = U.D;
@@ -307,11 +307,12 @@ function renderRoom(resetView) {
     else if (books.length) html += `<div class="plaque" data-ren="${g.id}" title="Renommer" style="left:${Math.min(W * .72, W - 160)}px;top:4px">${nm28(g)}<small>${g.bs.filter(b => !b.wish).length} ouvrage${g.bs.filter(b => !b.wish).length > 1 ? 's' : ''}</small></div>`;
     rowsOf(g, rowsN).forEach((r, i) => {
       const y = Math.round(TOP + (i + 1) * rowH - U.T); let x = zx + 20;
-      if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Cliquer : menu de l'étagère (sélectionner, supprimer). Maintenir puis glisser : déplacer l'étagère" aria-label="Étagère ${i + 1}"><b class="g37n" data-no-i18n>${i + 1}</b></div>` : ''}`;
+      const sk46 = !isAll && g.id !== NONE && g.id !== 'demo' ? g.id + '|' + (i + 1) : '';
+      if (!isAll) html += `<div class="rowgrp" data-rg="${i + 1}">${shelf3D(y, 0, W, sk46)}${g.id !== NONE && g.id !== 'demo' ? `<div class="shgrip" data-grip="${g.id}|${i + 1}" style="left:-52px;top:${y - 22}px" title="Cliquer : menu de l'étagère (sélectionner, supprimer). Maintenir puis glisser : déplacer l'étagère" aria-label="Étagère ${i + 1}"><i class="ghit46"></i><b class="g37n" data-no-i18n>${i + 1}</b></div>` : ''}`;
       html += dz(g.id, i + 1, zx, TOP + i * rowH, zw, rowH);
       if (CAM.sel) { const ids = r.filter(b => !b.wish).map(b => b.id), all = ids.length && ids.every(id => SEL.has(id));
         html += `<button class="rowsel${all ? ' on' : ''}" data-rs="${g.id}|${i + 1}" style="left:${zx + 6}px;top:${TOP + i * rowH + 6}px">${all ? '☑' : '☐'} Étagère ${i + 1}${ids.length ? ` (${ids.length})` : ''}</button>`; }
-      if (!isAll || zi === 0) html += rowTag37(i + 1, zx + (isAll ? 10 : 24), y);
+      if (!isAll || zi === 0) html += rowTag37(i + 1, zx + (isAll ? 10 : 24), y, sk46);
       r.forEach(b => { html += book3D(b, x, y, s, dimmed(b)); x += (bookDims(b).w + 1) * s; });
       if (r.length && x + 14 * s < zx + zw - 6) html += bookend3D(x + 3, y, s);
       if (!isAll && zx + zw - x > 190 * s) html += decor3D((i + hash(g.id)) % 3, zx + zw - 30, y, s);
@@ -333,6 +334,7 @@ function focusBook(id) { // centre la vue sur un livre
 $('#unit').addEventListener('click', async e => {
   if (justDragged) return;
   const gp = e.target.closest('.shgrip'); if (gp) return openShelfMenu20(gp.dataset.grip);
+  const sk = e.target.closest('[data-shelfkey]'); if (sk && !CAM.sel) return openShelfMenu20(sk.dataset.shelfkey); // V2.46 : planche ou étiquette « Étagère n »
   const bk = e.target.closest('.book');
   const rs = e.target.closest('[data-rs]'); if (rs) return selectRow(rs.dataset.rs);
   if (bk) { if (CAM.sel || e.ctrlKey || e.metaKey || e.shiftKey) { SEL.has(bk.dataset.id) ? SEL.delete(bk.dataset.id) : SEL.add(bk.dataset.id); bk.classList.toggle('sel'); return renderSelBar(); } const id = bk.dataset.id; clearTimeout(window._bkClick); window._bkClick = setTimeout(() => openBook(id), 260); return; }
