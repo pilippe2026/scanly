@@ -1,0 +1,14 @@
+SCANEBOOK V2.45 - DÉTOURAGE : BAS DES LIVRES ET CADRES AU VRAI CONTOUR
+Base exclusive : SCANEBOOK V2.44.
+
+D'après vos photos réelles :
+- Le bas de chaque tranche est maintenant détecté : la planche ou le sol clair sous les livres
+  n'entre plus dans la vignette (sur une étagère vue en perspective, l'écart est divisé par 3).
+  La zone analysée descend un peu plus bas pour ne plus couper les livres posés plus bas.
+- Écran « Vérifier et ranger » : chaque cadre est tracé selon le vrai contour de la tranche,
+  penché si le livre penche. Les cadres ne se chevauchent plus quand les livres sont inclinés.
+- Une tranche deux fois plus large que les tranches fines de la même étagère (deux BD collées,
+  par exemple deux tomes d'une même série) est revérifiée par l'IA, qui la coupe s'il y a deux
+  livres.
+- Vos livres déjà rangés ne sont pas modifiés.
+

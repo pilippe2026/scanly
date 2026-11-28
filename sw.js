@@ -1,4 +1,4 @@
-const CACHE='scanly-v2.44';
+const CACHE='scanly-v2.45';
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./scanly.css','./js/01_base.js','./js/02_piece.js','./js/03_fiche.js','./js/04_scan.js','./js/05_parametres.js','./js/06_demarrage.js','./js/07_synchro.js','./js/08_tactile_et_v2.js','./js/09_v227.js','./js/10_v229.js','./js/11_v233.js','./js/12_v234.js','./js/13_v236.js','./js/14_v241.js','./js/15_v243.js','./i18n_extra.js','./i18n.js','./book_sources.js','./assets/piece_canopee.jpg','./assets/piece_loft.jpg','./assets/piece_salon.jpg','./assets/piece_futur.jpg','./assets/piece_magie.jpg','./assets/piece_bnf.jpg','./assets/symbole.png','./assets/symbole_inverse.png','./assets/fonts/outfit-600.woff2','./assets/icon-64.png'].map(u=>new Request(u,{cache:'reload'})))));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim();});
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin)return;
