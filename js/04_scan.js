@@ -183,8 +183,8 @@ function renderReview(scroll = false) {
   $('#review').innerHTML = !detected.length ? `<p class="hint" style="margin-top:14px">Aucun ouvrage repéré. Essaie une photo plus nette, plus proche et bien éclairée (✎ pour recadrer).</p>` : `
     <div class="step" style="margin-top:20px"><i>3</i>Vérifier et ranger</div>
     <div class="hint"><b style="color:var(--navy)">${detected.length}</b> livre(s) repéré(s)${unk ? ` · <span style="color:var(--ko)">${unk} non reconnu(s) : ajoutés avec des champs vides à compléter</span>` : ''}${dups ? ` · ${dups} déjà présent(s) (décochés)` : ''}.</div>
-    ${detected.some(d => d._box) ? `<div class="shots">${used.map(si => `<div class="shotv"><img src="${shots[si]}" alt="">${detected.map((d, i) => d._shot === si && d._box ? `<div class="bbox${d.unknown ? ' unk' : ''}${d._sel ? '' : ' off'}" data-bi="${i}" style="top:${d._box[0] / 10}%;left:${d._box[1] / 10}%;height:${Math.max(1, d._box[2] - d._box[0]) / 10}%;width:${Math.max(1, d._box[3] - d._box[1]) / 10}%">${quadSvg45(d)}<span>${i + 1}</span></div>` : '').join('')}</div>`).join('')}</div>
-      <p class="hint">Chaque cadre numéroté = une ligne du tableau (pointillés rouges = non reconnu). Survole une ligne pour la repérer, clique sur un cadre pour aller à la ligne.</p>` : ''}
+    ${detected.some(d => d._box) ? `<div class="shots">${used.map(si => `<div class="shotw48"><button type="button" class="btn g sm add48" data-add48="${si}" title="Ajouter un cadre pour un livre oublié par la reconnaissance">＋ Livre oublié</button><div class="shotv"><img src="${shots[si]}" alt="">${detected.map((d, i) => d._shot === si && d._box ? `<div class="bbox${d.unknown ? ' unk' : ''}${d._sel ? '' : ' off'}" data-bi="${i}" style="top:${d._box[0] / 10}%;left:${d._box[1] / 10}%;height:${Math.max(1, d._box[2] - d._box[0]) / 10}%;width:${Math.max(1, d._box[3] - d._box[1]) / 10}%">${quadSvg45(d)}<span>${i + 1}</span></div>` : '').join('')}</div></div>`).join('')}</div>
+      <p class="hint">Chaque cadre numéroté = une ligne du tableau (pointillés rouges = non reconnu). <b>Touchez un cadre pour le recadrer</b> ; pour un livre oublié : bouton <b>＋ Livre oublié</b> sur la photo.</p>` : ''}
     <table class="rev"><tr><th>#</th><th><input type="checkbox" id="rAll" ${detected.every(d => d._sel) ? 'checked' : ''}></th><th>Tranche</th><th>Titre</th><th>Auteur</th><th>Série / T.</th><th>Type</th><th title="Étagère du meuble (1 = en haut)">Étagère</th><th>Pos.</th><th>Conf.</th></tr>
     ${detected.map((d, i) => `<tr data-i="${i}" class="${d.unknown ? 'unk' : ''}"><td class="hint" style="padding-top:10px"><b>${i + 1}</b></td><td><input type="checkbox" data-k="_sel" ${d._sel ? 'checked' : ''}></td><td style="white-space:nowrap">${d.spineImg ? `<img class="crop" src="${d.spineImg}" alt="" style="display:inline-block;vertical-align:top">` : `<div class="sw" style="background:${colOf(d)};display:inline-block"></div>`}${d._box ? ` <button type="button" class="btn s sm" data-qe="${i}" title="Ajuster le détourage de ce livre (4 coins)" style="padding:3px 7px;vertical-align:top">✎</button>` : ''}</td>
       <td><input class="fld" data-k="title" value="${esc(d.title)}" placeholder="${d.unknown ? 'Non reconnu – à compléter (ou plus tard)' : ''}">${d._dup ? '<span class="badge k">Déjà présent</span>' : ''}${d.unknown ? '<span class="badge k">Non reconnu</span>' : d.confidence != null && d.confidence < .6 ? '<span class="badge g">À vérifier</span>' : ''}
@@ -210,15 +210,9 @@ function renderReview(scroll = false) {
   $('#review').onclick = e => {
     const al = e.target.closest('[data-alt]'); if (al) { const i = +al.closest('tr').dataset.i, d = detected[i], k = +al.dataset.alt, a = d._alts[k];
       d._alts[k] = {titre: d.title, auteur: d.author}; d.title = a.titre; d.author = a.auteur || ''; d.unknown = false; d._dup = books.some(x => !x.wish && keyOf(x) === keyOf(d)); d._sel = !d._dup; return renderReview(); }
-    const qe = e.target.closest('[data-qe]'); if (qe) { const d = detected[+qe.dataset.qe], keep = $('#mbox').innerHTML, scrollY = $('#mbox .mbody')?.scrollTop || 0;
-      const quad = d.quad || [[d._box[1] / 1000, d._box[0] / 1000], [d._box[3] / 1000, d._box[0] / 1000], [d._box[3] / 1000, d._box[2] / 1000], [d._box[1] / 1000, d._box[2] / 1000]];
-      const back = () => { $('#mbox').innerHTML = keep; $('#modal').classList.add('on'); rebindScan(); renderReview(); const mb = $('#mbox .mbody'); if (mb) mb.scrollTop = scrollY; };
-      openQuadEditor({src: shots[d._shot], quad, title: `Détourage du livre n° ${+qe.dataset.qe + 1}`, onSave: async (qn, sp) => {
-        d.quad = qn; d.spineImg = sp.crop; d.color = sp.color; if (d.pxMed) { d.hU = Math.round(clamp(170 * sp.hpx / d.pxMed, 90, 300)); d.wU = Math.round(clamp(170 * sp.wpx / d.pxMed, 6, 95)); }
-        const xs = qn.map(p => p[0] * 1000), ys = qn.map(p => p[1] * 1000); d._box = [Math.min(...ys), Math.min(...xs), Math.max(...ys), Math.max(...xs)];
-        back(); toast('Détourage mis à jour'); }}).then(() => $$('#mbox [data-close]').forEach(x => x.addEventListener('click', e2 => { e2.stopPropagation(); if (modalLeaveGuard && !modalLeaveGuard()) return; modalLeaveGuard = null; runModalCleanup(); setTimeout(back, 0); }, true)));
-      return; }
-    const bb = e.target.closest('.bbox'); if (bb) { const tr = $(`#review tr[data-i="${bb.dataset.bi}"]`); tr.scrollIntoView({behavior: 'smooth', block: 'center'}); tr.querySelector('[data-k=title]').focus(); }
+    const qe = e.target.closest('[data-qe]'); if (qe) return editFrame48(+qe.dataset.qe);
+    const ad = e.target.closest('[data-add48]'); if (ad) return addFrame48(+ad.dataset.add48);
+    const bb = e.target.closest('.bbox'); if (bb) return editFrame48(+bb.dataset.bi);   // V2.48 : un cadre de la photo se recadre directement
   };
   $('#review').onmouseover = e => { const tr = e.target.closest('tr[data-i]'), bb = e.target.closest('.bbox'), i = tr ? tr.dataset.i : bb ? bb.dataset.bi : null;
     $$('#review .bbox.hl,#review tr.hl').forEach(x => x.classList.remove('hl')); if (i == null) return;
@@ -227,11 +221,56 @@ function renderReview(scroll = false) {
   $('#rAdd').onclick = addDetected;
   if (scroll) $('#review').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
+/* V2.48 : recadrer un cadre, ou ajouter un cadre pour un livre oublié, sans quitter la vérification */
+function quadEdit48(si, quad, title, onSave) {
+  const keep = $('#mbox').innerHTML, scrollY = $('#mbox .mbody')?.scrollTop || 0;
+  const back = () => { $('#mbox').innerHTML = keep; $('#modal').classList.add('on'); rebindScan(); renderReview(); const mb = $('#mbox .mbody'); if (mb) mb.scrollTop = scrollY; };
+  return openQuadEditor({src: shots[si], quad, title, onSave: async (qn, sp) => { await onSave(qn, sp); back(); }})
+    .then(() => $$('#mbox [data-close]').forEach(x => x.addEventListener('click', e2 => { e2.stopPropagation(); if (modalLeaveGuard && !modalLeaveGuard()) return; modalLeaveGuard = null; runModalCleanup(); setTimeout(back, 0); }, true)));
+}
+function setFrame48(d, qn, sp) {
+  d.quad = qn; d.spineImg = sp.crop; d.color = sp.color; if (d.pxMed) { d.hU = Math.round(clamp(170 * sp.hpx / d.pxMed, 90, 300)); d.wU = Math.round(clamp(170 * sp.wpx / d.pxMed, 6, 95)); }
+  const xs = qn.map(p => p[0] * 1000), ys = qn.map(p => p[1] * 1000); d._box = [Math.min(...ys), Math.min(...xs), Math.max(...ys), Math.max(...xs)];
+}
+function editFrame48(i) {
+  const d = detected[i]; if (!d || !d._box || d._shot == null || !shots[d._shot]) return;
+  const quad = d.quad || [[d._box[1] / 1000, d._box[0] / 1000], [d._box[3] / 1000, d._box[0] / 1000], [d._box[3] / 1000, d._box[2] / 1000], [d._box[1] / 1000, d._box[2] / 1000]];
+  return quadEdit48(d._shot, quad, `Recadrer le livre n° ${i + 1}`, async (qn, sp) => { setFrame48(d, qn, sp); toast('Cadre mis à jour'); });
+}
+function renumber48(si, row) {   // positions d'une rangée de la photo = ordre de gauche à droite des cadres
+  const L = detected.filter(d => d._shot === si && (d.row || 1) === row && d._box).sort((p, q) => (p._box[1] + p._box[3]) - (q._box[1] + q._box[3]));
+  L.forEach((d, k) => { d.position = k + 1; });
+}
+function addFrame48(si) {
+  const B = detected.filter(d => d._shot === si && d._box), md = (a, f) => { const v = a.map(f).sort((p, q) => p - q); return v.length ? v[v.length >> 1] : null; };
+  const w = md(B, d => d._box[3] - d._box[1]) || 40, y0 = md(B, d => d._box[0]) ?? 300, y1 = md(B, d => d._box[2]) ?? 700;
+  // proposé dans le plus grand trou entre deux cadres de la rangée principale, sinon au centre
+  let cx = 500, gBest = w * .5, hole = false; const S = B.filter(d => d._box[0] < y1 && d._box[2] > y0).sort((p, q) => p._box[1] - q._box[1]);
+  for (let k = 0; k < S.length - 1; k++) { const g = S[k + 1]._box[1] - S[k]._box[3]; if (g > gBest) { gBest = g; hole = true; cx = (S[k]._box[3] + S[k + 1]._box[1]) / 2; } }
+  const ww = Math.max(12, hole ? Math.min(w * 1.5, gBest) : w), x0 = clamp(cx - ww / 2, 0, 1000 - ww), x1 = x0 + ww;
+  const quad = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(p => [p[0] / 1000, p[1] / 1000]);
+  return quadEdit48(si, quad, 'Ajouter un livre oublié : placez le cadre sur sa tranche', async (qn, sp) => {
+    const cxn = (qn[0][0] + qn[1][0] + qn[2][0] + qn[3][0]) * 250, cyn = (qn[0][1] + qn[1][1] + qn[2][1] + qn[3][1]) * 250;
+    const dist = o => Math.abs((o._box[1] + o._box[3]) / 2 - cxn) + 3 * Math.abs((o._box[0] + o._box[2]) / 2 - cyn), near = B.slice().sort((p, q) => dist(p) - dist(q))[0];
+    const d = {id: uid(), title: '', author: '', series: '', volume: null, type: near ? near.type || 'Roman' : 'Roman', unknown: true, confidence: 0, _sel: true, _shot: si,
+      row: near ? near.row || 1 : REV38.base, position: 0, pxMed: near ? near.pxMed : null, added48: true};
+    if (near) { d._prow = near._prow; if (near._rowMan) d._rowMan = true; }
+    setFrame48(d, qn, sp);
+    const at = near ? detected.indexOf(near) + ((d._box[1] + d._box[3]) / 2 > (near._box[1] + near._box[3]) / 2 ? 1 : 0) : detected.length;
+    detected.splice(at, 0, d); renumber48(si, d.row || 1); toast('Livre ajouté : complétez son titre dans le tableau (ou plus tard)');
+  });
+}
 async function addDetected() {
   const sel = detected.filter(d => d._sel); if (!sel.length) return toast('Aucun ouvrage sélectionné');
   const useGB = $('#rGB').checked, useAI = $('#rAI').checked; rows38();
   sel.forEach(d => { d.row = clamp(parseInt(d.row) || 1, 1, 15); delete d._prow; delete d._rowMan; });
   const maxRow = Math.max(...sel.map(d => d.row)); // V2.38 : d.row = étagère réelle, déjà affichée dans le tableau
+  // V2.48 : confirmation de la destination avant d'ajouter
+  { const v = $('#rCase').value, cName = v === '__new' ? ($('#rNew').value || T28('Nouveau meuble')) : (cases.find(c => c.id === v)?.name || '?'), rs = [...new Set(sel.map(d => d.row))].sort((a, b) => a - b);
+    const nb = v === '__new' ? 0 : books.filter(b => b.caseId === v && !b.wish && rs.includes(b.row || 1)).length;
+    const msg = T28('Êtes-vous sûr de vouloir ajouter ces livres') + ` (${sel.length}) ` + T28('dans') + ` « ${cName} », ` + T28(rs.length > 1 ? 'étagères' : 'étagère') + ' ' + rs.join(', ') + ' ?'
+      + (nb ? '\n' + T28('Ils seront placés à la suite des livres déjà présents') + ` (${nb}).` : '') + '\n' + T28('Vous pourrez annuler avec ↶.');
+    if (!confirm(msg)) return; }
   let dest = $('#rCase').value; if (dest === '__new') dest = (await newCase($('#rNew').value || 'Nouveau meuble', maxRow)).id;
   const kc = cases.find(c => c.id === dest); if (kc && (kc.rows || 3) < maxRow) { kc.rows = maxRow; await DB.put('cases', kc); }
   for (const d of sel.filter(d => d.title)) { const w = books.find(x => x.wish && keyOf(x) === keyOf(d)) || books.find(x => x.wish && x.series && d.series && norm(x.series) === norm(d.series) && x.volume === d.volume);
@@ -241,14 +280,17 @@ async function addDetected() {
   sel.forEach(d => { if (d.quad && piOf[d._shot] != null) d.srcRef = {imp: imp.id, pi: piOf[d._shot]}; });
   const rows = new Map(); sel.forEach(d => { const r = d.row; if (!rows.has(r)) rows.set(r, []); rows.get(r).push(d); });
   rows.forEach((L, r) => { const base = nextPos(dest, r) - 1; L.sort((a, b) => (a.position || 999) - (b.position || 999)).forEach((d, i) => { d.row = r; d.position = base + i + 1; }); });
-  sel.forEach((d, i) => { d.title = String(d.title || '').trim(); d.unknown = !d.title; ['_sel', '_dup', '_shot', '_box', '_alts'].forEach(k => delete d[k]);
+  sel.forEach((d, i) => { d.title = String(d.title || '').trim(); d.unknown = !d.title; ['_sel', '_dup', '_shot', '_box', '_alts', 'added48', '_prow', '_rowMan'].forEach(k => delete d[k]);
     d.caseId = dest; d.importId = imp.id; d.importOrder = i; d.orig = {caseId: dest, row: d.row, position: d.position}; d.addedAt = Date.now(); });
   await DB.put('imports', imp); imports.push(imp);
+  pushUndo(T28('Ajout de livres scannés') + ` (${sel.length})`);   // V2.48 : ↶ retire les livres ajoutés (voir V2.35)
   await DB.putMany('books', sel); books.push(...sel);
+  { const u = UNDO.stack[UNDO.stack.length - 1]; if (u) { u.added = sel.map(d => d.id); persistUndo(); } }
   closeModal(); setView('lib'); curCase = dest; localStorage.setItem('scanly_case', curCase); renderRoom(true); renderAll();
   sel.forEach((d, i) => { const el = $(`#unit .book[data-id="${d.id}"]`); if (el) { el.style.animationDelay = (i * 30) + 'ms'; el.classList.add('new'); } });
   const un = sel.filter(d => d.unknown).length;
   toast(`${sel.length} livre(s) rangé(s)${un ? `, dont ${un} à identifier (filtre « À identifier »)` : ''} – les fiches se complètent en arrière-plan`, 6000);
+  if (typeof showUndo === 'function') showUndo(T28('Livres ajoutés') + ` (${sel.length})`);
   if (useGB || useAI) bgComplete(sel, useGB, useAI);
 }
 const BG = {running: false, queue: []};

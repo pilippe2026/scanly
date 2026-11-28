@@ -1,3 +1,21 @@
+SCANEBOOK V2.48 - FENÊTRE DE RECONNAISSANCE : CONFIRMATION, RETOUR ARRIÈRE, RECADRAGE
+Base exclusive : SCANEBOOK V2.47.
+
+- Confirmation avant d'ajouter les livres d'une photo :
+  « Êtes-vous sûr de vouloir ajouter ces livres (N) dans « Salon », étagère 2 ? »
+  avec, s'il y en a, le nombre de livres déjà présents (les nouveaux se placent à leur suite).
+- Retour arrière : ↶ (ou Cmd+Z / Ctrl+Z, ou le bandeau « Annuler » qui s'affiche après l'ajout)
+  retire maintenant les livres ajoutés par une photo ; ↷ les remet.
+  Avant, l'ajout d'une photo n'était pas enregistré dans l'historique.
+- Dans la vérification :
+  · toucher (ou cliquer) un cadre sur la photo ouvre directement son recadrage (4 coins) ;
+  · bouton « ＋ Livre oublié » au-dessus de la photo : un cadre est proposé dans le plus grand
+    trou entre deux livres, vous l'ajustez sur la tranche, et le livre s'ajoute au tableau
+    à la bonne place (titre à compléter tout de suite ou plus tard).
+- Vérifié sur iPhone (portrait et paysage), iPad, Mac et PC.
+
+----------------------------------------
+
 SCANEBOOK V2.47 - DÉTOURAGE DES TRANCHES : PRÉCISION FORTEMENT AMÉLIORÉE
 Base exclusive : SCANEBOOK V2.46.
 
